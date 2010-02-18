@@ -243,3 +243,17 @@ double EIG::center_dev(){
    return dim*log(sum/(double)dim) - log_product;
 
 }
+
+double EIG::centerpot(double alpha,EIG &eigen_Z,double c_S,double c_Z){
+
+   double ward = dim*log(1.0 + alpha*(c_S + c_Z));
+
+   for(int i = 0;i < dim;++i)
+      ward -= log(1.0 + alpha*eig[0][i]);
+
+   for(int i = 0;i < dim;++i)
+      ward -= log(1.0 + alpha*eigen_Z.eig[0][i]);
+
+   return ward;
+
+}

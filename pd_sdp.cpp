@@ -24,19 +24,17 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 8;//dim sp hilbert space
-   int N = 4;//nr of particles
+   int M = 12;//dim sp hilbert space
+   int N = 5;//nr of particles
 
    int n_tp = M*(M - 1)/2;//dim van tp ruimte
+
+   int dim = 2*n_tp;
 
 #ifndef PQ
 
    int n_ph = M*M;//dim van ph ruimte
-   int dim = 2*n_tp + n_ph;
-
-#else
-   
-   int dim = 2*n_tp;
+   dim += n_ph;
 
 #endif
 
@@ -56,9 +54,21 @@ int main(void){
 
    double center_dev = S.center_dev(Z);
 
-   double gamma = 0.5;//1.0/(1.0 + 1.0/sqrt(2*dim));
+   //eerst centering
+   double gamma = 1.0;
 
-   while(pd_gap > 1.0e-4){
+   double tolerance = 1.0e-4;
+
+   //flag == 0 : initiele centering run (tot op tolerance)
+   //flag == 1 : doe een stap met gamma = 0
+   //flag == 2 : doe een stap met gamma = 1
+   //flag == 3 : game over man
+
+   int flag = 0;
+
+   double a;//stapgrootte
+
+   while(flag != 3){
 
       cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
 
@@ -89,12 +99,11 @@ int main(void){
       b += B.tpm(0);
 
 #ifndef PQ
-      
+
       TPM hulp(M,N);
       hulp.G(1,B.phm());
 
       b += hulp;
-      //test
 
 #endif
 
@@ -137,12 +146,65 @@ int main(void){
       //los het stelsel op, geeft aantal duale iteraties nodig terug:
       cout << DZ.solve(B,D) << endl;
 
-      S += DS;
-      Z += DZ;
+      //welke stapgrootte moet ik nemen?
 
+      if(flag == 0 || flag == 2){//voor centering
+
+         S += DS;
+         Z += DZ;
+
+      }
+      else{
+
+         //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
+         a = DS.line_search(DZ,S,Z,5.0);
+
+         S.daxpy(a,DS);
+         Z.daxpy(a,DZ);
+
+      }
+
+      //update van enkele belangrijke variabelen
       pd_gap = S.ddot(Z);
       energy = (S.tpm(0)).ddot(ham);
       center_dev = S.center_dev(Z);
+
+      //keuze voor volgende iteratie:
+      if(flag == 0){
+
+         //als hij voldoende gecenterd is, exit.
+         if(center_dev < tolerance){
+
+            flag = 1;
+            gamma = 0.0;
+
+         }
+
+      }
+      else if(flag == 1){
+
+         if(pd_gap < tolerance)//exit when converged
+            flag = 3;
+         else{//center when not convergence
+
+            flag = 2;
+            gamma = 1.0;
+
+         }
+
+      }
+      else{//flag == 2: dus na een centering stap
+
+         if(pd_gap < tolerance)//exit when converged
+            flag = 3;
+         else{//take another step downwards when not converged
+
+            flag = 1;
+            gamma = 0;
+
+         }
+
+      }
 
    }
 

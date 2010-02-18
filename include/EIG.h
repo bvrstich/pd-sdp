@@ -32,6 +32,8 @@ class EIG{
 
       int gn_tp();
 
+      double centerpot(double,EIG &,double,double);
+
 #ifndef PQ
 
       int gn_ph();

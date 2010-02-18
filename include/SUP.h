@@ -107,6 +107,8 @@ class SUP{
 
       double center_dev(SUP &Z);
 
+      double line_search(SUP &DZ,SUP &S,SUP &Z,double max_dev);
+
    private:
 
       TPM **SZ_tp;
@@ -114,6 +116,8 @@ class SUP{
       int M;
       int N;
       int n_tp;
+
+      int dim;
 
 #ifndef PQ
       

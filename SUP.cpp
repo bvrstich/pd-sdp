@@ -19,11 +19,15 @@ SUP::SUP(int M,int N){
    for(int i = 0;i < 2;++i)
       SZ_tp[i] = new TPM(M,N);
 
+   this->dim = 2*n_tp;
+
 #ifndef PQ
 
    this->n_ph = M*M;
    
    SZ_ph = new PHM(M,N);
+
+   dim += n_ph;
 
 #endif
 
@@ -35,6 +39,7 @@ SUP::SUP(SUP &SZ_c){
    this->M = SZ_c.M;
    this->N = SZ_c.N;
    this->n_tp = SZ_c.n_tp;
+   this->dim = 2*n_tp;
 
    SZ_tp = new TPM * [2];
 
@@ -47,6 +52,8 @@ SUP::SUP(SUP &SZ_c){
 #ifndef PQ
 
    this->n_ph = M*M;
+
+   dim += n_ph;
    
    SZ_ph = new PHM(M,N);
 
@@ -452,7 +459,7 @@ int SUP::solve(SUP &B,SUP &D){
 
    int cg_iter = 0;
 
-   while(rr > 1.0e-3){
+   while(rr > 1.0e-5){
 
       ++cg_iter;
 
@@ -568,5 +575,73 @@ double SUP::center_dev(SUP &Z){
    EIG eig(SZ);
 
    return eig.center_dev();
+
+}
+
+//line search die kijkt hoe ver je afwijkt van het centraal pad bij een stap
+double SUP::line_search(SUP &DZ,SUP &S,SUP &Z,double max_dev){
+
+   //eerst de huidige deviatie van het centraal pad nemen:
+   double center_dev = S.center_dev(Z);
+
+   //eigenwaarden zoeken van S^{-1/2} DS S^{-1/2} en Z^{-1/2} DZ Z^{-1/2}
+
+   //kopieer S in de zogeheten wortel:
+   SUP wortel(S);
+
+   //maak negatieve vierkantswortel uit S
+   wortel.sqrt(-1);
+
+   //de L_map
+   SUP hulp(M,N);
+   hulp.L_map(wortel,*this);
+
+   //eigenwaarden in eigen_S stoppen
+   EIG eigen_S(hulp);
+
+   //nu idem voor Z
+   wortel = Z;
+
+   wortel.sqrt(-1);
+
+   hulp.L_map(wortel,DZ);
+
+   EIG eigen_Z(hulp);
+
+   //nog c_S en c_Z uitrekenen:
+   double pd_gap = S.ddot(Z);
+
+   //c_S = Tr (DS Z)/Tr (SZ)
+   double c_S = this->ddot(Z)/pd_gap;
+
+   //c_Z = Tr (S DZ)/Tr (SZ)
+   double c_Z = S.ddot(DZ)/pd_gap;
+
+   //waar zitten de singulariteiten: tot waar mag ik zoeken?
+   double a_max = -1.0/eigen_S.min();
+   double b_max = -1.0/eigen_Z.min();
+
+   //a_max is de waarde tot waar ik zal zoeken:
+   if(b_max < a_max)
+      a_max = b_max;
+
+   double a = 0.0;
+   double b = a_max;
+
+   double c = (a + b)/2.0;
+
+   //bissectiemethode om stapgrootte te bepalen:
+   while(b - a > 1.0e-5){
+
+      c = (a + b)/2.0;
+
+      if( (center_dev + eigen_S.centerpot(c,eigen_Z,c_S,c_Z) - max_dev) < 0.0 )
+         a = c;
+      else
+         b = c;
+
+   }
+
+   return c;
 
 }
