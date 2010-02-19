@@ -13,7 +13,12 @@ int PHM::counter = 0;
 int **PHM::ph2s;
 int **PHM::s2ph;
 
-//constructor:
+/**
+ * standard constructor, maakt Matrix aan met dimensie M*M
+ * als counter == 0 dan alloceerd de constructor het geheugen voor lijsten ph2s en s2ph en initialiseerd deze:
+ * @param M aantal sp orbitals
+ * @param N aantal deeltjes
+ */
 PHM::PHM(int M,int N) : Matrix(M*M) {
    
    this->N = N;
@@ -56,7 +61,11 @@ PHM::PHM(int M,int N) : Matrix(M*M) {
 
 }
 
-//copy constructor
+/**
+ * copy constructor, maakt Matrix aan met dimensie M*M en kopieerd er phm_c in
+ * als counter == 0 dan alloceerd de constructor het geheugen voor lijsten ph2s en s2ph en initialiseerd deze:
+ * @param phm_c matrix die gekopieerd moet worden
+ */
 PHM::PHM(PHM &phm_c) : Matrix(phm_c){
 
    this->N = phm_c.N;
@@ -99,7 +108,9 @@ PHM::PHM(PHM &phm_c) : Matrix(phm_c){
 
 }
 
-//destructor
+/**
+ * Destructor: als counter == 1 dan dealloceerd de destructor het geheugen voor lijsten ph2s en s2ph.
+ */
 PHM::~PHM(){
 
    if(counter == 1){
@@ -118,7 +129,13 @@ PHM::~PHM(){
 
 }
 
-//access the numbers: sp indices
+/**
+ * toegang tot de getallen in de PHM door gebruik te maken van de sp indices,
+ * @param a eerste sp index, vormt samen met b de eerste ph index
+ * @param b tweede sp index, vormt samen met a de eerste ph index
+ * @param c derde sp index, vormt samen met d de tweede ph index
+ * @param d vierde sp index, vormt samen met c de tweede ph index
+ */
 double &PHM::operator()(int a,int b,int c,int d){
 
    int i = s2ph[a][b];
@@ -128,7 +145,6 @@ double &PHM::operator()(int a,int b,int c,int d){
 
 }
 
-//friend function! output stream operator overloaded
 ostream &operator<<(ostream &output,PHM &phm_p){
 
    for(int i = 0;i < phm_p.n;++i)
@@ -144,28 +160,38 @@ ostream &operator<<(ostream &output,PHM &phm_p){
 
 }
 
+/**
+ * @return aantal deeltjes
+ */
 int PHM::gN(){
 
    return N;
 
 }
 
+/**
+ * @return aantal sp orbitals
+ */
 int PHM::gM(){
 
    return M;
 
 }
 
+/**
+ * @return de dimensie van de particle hole ruimte en tevens de dimensie van de matrix
+ */
 int PHM::gn(){
 
    return n;
 
 }
 
-//van tpm naar ph ruimte:
-
-//option == 1: G up
-//option == -1: inverse G down
+/**
+ * De G afbeelding die een TPM object afbeeld op een PHM object.
+ * @param option = 1 dan wordt G_up uitgevoerd, = -1 dan wordt G^{-1}_down uitgevoerd
+ * @param tpm input TPM die afgebeeld wordt op this
+ */
 void PHM::G(int option,TPM &tpm){
 
    SPM spm(M,N);
@@ -203,6 +229,11 @@ void PHM::G(int option,TPM &tpm){
 
 }
 
+/**
+ * Bereken de skew trace gedefinieerd als: \n
+ * sum_{ab} PHM(a,a,b,b)
+ * @return de skew trace
+ */
 double PHM::skew_trace(){
 
    double ward = 0.0;
@@ -215,6 +246,12 @@ double PHM::skew_trace(){
 
 }
 
+/**
+ * Trek van this - de G-afbeelding van de eenheidsmatrix  * een constante - af:\n
+ * this -= scale* G(1) \n
+ * zie ook de nota's primal_dual.pdf voor meer info.
+ * @param scale de constante waarmee de eenheidsmatrix vermenigvuldigt wordt
+ */
 void PHM::min_gunit(double scale){
 
    for(int a = 0;a < M;++a)

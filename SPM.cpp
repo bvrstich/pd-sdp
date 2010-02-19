@@ -7,7 +7,11 @@ using std::endl;
 #include "SPM.h"
 #include "lapack.h"
 
-//constructor:
+/**
+ * constructor, maakt een Matrix object aan met dimensie M
+ * @param M aantal sp orbitals, tevens dimensie van de matrix
+ * @param N aantal deeltjes
+ */
 SPM::SPM(int M,int N) : Matrix(M) {
 
    this->M = M;
@@ -15,7 +19,10 @@ SPM::SPM(int M,int N) : Matrix(M) {
 
 }
 
-//copy constructor()
+/**
+ * copy constructor, maakt een Matrix object aan dat een kopie is van de inputmatrix
+ * @param spm_copy inputmatrix
+ */
 SPM::SPM(SPM &spm_copy) : Matrix(spm_copy) {
 
    this->M = spm_copy.gM();
@@ -23,10 +30,14 @@ SPM::SPM(SPM &spm_copy) : Matrix(spm_copy) {
 
 }
 
-//destructor
+//!destructor
 SPM::~SPM(){
 
 }
+
+/**
+ * @return aantal deeltjes
+ */
 
 int SPM::gN(){
 
@@ -34,13 +45,16 @@ int SPM::gN(){
 
 }
 
+/**
+ * @return aantal sp orbitals en dimensie van de matrix
+ */
+
 int SPM::gM(){
 
    return M;
 
 }
 
-//friend function! output stream operator overloaded
 ostream &operator<<(ostream &output,SPM &spm_p){
 
    for(int i = 0;i < spm_p.M;++i)

@@ -9,7 +9,12 @@ using std::endl;
 #include "SUP.h"
 #include "lapack.h"
 
-//constructor:
+/**
+ * standard constructor\n
+ * Alloceert twee array's met dimensie n_tp en een met dimensie n_ph en zorg ervoor dat de daartoe voorziene pointers ernaar verwijzen.
+ * @param M aantal sp orbitals
+ * @param N aantal deeltjes
+ */
 EIG::EIG(int M,int N){
    
    this->N = N;
@@ -42,7 +47,12 @@ EIG::EIG(int M,int N){
 
 }
 
-//copy constructor:
+/**
+ * Copy constructor\n
+ * Alloceert twee array's met dimensie n_tp en een met dimensie n_ph en zorg ervoor dat de daartoe voorziene pointers ernaar verwijzen. 
+ * De inhoud van eig_c wordt dan gekopieerd naar this.
+ * @param eig_c De EIG waarvan de inhoud gekopieerd zal worden naar this
+ */
 EIG::EIG(EIG &eig_c){
 
    this->N = N;
@@ -79,6 +89,10 @@ EIG::EIG(EIG &eig_c){
 
 }
  
+/**
+ * overload equality operator
+ * @param eig_c Deze EIG zal gekopieerd worden in this.
+ */
 EIG &EIG::operator=(EIG &eig_c){
 
    int inc = 1;
@@ -89,13 +103,22 @@ EIG &EIG::operator=(EIG &eig_c){
 
 }
 
+/**
+ * Toegang tot de afzonderlijke vectoren.
+ * @param i index die aangeeft welke vector je terugkrijgt: i = 0: vector van het bovenste blok(TPM), i = 1 vector van het middenste blok(TPM), i = 2 vector van het onderste blok (PHM).
+ * @return de overeenkomstige pointer
+ */
 double *EIG::operator[](int i){
 
    return eig[i];
 
 }
 
-//constructor met initialisatie door SUP matrix:
+/**
+ * Constructor op basis van een SUP matrix. Alloceert twee array's met dimensie n_tp en een met dimensie n_ph en zorg ervoor dat de daartoe voorziene pointers ernaar verwijzen. 
+ * This wordt dan opgevult met de eigenwaarden van de SUP matrix SZ, opgelet, SZ wordt hierbij vernield en bevat zijn eigenvectoren in de kolommen.
+ * @param SZ de bewuste SUP matrix
+ */
 EIG::EIG(SUP &SZ){
 
    this->N = SZ.gN();
@@ -138,7 +161,9 @@ EIG::EIG(SUP &SZ){
 
 }
 
-//destructor
+/**
+ * Destructor, deallocatie van het geheugen.
+ */
 EIG::~EIG(){
 
    delete [] eig[0];
@@ -146,7 +171,6 @@ EIG::~EIG(){
 
 }
 
-//friend function! output stream operator overloaded
 ostream &operator<<(ostream &output,const EIG &eig_p){
 
    for(int i = 0;i < eig_p.n_tp;++i)
@@ -170,12 +194,23 @@ ostream &operator<<(ostream &output,const EIG &eig_p){
 
 }
 
+/**
+ * operator () overloaded\n
+ * Toegang van buitenaf tot de elementen in de array
+ * @param block in welk blok zit het element dat je wil
+ * @param index op welke plaats in dat blok staat het element dat je wil
+ * @return het gewenste getal eig[block][index]
+ */
 double EIG::operator()(int block,int index){
 
    return eig[block][index];
 
 }
 
+/**
+ * @return het minimum van de elementen in de EIG\n
+ * Opgelet, dit werkt enkel als de EIG gevuld is door diagonalisatie van een SUP.
+ */
 double EIG::min(){
 
    double ward = eig[0][0];
@@ -194,6 +229,10 @@ double EIG::min(){
 
 }
 
+/**
+ * @return het maximum van de elementen in de EIG\n
+ * Opgelet, dit werkt enkel als de EIG gevuld is door diagonalisatie van een SUP.
+ */
 double EIG::max(){
 
    double ward = eig[0][n_tp - 1];
@@ -212,6 +251,9 @@ double EIG::max(){
 
 }
 
+/**
+ * @return de afwijking van het centraal pad berekend met de logaritmische potentiaalbarriere (zie notes)
+ */
 double EIG::center_dev(){
 
    double sum = 0.0;
@@ -244,6 +286,16 @@ double EIG::center_dev(){
 
 }
 
+/**
+ * Geeft terug wat de afwijking is van het centraal pad (grootte van de potentiaal) wanneer je stapgrootte 
+ * alpha zet langs de primal dual Newton richting, d.m.v. de eigenwaarden eigen_S en eigen_Z berekend in SUP::line_search.\n
+ * (*this) = eigen_S --> de eigenwaarden voor de DS stap
+ * @param alpha afstand langs de Newton richting
+ * @param eigen_Z  --> de eigenwaarden voor de DZ stap
+ * @param c_S = Tr (DS Z)/Tr (SZ): parameter berekend in SUP::line_search
+ * @param c_Z = Tr (S DZ)/Tr (SZ): parameter berekend in SUP::line_search
+ * @return de afwijking van het centraal pad bij stapgrootte alpha langs de Newton richting
+ */
 double EIG::centerpot(double alpha,EIG &eigen_Z,double c_S,double c_Z){
 
    double ward = dim*log(1.0 + alpha*(c_S + c_Z));

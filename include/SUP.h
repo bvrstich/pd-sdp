@@ -16,9 +16,26 @@ using std::ostream;
 
 class EIG;
 
+/**
+ * @author Brecht Verstichel
+ * @date 18-02-2010\n\n
+ * De klasse SUP (supermatrix) is een blokmatrix over de carrierspace's van de verschillende condities:\n
+ * Belangrijk om hierbij te onthouden dat dit een algemene blokmatrix is met twee TPM's en een PHM die niet 
+ * noodzakelijk met elkaar in verband staan. Zie ook notes primal_dual.pdf .
+ */
+
 class SUP{
   
-   friend ostream &operator<<(ostream &,SUP &);
+   /**
+    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
+    * ifstream object aan en doe \n\n
+    * object << sup_p << endl;\n\n
+    * Wil je naar het scherm printen:\n\n
+    * cout << sup_p << endl;\n\n
+    * @param output de stream waarnaar je toe schrijft.
+    * @param sup_p de te printen SUP-matrix
+    */
+   friend ostream &operator<<(ostream &output,SUP &sup_p);
 
    public:
 
@@ -68,6 +85,7 @@ class SUP{
       int gn_ph();
 
 #endif
+      int gdim();
 
       double ddot(SUP &);
 
@@ -111,18 +129,27 @@ class SUP{
 
    private:
 
+      //!dubbele pointer van TPM's, deze zullen verwijzen naar de twee TPM matrices
       TPM **SZ_tp;
 
+      //!aantal sp orbitalen
       int M;
+
+      //!aantal deeltjes
       int N;
+
+      //!diminsie van tp space
       int n_tp;
 
+      //!totale dimensie van de supermatrix
       int dim;
 
 #ifndef PQ
       
+      //!pointer naar de particle hole matrix
       PHM *SZ_ph;
 
+      //!dimensie van de particle hole ruimte
       int n_ph;
 
 #endif

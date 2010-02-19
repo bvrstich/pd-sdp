@@ -6,9 +6,24 @@
 
 using std::ostream;
 
+/**
+ * @author Brecht Verstichel
+ * @date 18-02-2010\n\n
+ * Dit is een zelfgeschreven matrix-klasse voor vierkante matrices. Het is een wrapper rond een dubbele pointer
+ * met veelgebruike lapack en blas routines als voorgeprogrammeerde memberfuncties.
+ */
 class Matrix{
 
-   friend ostream &operator<<(ostream &,Matrix &);
+   /**
+    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
+    * ifstream object aan en doe \n\n
+    * object << matrix << endl;\n\n
+    * Wil je naar het scherm printen:\n\n
+    * cout << matrix << endl;\n\n
+    * @param output de stream waarnaar je toe schrijft.
+    * @param matrix_p de te printen matrix
+    */
+   friend ostream &operator<<(ostream &output,Matrix &matrix_p);
 
    public:
 
@@ -74,9 +89,12 @@ class Matrix{
    private:
 
       //velden
+
+      //!De dubbele pointer van double's die de eigenlijke matrix bevat.
       double **matrix;
 
-      int n;//dim of matrix
+      //!De dimensie van de vierkante matrix
+      int n;
 
 };
 

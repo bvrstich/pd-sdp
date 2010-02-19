@@ -1,3 +1,13 @@
+/**
+ * @mainpage 
+ * This is an implementation of a primal dual interior point method
+ * for optimizing the second order density matrix using the P Q and G N-representability conditions.
+ * The method used is a path following algorithm with predictor corrector steps.
+ * When compiled with option PQ only the P and Q conditions will be used.
+ * @author Brecht Verstichel
+ * @date 18-02-2010
+ */
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -20,12 +30,24 @@ using std::ofstream;
 #include "SUP.h"
 #include "EIG.h"
 
+/**
+ * 
+ * In the main the actual program is run.\n 
+ * Part 1: An easy initial point is taken and then centered to the required precision (flag == 0)\n
+ * Part 2: When the primal dual point is sufficiently centered steps are taken to reduce the
+ * primal dual gap and take a large step in that direction (predictor) (flag == 1)\n
+ * After each step a correcting step (flag == 2) is taken that brings the primal dual point closer to
+ * the central path.\n
+ * Part 3: When the primal dual gap is smaller that the required accuracy exit the while. (flag == 3)\n
+ * For more information on the actual method, see primal_dual.pdf
+ */
+
 int main(void){
 
    cout.precision(10);
 
-   int M = 12;//dim sp hilbert space
-   int N = 5;//nr of particles
+   int M = 8;//dim sp hilbert space
+   int N = 4;//nr of particles
 
    int n_tp = M*(M - 1)/2;//dim van tp ruimte
 

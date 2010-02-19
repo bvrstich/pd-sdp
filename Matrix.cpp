@@ -8,7 +8,11 @@ using std::ostream;
 #include "lapack.h"
 #include "Matrix.h"
 
-//constructor:
+/**
+ * constructor
+ * @param n dimensie van de matrix
+ */
+
 Matrix::Matrix(int n){
 
    this->n = n;
@@ -21,7 +25,11 @@ Matrix::Matrix(int n){
 
 }
 
-//copy constructor:
+/**
+ * copy constructor
+ * @param mat_copy Deze matrix zal gekopieerd worden in het nieuw aangemaakte object.
+ */
+
 Matrix::Matrix(Matrix &mat_copy){
 
    this->n = mat_copy.n;
@@ -40,7 +48,10 @@ Matrix::Matrix(Matrix &mat_copy){
 
 }
 
-//destructor
+/**
+ * Destructor
+ */
+
 Matrix::~Matrix(){
 
    delete [] matrix[0];
@@ -48,7 +59,11 @@ Matrix::~Matrix(){
 
 }
 
-//overload equality operator
+/**
+ * overload equality operator
+ * @param matrix_copy Deze matrix zal gekopieerd worden in this.
+ */
+
 Matrix &Matrix::operator=(Matrix &matrix_copy){
 
    int dim = n*n;
@@ -61,6 +76,11 @@ Matrix &Matrix::operator=(Matrix &matrix_copy){
 
 }
 
+/**
+ * Zet alle getallen in de matrix gelijk aan a
+ * @param a Het getal
+ */
+
 Matrix &Matrix::operator=(double a){
 
    for(int i = 0;i < n;++i)
@@ -71,7 +91,10 @@ Matrix &Matrix::operator=(double a){
 
 }
 
-//overload += operator
+/**
+ * Overload += operator
+ * @param matrix_pl De matrix die opgeteld moet worden bij this
+ */
 Matrix &Matrix::operator+=(Matrix &matrix_pl){
 
    int dim = n*n;
@@ -84,7 +107,11 @@ Matrix &Matrix::operator+=(Matrix &matrix_pl){
 
 }
 
-//overload -= operator
+/**
+ * Overload -= operator
+ * @param matrix_pl De matrix die afgetrokken moet worden van this
+ */
+
 Matrix &Matrix::operator-=(Matrix &matrix_pl){
 
    int dim = n*n;
@@ -97,7 +124,12 @@ Matrix &Matrix::operator-=(Matrix &matrix_pl){
 
 }
 
-//+= times a constant 
+/**
+ * Bereken deze matrix plus een constante maal een andere matrix
+ * @param alpha Het getal waarmee matrix_pl vermenigvuldig wordt
+ * @param matrix_pl De matrix die alpha maal opgeteld wordt bij this
+ */
+
 Matrix &Matrix::daxpy(double alpha,Matrix &matrix_pl){
 
    int dim = n*n;
@@ -109,7 +141,11 @@ Matrix &Matrix::daxpy(double alpha,Matrix &matrix_pl){
 
 }
 
-// divide by a constant
+/**
+ * Overload /= operator
+ * @param c Deel alle getallen in de matrix door c
+ */
+
 Matrix &Matrix::operator/=(double c){
 
    int dim = n*n;
@@ -123,32 +159,60 @@ Matrix &Matrix::operator/=(double c){
 
 }
 
-//change the numbers
+/**
+ * Overloaded () operator, write toegang tot de getallen in de matrix, om het makkelijk te maken
+ * om te werken met lapack en blas routines worden deze matrices automatisch getransponeerd. We kunnen 
+ * dus werken met de C notatie voor matrices terwijl lapack werkt met de fortran notatie.
+ * @param i rij
+ * @param j kolom 
+ * @return wijzigbaar getal op de plaats (i,j) in de matrix
+ */
 double &Matrix::operator()(int i,int j){
 
    return matrix[j][i];
 
 }
 
-//access the numbers
+/**
+ * Overloaded () operator, read toegang tot de getallen in de matrix, om het makkelijk te maken
+ * om te werken met lapack en blas routines worden deze matrices automatisch getransponeerd. We kunnen 
+ * dus werken met de C notatie voor matrices terwijl lapack werkt met de fortran notatie.
+ * @param i rij
+ * @param j kolom 
+ * @return niet-wijzigbaar getal op de plaats (i,j) in de matrix
+ */
+
 double Matrix::operator()(int i,int j) const {
 
    return matrix[j][i];
 
 }
 
-//get pointer to matrix matrix
+/**
+ * Geeft de eigenlijke dubbele pointer terug, soms handig wanneer met mkl gewerkt wordt.
+ * @return dubbele pointer van double, matrix.
+ */
+
 double **Matrix::gMatrix(){
 
    return matrix;
 
 }
 
+/**
+ * @return dimensie van de matrix
+ */
+
 int Matrix::gn(){
 
    return n;
 
 }
+
+/**
+ * berekend de trace van de matrix
+ * @return trace van de matrix
+ */
 
 double Matrix::trace(){
 
@@ -161,7 +225,13 @@ double Matrix::trace(){
 
 }
 
-//diagonaliseer symmetrische matrices
+/**
+ * Diagonaliseerd symmetrische matrices. Opgelet, huidige matrix wordt vernietigd, 
+ * daar zullen de eigenvectoren opgeslaan worden (In de kolommen!)
+ * @param eigenvalues de pointer van doubles waarin de eigenwaarden opgeslaan gaan worden, 
+ * geheugen moet op voorhand gealloceerd zijn op de matrixdimensie!
+ */
+
 void Matrix::diagonalize(double *eigenvalues){
 
    char jobz = 'V';
@@ -179,6 +249,12 @@ void Matrix::diagonalize(double *eigenvalues){
 
 }
 
+/**
+ * Berekend het inproduct van twee matrices gedefinieerd als Tr(M_1 M_2)
+ * @param matrix_i De matrix waarmee het inproduct van this genomen wordt
+ * @return double met inproduct in.
+ */
+
 double Matrix::ddot(Matrix &matrix_i){
 
    int dim = n*n;
@@ -187,6 +263,12 @@ double Matrix::ddot(Matrix &matrix_i){
    return ddot_(&dim,matrix[0],&inc,matrix_i.matrix[0],&inc);
 
 }
+
+/**
+ * Inverteer de symmetrische, positief definiete matrix.
+ * Gebruikt de lapack implementatie van cholesky decompostie dus de matrix MOET
+ * positief definiet zijn! Vernietigd de oorspronkelijke matrix.
+ */
 
 void Matrix::invert(){
 
@@ -203,6 +285,10 @@ void Matrix::invert(){
 
 }
 
+/**
+ * Herschaal de matrix met een factor alpha
+ * @param alpha Het bewuste getal
+ */
 void Matrix::dscal(double alpha){
 
    int dim = n*n;
@@ -211,6 +297,12 @@ void Matrix::dscal(double alpha){
    dscal_(&dim,&alpha,matrix[0],&inc);
 
 }
+
+/**
+ * Vul de matrix met random getallen, gebruikt de standaard randomnummergenerator van C++
+ * Wordt geinitialiseerd (geseed) op de tijd dus kan twee maal zelfde resultaat reeks geven
+ * als de computertijd hetzelfde is.
+ */
 
 void Matrix::fill_Random(){
 
@@ -224,7 +316,11 @@ void Matrix::fill_Random(){
 
 }
 
-//^{1/2} of ^{-1/2}
+/**
+ * Neem de positieve of negatieve vierkantswortel uit de matrix. Opgelet, matrix wordt vernietigd
+ * @param option = +1 Neem dan de Positieve vierkantswortel, = -1 Neem dan de negatieve vierkantswortel
+ */
+
 void Matrix::sqrt(int option){
 
    Matrix hulp(*this);
@@ -259,6 +355,11 @@ void Matrix::sqrt(int option){
 
 }
 
+/**
+ * Vermenigvuldig this met een diagonaalmatrix
+ * @param diag de diagonaalmatrix waarmee this vermenigvuldig wordt
+ */
+
 void Matrix::mdiag(double *diag){
 
    int inc = 1;
@@ -268,8 +369,12 @@ void Matrix::mdiag(double *diag){
 
 }
 
-//symmetrische matrix links en rechts vermenigvuldigen met symmetrische matrix:
-//this = map*object*map
+/**
+ * symmetrische matrix links en rechts vermenigvuldigen met symmetrische matrix:\n
+ * this = map*object*map
+ * @param map de matrix die links en rechts inwerkt op object
+ * @param object wordt links en rechts vermenigvuldigd met map
+ */
 void Matrix::L_map(Matrix &map,Matrix &object){
    
    char side = 'L';
@@ -293,6 +398,14 @@ void Matrix::L_map(Matrix &map,Matrix &object){
 
 }
 
+/**
+ * algemeen matrixproduct tussen twee matrices
+ * 
+ * @param A linkse matrix
+ * @param B rechtse matrix
+ * @return Het product wordt teruggegeven
+ */
+
 Matrix &Matrix::mprod(Matrix &A,Matrix &B){
 
    char trans = 'N';
@@ -306,7 +419,9 @@ Matrix &Matrix::mprod(Matrix &A,Matrix &B){
 
 }
 
-//kopieer bovendriehoek in benedendriehoek
+/**
+ * Kopieer bovendriehoek in benedendriehoek van matrix.
+ */
 void Matrix::symmetrize(){
 
    for(int i = 0;i < n;++i)
@@ -315,7 +430,6 @@ void Matrix::symmetrize(){
 
 }
 
-//friend function! output stream operator overloaded
 ostream &operator<<(ostream &output,Matrix &matrix_p){
 
    for(int i = 0;i < matrix_p.gn();++i)

@@ -22,7 +22,12 @@ int TPM::counter = 0;
 int **TPM::t2s;
 int **TPM::s2t;
 
-//constructor:
+/**
+ * standard constructor, maakt Matrix aan met dimensie M*(M - 1)/2
+ * als counter == 0 dan alloceerd de constructor het geheugen voor lijsten t2s en s2t en initialiseerd deze:
+ * @param M aantal sp orbitals
+ * @param N aantal deeltjes
+ */
 TPM::TPM(int M,int N) : Matrix(M*(M - 1)/2) {
    
    this->N = N;
@@ -69,7 +74,11 @@ TPM::TPM(int M,int N) : Matrix(M*(M - 1)/2) {
 
 }
 
-//copy constructor
+/**
+ * copy constructor, maakt Matrix aan met dimensie M*(M - 1)/2 en kopieerd er tpm_c in
+ * als counter == 0 dan alloceerd de constructor het geheugen voor lijsten t2s en s2t en initialiseerd deze:
+ * @param tpm_c matrix die gekopieerd moet worden
+ */
 TPM::TPM(TPM &tpm_c) : Matrix(tpm_c){
 
    this->N = tpm_c.N;
@@ -116,7 +125,9 @@ TPM::TPM(TPM &tpm_c) : Matrix(tpm_c){
 
 }
 
-//destructor
+/**
+ * Destructor: als counter == 1 dan dealloceerd de destructor het geheugen voor lijsten t2s en s2t.
+ */
 TPM::~TPM(){
 
    if(counter == 1){
@@ -135,7 +146,15 @@ TPM::~TPM(){
 
 }
 
-//access the numbers: sp indices
+/**
+ * toegang tot de getallen in de matrix door gebruik te maken van de sp indices,
+ * er wordt rekenging gehouden met de antisymmetrie.\n
+ * vb. TPM(a,b,c,d) = - TPM(b,a,c,d) = -TPM(a,b,d,c) = TPM(b,a,d,c)
+ * @param a eerste sp index, vormt samen met b de eerste tp index
+ * @param b tweede sp index, vormt samen met a de eerste tp index
+ * @param c derde sp index, vormt samen met d de tweede tp index
+ * @param d vierde sp index, vormt samen met c de tweede tp index
+ */
 double TPM::operator()(int a,int b,int c,int d) const{
 
    if( (a == b) || (c == d) )
@@ -158,7 +177,6 @@ double TPM::operator()(int a,int b,int c,int d) const{
 
 }
 
-//friend function! output stream operator overloaded
 ostream &operator<<(ostream &output,TPM &tpm_p){
 
    for(int i = 0;i < tpm_p.n;++i)
@@ -174,18 +192,37 @@ ostream &operator<<(ostream &output,TPM &tpm_p){
 
 }
 
+/**
+ * @return aantal deeltjes
+ */
 int TPM::gN(){
 
    return N;
 
 }
 
+/**
+ * @return aantal sp orbitals
+ */
 int TPM::gM(){
 
    return M;
 
 }
 
+/**
+ * @return de dimensie van de matrix en van de tweedeeltjesruimte
+ */
+int TPM::gn(){
+
+   return n;
+
+}
+
+/**
+ * Maakt de gereduceerde tweedeeltjes hubbard hamiltoniaan aan en stop hem in this
+ * @param U de sterkte van de on site repulsie (U > 0) of attractie (U < 0)
+ */
 void TPM::hubbard(double U){
 
    int a,b,c,d;//sp orbitals
@@ -227,6 +264,11 @@ void TPM::hubbard(double U){
 
 }
 
+/**
+ * De Q afbeelding
+ * @param option = 1, gewone Q afbeelding , = -1 inverse Q afbeelding
+ * @param tpm_d De TPM waarvan de Q-like afbeelding genomen wordt en in this gestoken wordt
+ */
 void TPM::Q(int option,TPM &tpm_d){
 
    double a = 1;
@@ -237,7 +279,14 @@ void TPM::Q(int option,TPM &tpm_d){
 
 }
 
-//een algemene Q-like afbeelding Q(A,B,C)(tpm_d)
+/**
+ * De Q-like afbeelding: zie primal-dual.pdf voor meer info (vorm: Q(A,B,C)(TPM) )
+ * @param option = 1, gewone Q afbeelding , = -1 inverse Q afbeelding
+ * @param A voorfactor van two particle stuk afbeelding
+ * @param B voorfactor van no particle stuk afbeelding
+ * @param C voorfactor van single particle stuk afbeelding
+ * @param tpm_d De TPM waarvan de Q-like afbeelding genomen wordt en in this gestoken wordt
+ */
 void TPM::Q(int option,double A,double B,double C,TPM &tpm_d){
 
    if(option == -1){
@@ -286,7 +335,9 @@ void TPM::Q(int option,double A,double B,double C,TPM &tpm_d){
    this->symmetrize();
 
 }
-
+/**
+ * initialiseer this op de eenheidsmatrix met trace N*(N - 1)/2
+ */
 void TPM::unit(){
 
    double ward = N*(N - 1.0)/(2.0*n);
@@ -302,6 +353,9 @@ void TPM::unit(){
 
 }
 
+/**
+ * orthogonale projectie op traceless ruimte
+ */
 void TPM::proj_Tr(){
 
    double ward = (this->trace())/(double)n;
@@ -311,6 +365,13 @@ void TPM::proj_Tr(){
 
 }
 
+/**
+ * Primale hessiaan afbeelding:\n
+ * Hb = D_1 b D_1 + D_2 Q(b) D_2 + D_3 G(b) D_3\n
+ * met D_1,D_2 en D_3 de P,Q en G blokken van de SUP D. (Indien gecompileerd wordt met optie PQ wordt het G stuk weggelaten)
+ * @param b TPM matrix waarop de hessiaan inwerkt en waarvan de afbeelding wordt opgeslagen in this
+ * @param D SUP matrix die de structuur van de hessiaan afbeelding bepaald.
+ */
 void TPM::H(TPM &b,SUP &D){
 
    this->L_map(D.tpm(0),b);
@@ -347,6 +408,13 @@ void TPM::H(TPM &b,SUP &D){
 
 }
 
+/**
+ * Implementie van het lineair conjugate gradient algoritme ter oplossing van het primale stelsel\n
+ * H(*this) =  b waarin H de hessiaan afbeelding voorstelt.
+ * @param b rechterlid van het stelsel
+ * @param D SUP matrix die de structuur van de hessiaan afbeelding bepaald.
+ * @return return het aantal iteraties dat nodig was om de gewenste nauwkeurigheid te bereiken
+ */
 int TPM::solve(TPM &b,SUP &D){
 
    *this = 0;
@@ -362,7 +430,7 @@ int TPM::solve(TPM &b,SUP &D){
 
    int cg_iter = 0;
 
-   while(rr > 1.0e-7){
+   while(rr > 1.0e-5){
 
       ++cg_iter;
 
@@ -394,11 +462,11 @@ int TPM::solve(TPM &b,SUP &D){
 
 
 #ifndef PQ
-
-//van de ph naar de tp ruimte:
-
-//option == 1: doe dan de G down
-//option == -1: doe dan de inverse G up
+/**
+ * De G afbeelding die een PHM object afbeeld op een TPM object.
+ * @param option = 1 dan wordt G_down uitgevoerd, = -1 dan wordt G^{-1}_up uitgevoerd
+ * @param phm input PHM die afgebeeld wordt op this
+ */
 void TPM::G(int option,PHM &phm){
 
    SPM spm(M,N);
@@ -445,6 +513,13 @@ void TPM::G(int option,PHM &phm){
 
 #endif
 
+/**
+ * Overlapmatrix afbeelding, is eigenlijk een Q-like afbeelding waarvoor ik de 
+ * parameters a,b en c heb berekend in primal-dual.pdf. Aangezien het een Q-like afbeelding is hebben we dus onmiddelijk ook de inverse
+ * overlapmatrix-afbeelding.
+ * @param option = 1 directe overlapmatrixafbeelding , = -1 inverse overlapmatrix afbeelding
+ * @param tpm_d de input TPM die afgebeeld wordt op this
+ */
 void TPM::S(int option,TPM &tpm_d){
 
 #ifdef PQ
@@ -465,6 +540,11 @@ void TPM::S(int option,TPM &tpm_d){
 
 }
 
+/**
+ * Trek van this de eenheidsmatrix * een constante af:\n
+ * this -= scale* 1
+ * @param scale de constante waarmee de eenheidsmarix vermenigvuldigt wordt
+ */
 void TPM::min_unit(double scale){
 
    for(int i = 0;i < n;++i)
@@ -472,6 +552,11 @@ void TPM::min_unit(double scale){
 
 }
 
+/**
+ * Trek van this - de Q-afbeelding van de eenheidsmatrix  * een constante - af:\n
+ * this -= scale* Q(1)
+ * @param scale de constante waarmee de eenheidsmarix vermenigvuldigt wordt
+ */
 void TPM::min_qunit(double scale){
 
    double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
