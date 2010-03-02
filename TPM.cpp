@@ -17,6 +17,8 @@ using std::endl;
 #include "SUP.h"
 #include "lapack.h"
 
+#include "DPM.h"
+
 int TPM::counter = 0;
 
 int **TPM::t2s;
@@ -29,7 +31,7 @@ int **TPM::s2t;
  * @param N aantal deeltjes
  */
 TPM::TPM(int M,int N) : Matrix(M*(M - 1)/2) {
-   
+
    this->N = N;
    this->M = M;
    this->n = M*(M - 1)/2;
@@ -397,7 +399,7 @@ void TPM::H(TPM &b,SUP &D){
    PHM hulpje(M,N);
 
    hulpje.L_map(D.phm(),Gb);
-   
+
    hulp.G(1,hulpje);
 
    *this += hulp;
@@ -455,7 +457,7 @@ int TPM::solve(TPM &b,SUP &D){
       b += r;
 
    }
-   
+
    return cg_iter;
 
 }
@@ -565,5 +567,68 @@ void TPM::min_qunit(double scale){
 
    for(int i = 0;i < n;++i)
       (*this)(i,i) -= scale;
+
+}
+
+/**
+ * calculate the trace of one pair of sp indices of a DPM an put in (*this):\n\n
+ * TPM(a,b,d,e) = \sum_{c} DPM(a,b,c,d,e,c)
+ * @param dpm input DPM
+ */
+void TPM::bar(DPM &dpm){
+
+   int a,b,c,d;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = 0;j < n;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l = 0;l < M;++l)
+            (*this)(i,j) += dpm(a,b,l,c,d,l);
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * map a DPM (dpm) on a TPM (*this) with a T1 map, (Q-like map), watch out for the inverse
+ * up map, when M = 2*N it is singular! So don't use it!:
+ * @param option = +1 T1_down , =-1 inverse T1_up
+ * @param dpm The input DPM
+ */
+void TPM::T(int option,DPM &dpm){
+
+   TPM tpm(M,N);
+   tpm.bar(dpm);
+
+   if(option == 1){
+
+      double a = 1;
+      double b = 1.0/(3.0*N*(N - 1.0));
+      double c = 0.5/(N - 1.0);
+
+      this->Q(1,a,b,c,tpm);
+
+   }
+   else{//option == -1
+
+      double a = M - 4.0;
+      double b = (M - N - 2.0)/(N*(N - 1.0));
+      double c = (M - N - 2.0)/(N - 1.0);
+
+      this->Q(-1,a,b,c,tpm);
+
+   }
 
 }

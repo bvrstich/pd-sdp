@@ -11,6 +11,7 @@ using std::ostream;
 class SPM;
 class SUP;
 class PHM;
+class DPM;
 
 /**
  * @author Brecht Verstichel
@@ -84,13 +85,17 @@ class TPM : public Matrix {
       //de G down en inverse G up
       void G(int option,PHM &);
 
+      void bar(DPM &);
+
+      void T(int option,DPM &);
+
       void min_unit(double scale);
 
       void min_qunit(double scale);
 
    private:
 
-      
+
       //!static lijst, dubbele pointer (n_tp*2) van integers die een tp index i neemt en dan twee sp indices teruggeeft: t2s(i,0) = a  t2s(i,1) = b
       static int **t2s;
 

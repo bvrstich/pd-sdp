@@ -27,6 +27,8 @@ using std::ofstream;
 
 #endif 
 
+#include "DPM.h"
+
 #include "SUP.h"
 #include "EIG.h"
 

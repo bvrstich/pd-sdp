@@ -9,4 +9,4 @@
 callgrind.out.*
 pd_sdp
 tags
-docs/
+docs
