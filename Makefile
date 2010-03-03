@@ -26,16 +26,16 @@ BRIGHT_ROOT= .
 
 INCLUDE = ./include
 
-LIBS= -llapack -lblas
+LIBS=
 
-CC	= gcc
-CXX	= g++
+CC	= icc
+CXX	= icpc
 
 # -----------------------------------------------------------------------------
 #   Compiler & Linker flags
 # -----------------------------------------------------------------------------
-CFLAGS	= -I$(INCLUDE) -g -Wall -O3
-LDFLAGS	= -g -Wall -O3
+CFLAGS	= -I$(INCLUDE) -g -Wall -O2 -I/opt/intel/mkl/10.0.3.020/include/
+LDFLAGS	= -g -Wall -O2 -lmkl_lapack -lmkl_intel -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -L/opt/intel/mkl/10.0.3.020/lib/32/
 
 
 # =============================================================================
@@ -105,6 +105,9 @@ clean:
 	@echo -n $(OBJ)
 	@rm -f $(OBJ)
 	@echo 'Done.'
+
+doc:
+	doxygen doc-config
 
 
 # ====================== End of file 'Makefile.in' ========================== #
