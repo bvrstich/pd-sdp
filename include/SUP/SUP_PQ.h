@@ -104,7 +104,9 @@ class SUP_PQ{
 
       void proj_U_Tr();
 
-      void diagonalize(EIG_PQ &);
+      EIG_PQ diagonalize();
+
+      virtual EIG_PQ *get_EIG();
 
       double center_dev(SUP_PQ &Z);
 

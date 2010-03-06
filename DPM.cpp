@@ -5,8 +5,7 @@
 using std::ostream;
 using std::endl;
 
-#include "include/DPM.h"
-#include "include/SPM.h"
+#include "include.h"
 
 int DPM::counter = 0;
 

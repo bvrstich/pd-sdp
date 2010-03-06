@@ -1,100 +1,31 @@
+/**
+ * @file 
+ * This is a wrapper class around the different EIG_PQ(GT1) classes. It is decided at compile time from which 
+ * EIG_* file this class inherits. Compile with PQ to inherit from EIG_PQ, compile with PQG to inherit from EIG_PQG, etc. .
+ * This way, you can use the EIG object everywhere in the program without having to worry about which conditions are used.
+ */
 #ifndef EIG_H
 #define EIG_H
 
-#include <iostream>
-#include <fstream>
+//if PQ is defined, inherit from EIG_PQ
+#ifdef PQ
 
-using std::ostream;
+#include "EIG/EIG_PQ.h"
 
-#include "SUP.h"
+class EIG : public EIG_PQ { 
 
-/**
- * @author Brecht Verstichel
- * @date 19-02-2010\n\n
- * De klasse EIG is een blok-vector over de carrierspace's van de verschillende condities: dus eigenlijk een 
- * klasse om makkelijk met de eigenwaarden van een SUP matrix te kunnen werken.
- * Deze wordt enkel gebruikt bij diagonalisatie van een SUP matrix, moest je de EIG objecten random vullen zouden
- * enkele functies rare(foute) resultaten kunnen geven.
- */
+   public :
 
-class EIG{
+      EIG(int M,int N) : EIG_PQ(M,N) { }
 
-   /**
-    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
-    * ifstream object aan en doe \n\n
-    * object << eig_p << endl;\n\n
-    * Wil je naar het scherm printen:\n\n
-    * cout << eig_p << endl;\n\n
-    * @param output de stream waarnaar je toe schrijft.
-    * @param eig_p de te printen matrix
-    */
-   friend ostream &operator<<(ostream &output,const EIG &eig_p);
+      EIG(EIG &eig) : EIG_PQ(eig) { }
 
-   public:
-      
-      //constructor
-      EIG(int M,int N);
+      EIG(SUP_PQ &SZ) : EIG_PQ(SZ) { }
 
-      //copy constructor
-      EIG(EIG &);
-
-      //constructor met initialisatie op 
-      EIG(SUP &);
-
-      //destructor
-      ~EIG();
-
-      int gN();
-
-      int gM();
-
-      int gn_tp();
-
-      double centerpot(double,EIG &,double,double);
-
-#ifndef PQ
-
-      int gn_ph();
-
-#endif
-
-      double operator()(int,int);
-
-      //overload equality operator
-      EIG &operator=(EIG &);
-
-      double *operator[](int);
-
-      double min();
-
-      double max();
-
-      double center_dev();
-
-   private:
-
-      //!dubbele pointer, hier zullen de eigenwaarden van de twee TPM 's en de PHM in opgeslaan worden
-      double **eig;
-
-      //!aantal deeltjes
-      int N;
-
-      //!dimensie van de sp ruimte
-      int M;
-
-      //!dimensie van de tp ruimte
-      int n_tp;
-
-#ifndef PQ
-      
-      //!dimensie van de ph ruimte
-      int n_ph;
-
-#endif
-
-      //!totale dimensie van EIG vector
-      int dim;
-
+      ~EIG(){ }
+   
 };
+
+#endif
 
 #endif

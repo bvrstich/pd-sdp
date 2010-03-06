@@ -1,6 +1,6 @@
 ###############################################################################
 #
-#  Makefile template for the sources
+#  makefile template for the sources
 #
 ###############################################################################
 
@@ -14,8 +14,8 @@ CPPSRC	= pd_sdp.cpp\
             TPM.cpp\
             PHM.cpp\
             DPM.cpp\
-            SUP.cpp\
-            EIG.cpp
+            SUP/SUP_PQ.cpp\
+            EIG/EIG_PQ.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
@@ -73,15 +73,15 @@ PQ:
 # -----------------------------------------------------------------------------
 #   The default way to compile all source modules
 # -----------------------------------------------------------------------------
-%.o:	%.for Makefile
+%.o:	%.for makefile
 	@echo; echo "Compiling $(@:.o=.for) ..."
 	$(FF) -c $(FFLAGS) $(SFLAGS) $(@:.o=.for) -o $@
 
-%.o:	%.c Makefile
+%.o:	%.c makefile
 	@echo; echo "Compiling $(@:.o=.c) ..."
 	$(CC) -c $(CFLAGS) $(SFLAGS) $(@:.o=.c) -o $@
 
-%.o:	%.cpp Makefile
+%.o:	%.cpp makefile
 	@echo; echo "Compiling $(@:.o=.cpp) ..."
 	$(CXX) -c $(CFLAGS) $(SFLAGS) $(DEFS) $(@:.o=.cpp) -o $@
 
@@ -89,7 +89,7 @@ PQ:
 # -----------------------------------------------------------------------------
 #   Link everything together
 # -----------------------------------------------------------------------------
-$(BRIGHT_ROOT)/$(BINNAME):	Makefile $(OBJ) 
+$(BRIGHT_ROOT)/$(BINNAME):	makefile $(OBJ) 
 	@echo; echo "Linker: creating $(BRIGHT_ROOT)/$(BINNAME) ..."
 	$(CXX) $(LDFLAGS) $(SFLAGS) -o $(BRIGHT_ROOT)/$(BINNAME) $(OBJ) $(LIBS)
 
@@ -107,5 +107,7 @@ clean:
 	@rm -f $(OBJ)
 	@echo 'Done.'
 
+doc:
+	@doxygen doc-config
 
-# ====================== End of file 'Makefile.in' ========================== #
+# ====================== End of file 'makefile.in' ========================== #

@@ -5,8 +5,7 @@
 using std::ostream;
 using std::endl;
 
-#include "PHM.h"
-#include "lapack.h"
+#include "include.h"
 
 int PHM::counter = 0;
 

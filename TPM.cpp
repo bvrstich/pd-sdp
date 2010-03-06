@@ -5,19 +5,7 @@
 using std::ostream;
 using std::endl;
 
-#include "SPM.h"
-#include "TPM.h"
-
-#ifndef PQ
-
-#include "PHM.h"
-
-#endif
-
-#include "SUP.h"
-#include "lapack.h"
-
-#include "DPM.h"
+#include "include.h"
 
 int TPM::counter = 0;
 
@@ -267,6 +255,33 @@ void TPM::hubbard(double U){
 }
 
 /**
+ * "Collaps" a SUP matrix onto a traceless TPM means:\n\n
+ * B -> sum_i Tr (B u^i) f_i = this\n\n
+ * @param B input SUP matrix
+ */
+void TPM::collaps(SUP &B){
+
+   *this = B.tpm(0);
+
+   TPM hulp(M,N);
+
+   hulp.Q(1,B.tpm(1));
+
+   *this += hulp;
+
+#ifdef __G_CON
+
+   hulp.G(1,B.phm());
+
+   *this += hulp;
+
+#endif
+
+   this->proj_Tr();
+
+}
+
+/**
  * De Q afbeelding
  * @param option = 1, gewone Q afbeelding , = -1 inverse Q afbeelding
  * @param tpm_d De TPM waarvan de Q-like afbeelding genomen wordt en in this gestoken wordt
@@ -390,7 +405,7 @@ void TPM::H(TPM &b,SUP &D){
 
    *this += Qb;
 
-#ifndef PQ
+#ifdef __G_CON
 
    //maak G(b)
    PHM Gb(M,N);
@@ -462,8 +477,6 @@ int TPM::solve(TPM &b,SUP &D){
 
 }
 
-
-#ifndef PQ
 /**
  * De G afbeelding die een PHM object afbeeld op een TPM object.
  * @param option = 1 dan wordt G_down uitgevoerd, = -1 dan wordt G^{-1}_up uitgevoerd
@@ -513,8 +526,6 @@ void TPM::G(int option,PHM &phm){
 
 }
 
-#endif
-
 /**
  * Overlapmatrix afbeelding, is eigenlijk een Q-like afbeelding waarvoor ik de 
  * parameters a,b en c heb berekend in primal-dual.pdf. Aangezien het een Q-like afbeelding is hebben we dus onmiddelijk ook de inverse
@@ -524,17 +535,14 @@ void TPM::G(int option,PHM &phm){
  */
 void TPM::S(int option,TPM &tpm_d){
 
-#ifdef PQ
-
    double a = 2.0;
    double b = (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
    double c = (2.0*N - M)/((N - 1.0)*(N - 1.0));
 
-#else
+#ifdef __G_CON
 
-   double a = 6.0;
-   double b = (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
-   double c = (4.0*N - 2.0*M - 2.0)/((N - 1.0)*(N - 1.0));
+   a += 4.0;
+   c += (2.0*N - M - 2.0)/((N - 1.0)*(N - 1.0));
 
 #endif
 

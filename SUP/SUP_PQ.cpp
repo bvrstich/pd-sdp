@@ -5,7 +5,7 @@
 using std::ostream;
 
 #include "SUP/SUP_PQ.h"
-#include "EIG.h"
+#include "EIG/EIG_PQ.h"
 
 /**
  * standard constructor\n\n
@@ -98,14 +98,6 @@ SUP_PQ &SUP_PQ::operator=(SUP_PQ &SZ_c){
    (*SZ_tp[1]) = (*SZ_c.SZ_tp[1]);
 
    return *this;
-
-}
-
-virtual EIG_PQ *SUP_PQ::get_EIG(SUP_PQ &SZ){
-
-   EIG_PQ *a = new EIG_PQ(SZ);
-
-   return a;
 
 }
 
@@ -411,7 +403,7 @@ int SUP_PQ::solve(SUP_PQ &B,SUP_PQ &D){
 
    int cg_iter = 0;
 
-   while(rr > 1.0e-3){
+   while(rr > 1.0e-5){
 
       ++cg_iter;
 
@@ -489,14 +481,32 @@ double SUP_PQ::U_trace(){
 }
 
 /**
- * Diagonalisation of all the blockmatrices in SUP_PQ trough Matrix::diagonalize. Eigenvalues are saved in the input EIG object eig. 
- * Eigenvectors are saved in the original SUP_PQ matrix, so the orignal SUP_PQ this is destroyed.
- * @param eig input EIG that will containt the eigenvalues after the operation.
+ * Diagonalisation of all the blockmatrices in SUP_PQ trough Matrix::diagonalize. Eigenvalues are saved in the EIG_PQ object eig. 
+ * Eigenvectors are saved in the original SUP_PQ matrix (*this), so the original SUP_PQ this is destroyed.
+ * @return EIG_PQ that will contain the eigenvalues of this after the operation.
  */
-void SUP_PQ::diagonalize(EIG_PQ &eig){
+EIG_PQ SUP_PQ::diagonalize(){
+
+   EIG_PQ eig(M,N);
 
    SZ_tp[0]->diagonalize(eig[0]);
    SZ_tp[1]->diagonalize(eig[1]);
+
+   return eig;
+
+}
+
+/**
+ * Diagonalisation of all the blockmatrices in SUP_PQ trough Matrix::diagonalize. Eigenvalues are saved in a EIG_PQ object eig. 
+ * Eigenvectors are saved in the original SUP_PQ matrix (*this), so the original SUP_PQ this is destroyed.\n
+ * Watch out: a EIG_PQ object here is dynamically allocated and has to be deleted explicitally after calling this function.
+ * @return pointer to the EIG_PQ that will contain the eigenvalues of this after the operation.
+ */
+EIG_PQ *SUP_PQ::get_EIG(){
+
+   EIG_PQ *eig = new EIG_PQ(*this);
+
+   return eig;
 
 }
 
@@ -515,13 +525,8 @@ double SUP_PQ::center_dev(SUP_PQ &Z){
    SUP_PQ SZ(M,N);
    SZ.L_map(sqrt_S,Z);
 
-   EIG_PQ *eig = SZ.get_EIG(M,N);
+   return (SZ.diagonalize()).center_dev();
 
-   double ward = eig.center_dev();
-
-   delete eig;
-
-   return ward;
 
 }
 
@@ -552,7 +557,7 @@ double SUP_PQ::line_search(SUP_PQ &DZ,SUP_PQ &S,SUP_PQ &Z,double max_dev){
    hulp.L_map(wortel,*this);
 
    //eigenwaarden in eigen_S stoppen
-   EIG eigen_S(hulp);
+   EIG_PQ *eigen_S = hulp.get_EIG();
 
    //nu idem voor Z
    wortel = Z;
@@ -561,7 +566,7 @@ double SUP_PQ::line_search(SUP_PQ &DZ,SUP_PQ &S,SUP_PQ &Z,double max_dev){
 
    hulp.L_map(wortel,DZ);
 
-   EIG eigen_Z(hulp);
+   EIG_PQ *eigen_Z = hulp.get_EIG();
 
    //nog c_S en c_Z uitrekenen:
    double pd_gap = S.ddot(Z);
@@ -573,8 +578,8 @@ double SUP_PQ::line_search(SUP_PQ &DZ,SUP_PQ &S,SUP_PQ &Z,double max_dev){
    double c_Z = S.ddot(DZ)/pd_gap;
 
    //waar zitten de singulariteiten: tot waar mag ik zoeken?
-   double a_max = -1.0/eigen_S.min();
-   double b_max = -1.0/eigen_Z.min();
+   double a_max = -1.0/eigen_S->min();
+   double b_max = -1.0/eigen_Z->min();
 
    //a_max is de waarde tot waar ik zal zoeken:
    if(b_max < a_max)
@@ -590,12 +595,16 @@ double SUP_PQ::line_search(SUP_PQ &DZ,SUP_PQ &S,SUP_PQ &Z,double max_dev){
 
       c = (a + b)/2.0;
 
-      if( (center_dev + eigen_S.centerpot(c,eigen_Z,c_S,c_Z) - max_dev) < 0.0 )
+      if( (center_dev + eigen_S->centerpot(c,*eigen_Z,c_S,c_Z) - max_dev) < 0.0 )
          a = c;
       else
          b = c;
 
    }
+
+   //nog allocated memory deleten
+   delete eigen_S;
+   delete eigen_Z;
 
    return c;
 

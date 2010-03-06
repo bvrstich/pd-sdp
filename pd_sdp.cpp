@@ -16,21 +16,7 @@ using std::cout;
 using std::endl;
 using std::ofstream;
 
-#include "lapack.h"
-#include "Matrix.h"
-#include "SPM.h"
-#include "TPM.h"
-
-#ifndef PQ
-
-#include "PHM.h"
-
-#endif 
-
-#include "DPM.h"
-
-#include "SUP.h"
-#include "EIG.h"
+#include "include.h"
 
 /**
  * 
@@ -51,14 +37,11 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   int n_tp = M*(M - 1)/2;//dim van tp ruimte
+   int dim = M*(M - 1);
 
-   int dim = 2*n_tp;
+#ifdef __G_CON
 
-#ifndef PQ
-
-   int n_ph = M*M;//dim van ph ruimte
-   dim += n_ph;
+   dim += M*M;
 
 #endif
 
@@ -115,23 +98,10 @@ int main(void){
 
       B -= Z;
 
-      //nu kan het rechterlid worden gemaakt:
+      //nu kan het rechterlid van het primale Newton stelsel worden gemaakt:
       TPM b(M,N);
 
-      b.Q(1,B.tpm(1));
-
-      b += B.tpm(0);
-
-#ifndef PQ
-
-      TPM hulp(M,N);
-      hulp.G(1,B.phm());
-
-      b += hulp;
-
-#endif
-
-      b.proj_Tr();
+      b.collaps(B);
 
       //dit wordt de stap:
       TPM delta(M,N);

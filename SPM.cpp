@@ -4,8 +4,7 @@
 using std::ostream;
 using std::endl;
 
-#include "SPM.h"
-#include "lapack.h"
+#include "include.h"
 
 /**
  * constructor, maakt een Matrix object aan met dimensie M

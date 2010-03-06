@@ -63,6 +63,8 @@ class TPM : public Matrix {
 
       void hubbard(double U);
 
+      void collaps(SUP &B);
+
       //Q afbeelding en zijn inverse
       void Q(int option,TPM &);
 
