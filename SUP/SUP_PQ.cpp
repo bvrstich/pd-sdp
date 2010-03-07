@@ -246,17 +246,17 @@ void SUP_PQ::dscal(double alpha){
 void SUP_PQ::proj_U(){
   
    //eerst M_Gamma + Q(M_Q) in O stoppen
-   TPM O(*SZ_tp[0]);
+   TPM O(M,N);
 
-   SZ_tp[0]->Q(1,*SZ_tp[1]);
+   O.collaps(*this);
 
-   O += *SZ_tp[0];
+   //dan de inverse overlapmatrix hierop laten inwerken en in hulp stoppen
+   TPM hulp(M,N);
 
-   //dan de inverse overlapmatrix hierop laten inwerken en in this[0] stoppen
-   SZ_tp[0]->S(-1,O);
+   hulp.S(-1,O);
 
-   //en de Q hiervan in this[1]
-   SZ_tp[1]->Q(1,*SZ_tp[0]);
+   //en this vullen met deze TPM
+   this->fill(hulp);
 
    //Nu is de projectie op de u^\alpha's gebeurd.
    //Nu nog de projectie op de u^i's: dus component langs u^0 eruit halen

@@ -112,7 +112,7 @@ class SUP_PQ{
 
       double line_search(SUP_PQ &DZ,SUP_PQ &S,SUP_PQ &Z,double max_dev);
 
-   private:
+   protected:
 
       //!double pointer of TPM's,
       TPM **SZ_tp;
