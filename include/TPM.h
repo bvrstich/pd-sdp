@@ -93,6 +93,8 @@ class TPM : public Matrix {
 
       void min_qunit(double scale);
 
+      void collaps(int option,SUP &);
+
    private:
 
       //!static list of dimension [n_tp][2] that takes in a tp index i and returns two sp indices: a = t2s[i][0] and b = t2s[i][1]

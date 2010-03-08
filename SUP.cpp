@@ -197,13 +197,8 @@ PHM &SUP::phm(){
 void SUP::init_S(){
 
    (*SZ_tp[0]).unit();
-   (*SZ_tp[1]).Q(1,*SZ_tp[0]);
 
-#ifndef PQ
-   
-   SZ_ph->G(1,*SZ_tp[0]);
-
-#endif
+   this->fill();
 
 }
 
@@ -224,10 +219,30 @@ ostream &operator<<(ostream &output,SUP &SZ_p){
 }
 
 /**
+ * Fill the SUP matrix with random elements, watch out, not necessarily positive definite
+ */
+void SUP::fill_Random(){
+
+   SZ_tp[0]->fill_Random();
+   SZ_tp[1]->fill_Random();
+
+#ifndef PQ
+
+   SZ_ph->fill_Random();
+
+#endif
+
+}
+
+/**
  * Het initialisatie voor Z, zie primal_dual.pdf voor meer info.
  */
 void SUP::init_Z(double alpha,TPM &ham,SUP &u_0){
 
+   this->fill_Random();
+
+   this->proj_C(ham);
+/*
    (*SZ_tp[0]) = ham;
 
 #ifndef PQ
@@ -247,7 +262,7 @@ void SUP::init_Z(double alpha,TPM &ham,SUP &u_0){
    SZ_ph->G(-1,*SZ_tp[0]);
 
 #endif
-
+*/
    //nog een eenheidsmatrix maal constante bijtellen zodat Z positief definiet is:
    this->daxpy(alpha,u_0); 
 
@@ -366,36 +381,49 @@ void SUP::dscal(double alpha){
 void SUP::proj_U(){
   
    //eerst M_Gamma + Q(M_Q) + G(M_G) in O stoppen
-   TPM O(*SZ_tp[0]);
+   TPM O(M,N);
 
-   SZ_tp[0]->Q(1,*SZ_tp[1]);
-
-   O += *SZ_tp[0];
-
-#ifndef PQ
-   
-   SZ_tp[0]->G(1,*SZ_ph);
-
-   O += *SZ_tp[0];
-
-#endif
+   O.collaps(0,*this);
 
    //dan de inverse overlapmatrix hierop laten inwerken en in this[0] stoppen
-   (*SZ_tp[0]).S(-1,O);
+   SZ_tp[0]->S(-1,O);
 
-   //en de Q hiervan in this[1]
-   (*SZ_tp[1]).Q(1,*SZ_tp[0]);
+   //fill up the rest with the right maps
+   this->fill();
 
-#ifndef PQ
-
-   //en de G hiervan in in phm van SZ
-   SZ_ph->G(1,*SZ_tp[0]);
-
-#endif
-   
    //Nu is de projectie op de u^\alpha's gebeurd.
    //Nu nog de projectie op de u^i's: dus component langs u^0 eruit halen
    this->proj_U_Tr();
+
+}
+
+/**
+ * Project the general SUP matrix (*this) orthogonally onto the linear space for which\n\n
+ * Tr(Z u^i) = h^i      with h^i = Tr(tpm f^i)\n\n
+ * is valid.
+ * @param tpm input TPM (mostly the hamiltonian of the problem)
+ */
+void SUP::proj_C(TPM &tpm){
+
+   TPM hulp(M,N);
+
+   hulp.collaps(0,*this);
+
+   hulp -= tpm;
+
+   //Z_res is the orthogonal piece of this that will be deducted,
+   //so the piece of this in the U-space - ham
+   SUP Z_res(M,N);
+
+   //apply iverse S to it and put it in Z_res.tpm(0)
+   (Z_res.tpm(0)).S(-1,hulp);
+
+   //and fill it up Johnny
+   Z_res.fill();
+
+   Z_res.proj_U_Tr();
+
+   *this -= Z_res;
 
 }
 
@@ -552,6 +580,22 @@ void SUP::fill(TPM &tpm){
    SZ_ph->G(1,tpm);
 
 #endif
+
+}
+
+/**
+ * fill the SUP matrix with the TPM matrix stored in the first block:\n\n
+ * this = diag[this->tpm(0) Q(this->tpm(0)) G(this->tpm(0))]
+ */
+void SUP::fill(){
+
+   SZ_tp[1]->Q(1,*SZ_tp[0]);
+
+#ifndef PQ
+
+   SZ_ph->G(1,*SZ_tp[0]);
+
+#endif 
 
 }
 

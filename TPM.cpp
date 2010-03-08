@@ -568,7 +568,7 @@ void TPM::min_qunit(double scale){
 
 /**
  * calculate the trace of one pair of sp indices of a DPM an put in (*this):\n\n
- * TPM(a,b,d,e) = \sum_{c} DPM(a,b,c,d,e,c)
+ * TPM(a,b,d,e) = sum_{c} DPM(a,b,c,d,e,c)
  * @param dpm input DPM
  */
 void TPM::bar(DPM &dpm){
@@ -626,5 +626,34 @@ void TPM::T(int option,DPM &dpm){
       this->Q(-1,a,b,c,tpm);
 
    }
+
+}
+
+/**
+ * Collaps a SUP matrix S onto a TPM matrix like this:\n\n
+ * sum_i Tr (S u^i)f^i = this
+ * @param option = 0, project onto full symmetric matrix space, = 1 project onto traceless symmetric matrix space
+ * @param S input SUP
+ */
+void TPM::collaps(int option,SUP &S){
+
+   *this = S.tpm(0);
+
+   TPM hulp(M,N);
+
+   hulp.Q(1,S.tpm(1));
+
+   *this += hulp;
+
+#ifdef __G_CON
+
+   hulp.G(1,S.phm());
+
+   *this += hulp;
+
+#endif
+
+   if(option == 1)
+      this->proj_Tr();
 
 }

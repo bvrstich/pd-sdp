@@ -36,17 +36,6 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   int n_tp = M*(M - 1)/2;//dim van tp ruimte
-
-   int dim = 2*n_tp;
-
-#ifndef PQ
-
-   int n_ph = M*M;//dim van ph ruimte
-   dim += n_ph;
-
-#endif
-
    //hamiltoniaan
    TPM ham(M,N);
    ham.hubbard(1.0);
@@ -55,7 +44,9 @@ int main(void){
    S.init_S();
 
    SUP Z(M,N);
-   Z.init_Z(10.0,ham,S);
+   Z.init_Z(20.0,ham,S);
+
+   int dim = Z.gdim();
 
    //eerste primal dual gap:
    double pd_gap = S.ddot(Z);
@@ -72,7 +63,6 @@ int main(void){
    //flag == 1 : doe een stap met gamma = 0
    //flag == 2 : doe een stap met gamma = 1
    //flag == 3 : game over man
-
    int flag = 0;
 
    double a;//stapgrootte
@@ -100,23 +90,10 @@ int main(void){
 
       B -= Z;
 
-      //nu kan het rechterlid worden gemaakt:
+      //collaps B onto b to construct the right hand side of the primal Newton equation
       TPM b(M,N);
 
-      b.Q(1,B.tpm(1));
-
-      b += B.tpm(0);
-
-#ifndef PQ
-
-      TPM hulp(M,N);
-      hulp.G(1,B.phm());
-
-      b += hulp;
-
-#endif
-
-      b.proj_Tr();
+      b.collaps(1,B);
 
       //dit wordt de stap:
       TPM delta(M,N);
