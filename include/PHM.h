@@ -7,25 +7,23 @@ using std::ostream;
 
 #include "Matrix.h"
 #include "TPM.h"
-#include "SPM.h"
 
 /**
  * @author Brecht Verstichel
- * @date 18-02-2010\n\n
- * Deze klasse, PHM, stelt een particle hole matrix voor. Hij erft van de klasse Matrix en breidt die uit met een
- * lijst van hoe de deeltje-gat-basis opgebouwd is uit de eendeeltjesbasis. Er zijn ook specifieke memberfuncties toegevoegd.
+ * @date 23-02-2010\n\n
+ * This class, PHM, is a class written for particle-hole matrices, it inherits all the functions from its mother class
+ * Matrix, some special member functions and two lists that give the relationship between the sp and the ph basis.
  */
-
 class PHM : public Matrix {
 
-   /**
-    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
-    * ifstream object aan en doe \n\n
+    /**
+    * Output stream operator overloaded, the usage is simple, if you want to print to a file, make an
+    * ifstream object and type:\n\n
     * object << phm_p << endl;\n\n
-    * Wil je naar het scherm printen:\n\n
+    * For output onto the screen type: \n\n
     * cout << phm_p << endl;\n\n
-    * @param output de stream waarnaar je toe schrijft.
-    * @param phm_p de te printen matrix
+    * @param output The stream to which you are writing (e.g. cout)
+    * @param phm_p the TPM you want to print
     */
    friend ostream &operator<<(ostream &output,PHM &phm_p);
 
@@ -67,22 +65,22 @@ class PHM : public Matrix {
 
    private:
 
-      //!static counter, telt het aantal PHM objecten momenteel aangemaakt in het programma omdat het geheugen waar de ph2s en s2ph pointers naar wijzen maar 1 maal aangemaakt wordt (static dus)
+      //!static counter that counts the number of PHM objects running in the program
       static int counter;
 
-      //!static lijst, dubbele pointer (n_ph*2) van integers die een ph index i neemt en dan twee sp indices teruggeeft: ph2s(i,0) = a  ph2s(i,1) = b
+      //!static list of dimension [n_ph][2] that takes in a ph index i and returns two sp indices: a = ph2s[i][0] and b = ph2s[i][1]
       static int **ph2s;
 
-      //! static lijst, dubbele pointer (M*M) van integers die twee sp indices neemt (a,b) een een ph index teruggeeft (i)
+      //!static list of dimension [M][M] that takes two sp indices a,b and returns a ph index i: i = s2t[a][b]
       static int **s2ph;
 
-      //!aantal deeltjes
+      //!number of particles
       int N;
 
-      //!aantal sp orbital, dimensie van eendeeltjesruimte
+      //!dimension of sp hilbert space
       int M;
 
-      //!dimensie van de particle hole ruimte
+      //!dimension of ph space and dimension of PHM Matrix object
       int n;
 
 };

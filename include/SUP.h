@@ -95,6 +95,8 @@ class SUP{
 
       void proj_U();
 
+      void proj_C(TPM &);
+
       //maak de matrix D, nodig voor de hessiaan van het stelsel
       void D(SUP &S,SUP &Z);
 
@@ -115,6 +117,8 @@ class SUP{
 
       void fill(TPM &);
 
+      void fill();
+
       int solve(SUP &B,SUP &D);
 
       void H(SUP &B,SUP &D);
@@ -126,6 +130,8 @@ class SUP{
       double center_dev(SUP &Z);
 
       double line_search(SUP &DZ,SUP &S,SUP &Z,double max_dev);
+
+      void fill_Random();
 
    private:
 

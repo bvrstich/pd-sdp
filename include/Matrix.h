@@ -9,19 +9,20 @@ using std::ostream;
 /**
  * @author Brecht Verstichel
  * @date 18-02-2010\n\n
- * Dit is een zelfgeschreven matrix-klasse voor vierkante matrices. Het is een wrapper rond een dubbele pointer
- * met veelgebruike lapack en blas routines als voorgeprogrammeerde memberfuncties.
+ * This is a class written for symmetric matrices. It is a wrapper around a double pointer and
+ * redefines much used lapack and blas routines as memberfunctions
  */
+
 class Matrix{
 
    /**
-    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
-    * ifstream object aan en doe \n\n
+    * Output stream operator overloaded, the usage is simple, if you want to print to a file, make an
+    * ifstream object and type:\n\n
     * object << matrix << endl;\n\n
-    * Wil je naar het scherm printen:\n\n
+    * For output onto the screen type: \n\n
     * cout << matrix << endl;\n\n
-    * @param output de stream waarnaar je toe schrijft.
-    * @param matrix_p de te printen matrix
+    * @param output The stream to which you are writing (e.g. cout)
+    * @param matrix_p de Matrix you want to print
     */
    friend ostream &operator<<(ostream &output,Matrix &matrix_p);
 
@@ -49,9 +50,9 @@ class Matrix{
 
       Matrix &daxpy(double alpha,Matrix &);
 
-      Matrix &mprod(Matrix &A,Matrix &B);
-
       Matrix &operator/=(double );
+
+      Matrix &mprod(Matrix &,Matrix &);
 
       //easy to change the numbers
       double &operator()(int i,int j);
@@ -66,7 +67,6 @@ class Matrix{
 
       double trace();
 
-      //diagonaliseer symmetrische matrices
       void diagonalize(double *eigenvalues);
 
       double ddot(Matrix &);
@@ -88,12 +88,10 @@ class Matrix{
 
    private:
 
-      //velden
-
-      //!De dubbele pointer van double's die de eigenlijke matrix bevat.
+      //!double pointer of doubles, contains the numbers, the matrix
       double **matrix;
 
-      //!De dimensie van de vierkante matrix
+      //!dimension of the matrix
       int n;
 
 };
