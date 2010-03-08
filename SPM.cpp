@@ -4,13 +4,12 @@
 using std::ostream;
 using std::endl;
 
-#include "SPM.h"
-#include "lapack.h"
+#include "include.h"
 
 /**
- * constructor, maakt een Matrix object aan met dimensie M
- * @param M aantal sp orbitals, tevens dimensie van de matrix
- * @param N aantal deeltjes
+ * constructor, makes matrix of dimension M
+ * @param M dimension of single particle space and dimension of the Matrix
+ * @param N Nr of particles
  */
 SPM::SPM(int M,int N) : Matrix(M) {
 
@@ -20,8 +19,8 @@ SPM::SPM(int M,int N) : Matrix(M) {
 }
 
 /**
- * copy constructor, maakt een Matrix object aan dat een kopie is van de inputmatrix
- * @param spm_copy inputmatrix
+ * copy constructor
+ * @param spm_copy content of this matrix will be copied into the constructed matrix
  */
 SPM::SPM(SPM &spm_copy) : Matrix(spm_copy) {
 
@@ -30,15 +29,16 @@ SPM::SPM(SPM &spm_copy) : Matrix(spm_copy) {
 
 }
 
-//!destructor
+/**
+ * destructor
+ */
 SPM::~SPM(){
 
 }
 
 /**
- * @return aantal deeltjes
+ * @return nr of particles
  */
-
 int SPM::gN(){
 
    return N;
@@ -46,9 +46,8 @@ int SPM::gN(){
 }
 
 /**
- * @return aantal sp orbitals en dimensie van de matrix
+ * @return dimension of sp space and of matrix
  */
-
 int SPM::gM(){
 
    return M;

@@ -5,8 +5,7 @@
 using std::ostream;
 using std::endl;
 
-#include "PHM.h"
-#include "lapack.h"
+#include "include.h"
 
 int PHM::counter = 0;
 
@@ -14,11 +13,12 @@ int **PHM::ph2s;
 int **PHM::s2ph;
 
 /**
- * standard constructor, maakt Matrix aan met dimensie M*M
- * als counter == 0 dan alloceerd de constructor het geheugen voor lijsten ph2s en s2ph en initialiseerd deze:
- * @param M aantal sp orbitals
- * @param N aantal deeltjes
+ * standard constructor: constructs Matrix object of dimension M*M and
+ * if counter == 0, allocates and constructs the lists containing the relationship between sp and ph basis.
+ * @param M nr of sp orbitals
+ * @param N nr of particles
  */
+
 PHM::PHM(int M,int N) : Matrix(M*M) {
    
    this->N = N;
@@ -62,9 +62,9 @@ PHM::PHM(int M,int N) : Matrix(M*M) {
 }
 
 /**
- * copy constructor, maakt Matrix aan met dimensie M*M en kopieerd er phm_c in
- * als counter == 0 dan alloceerd de constructor het geheugen voor lijsten ph2s en s2ph en initialiseerd deze:
- * @param phm_c matrix die gekopieerd moet worden
+ * copy constructor: constructs Matrix object of dimension M*M and copies the content of phm_c into it,
+ * if counter == 0, allocates and constructs the lists containing the relationship between sp and ph basis.
+ * @param phm_c PHM to be copied into (*this)
  */
 PHM::PHM(PHM &phm_c) : Matrix(phm_c){
 
@@ -109,7 +109,7 @@ PHM::PHM(PHM &phm_c) : Matrix(phm_c){
 }
 
 /**
- * Destructor: als counter == 1 dan dealloceerd de destructor het geheugen voor lijsten ph2s en s2ph.
+ * destructor: if counter == 1 the memory for the static lists ph2s en s2ph will be deleted.
  */
 PHM::~PHM(){
 
@@ -130,11 +130,12 @@ PHM::~PHM(){
 }
 
 /**
- * toegang tot de getallen in de PHM door gebruik te maken van de sp indices,
- * @param a eerste sp index, vormt samen met b de eerste ph index
- * @param b tweede sp index, vormt samen met a de eerste ph index
- * @param c derde sp index, vormt samen met d de tweede ph index
- * @param d vierde sp index, vormt samen met c de tweede ph index
+ * access the elements of the matrix in sp mode, 
+ * @param a first sp index that forms the ph row index i together with b
+ * @param b second sp index that forms the ph row index i together with a
+ * @param c first sp index that forms the ph column index j together with d
+ * @param d second sp index that forms the ph column index j together with c
+ * @return the number on place PHM(i,j)
  */
 double &PHM::operator()(int a,int b,int c,int d){
 
@@ -161,7 +162,7 @@ ostream &operator<<(ostream &output,PHM &phm_p){
 }
 
 /**
- * @return aantal deeltjes
+ * @return number of particles
  */
 int PHM::gN(){
 
@@ -170,7 +171,7 @@ int PHM::gN(){
 }
 
 /**
- * @return aantal sp orbitals
+ * @return number of single particle oribals
  */
 int PHM::gM(){
 
@@ -179,7 +180,7 @@ int PHM::gM(){
 }
 
 /**
- * @return de dimensie van de particle hole ruimte en tevens de dimensie van de matrix
+ * @return dimension of the particle hole space, which is also the dimension of the matrix
  */
 int PHM::gn(){
 
@@ -188,9 +189,9 @@ int PHM::gn(){
 }
 
 /**
- * De G afbeelding die een TPM object afbeeld op een PHM object.
- * @param option = 1 dan wordt G_up uitgevoerd, = -1 dan wordt G^{-1}_down uitgevoerd
- * @param tpm input TPM die afgebeeld wordt op this
+ * De G map, maps a TPM object on a PHM object.
+ * @param option = 1 G_up map is used, = -1 G^{-1}_down map is used
+ * @param tpm input TPM
  */
 void PHM::G(int option,TPM &tpm){
 
@@ -230,9 +231,9 @@ void PHM::G(int option,TPM &tpm){
 }
 
 /**
- * Bereken de skew trace gedefinieerd als: \n
+ * Calculate the skew trace, defined as:\n\n
  * sum_{ab} PHM(a,a,b,b)
- * @return de skew trace
+ * @return the skew trace
  */
 double PHM::skew_trace(){
 
@@ -247,10 +248,10 @@ double PHM::skew_trace(){
 }
 
 /**
- * Trek van this - de G-afbeelding van de eenheidsmatrix  * een constante - af:\n
- * this -= scale* G(1) \n
- * zie ook de nota's primal_dual.pdf voor meer info.
- * @param scale de constante waarmee de eenheidsmatrix vermenigvuldigt wordt
+ * Deduct from this the G-map of the unit matrix times a constant (scale)\n\n
+ * this -= scale* G(1) \n\n
+ * see notes primal_dual.pdf for more information.
+ * @param scale the constant
  */
 void PHM::min_gunit(double scale){
 

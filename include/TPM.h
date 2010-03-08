@@ -15,22 +15,22 @@ class DPM;
 
 /**
  * @author Brecht Verstichel
- * @date 18-02-2010\n\n
- * Deze klasse, TPM, stelt een two particle matrix voor. Hij erft van de klasse Matrix en breidt die uit met een
- * lijst van hoe de tweedeeltjesbasis opgebouwd is uit de eendeeltjesbasis. Er zijn ook 
- * specifieke memberfuncties toegevoegd.
+ * @date 23-02-2010\n\n
+ * This class TPM is a class written for two particle matrices, it inherits alle the function from its mother 
+ * Matrix, some special member functions and two lists that give the relationship between the sp and the tp 
+ * basis.
  */
 
 class TPM : public Matrix {
 
    /**
-    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
-    * ifstream object aan en doe \n\n
+    * Output stream operator overloaded, the usage is simple, if you want to print to a file, make an
+    * ifstream object and type:\n\n
     * object << tpm_p << endl;\n\n
-    * Wil je naar het scherm printen:\n\n
+    * For output onto the screen type: \n\n
     * cout << tpm_p << endl;\n\n
-    * @param output de stream waarnaar je toe schrijft.
-    * @param tpm_p de te printen matrix
+    * @param output The stream to which you are writing (e.g. cout)
+    * @param tpm_p the TPM you want to print
     */
    friend ostream &operator<<(ostream &output,TPM &tpm_p);
 
@@ -95,23 +95,22 @@ class TPM : public Matrix {
 
    private:
 
-
-      //!static lijst, dubbele pointer (n_tp*2) van integers die een tp index i neemt en dan twee sp indices teruggeeft: t2s(i,0) = a  t2s(i,1) = b
+      //!static list of dimension [n_tp][2] that takes in a tp index i and returns two sp indices: a = t2s[i][0] and b = t2s[i][1]
       static int **t2s;
 
-      //! static lijst, dubbele pointer (M*M) van integers die twee sp indices neem (a,b) een een tp index teruggeeft (i)
+      //!static list of dimension [M][M] that takes two sp indices a,b and returns a tp index i: i = s2t[a][b]
       static int **s2t;
 
-      //!static counter, telt het aantal TPM objecten momenteel aangemaakt in het programma omdat het geheugen waar de t2s en s2t pointers naar wijzen maar 1 maal aangemaakt wordt (static dus)
+      //!static counter that counts the number of TPM objects running in the program
       static int counter;
 
-      //!aantal deeltjes
+      //!nr of particles
       int N;
 
-      //!aantal sp orbital, dimensie van eendeeltjesruimte
+      //!dimension of sp hilbert space
       int M;
 
-      //!dimensie van de tweedeeltjesruimte
+      //!dimension of tp hilbert space and of the matrix
       int n;
 
 };

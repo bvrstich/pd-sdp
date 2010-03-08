@@ -14,23 +14,8 @@
 
 using std::cout;
 using std::endl;
-using std::ofstream;
 
-#include "lapack.h"
-#include "Matrix.h"
-#include "SPM.h"
-#include "TPM.h"
-
-#ifndef PQ
-
-#include "PHM.h"
-
-#endif 
-
-#include "DPM.h"
-
-#include "SUP.h"
-#include "EIG.h"
+#include "include.h"
 
 /**
  * 
@@ -181,7 +166,7 @@ int main(void){
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,5.0);
+         a = DS.line_search(DZ,S,Z,1.0);
 
          S.daxpy(a,DS);
          Z.daxpy(a,DZ);

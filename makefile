@@ -1,6 +1,6 @@
 ###############################################################################
 #
-#  Makefile template for the sources
+#  makefile template for the sources
 #
 ###############################################################################
 
@@ -15,7 +15,7 @@ CPPSRC	= pd_sdp.cpp\
             PHM.cpp\
             DPM.cpp\
             SUP.cpp\
-            EIG.cpp
+            EIG.cpp\
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
@@ -46,7 +46,7 @@ all:
 	@echo
 	@echo '  +++ Building $(BINNAME)...'
 	@echo	
-	$(MAKE) $(BRIGHT_ROOT)/$(BINNAME)
+	$(MAKE) $(BRIGHT_ROOT)/$(BINNAME) DEFS="-DPQG"
 	@if test $?; then \
 	   echo; echo '*************** FAILED! ***************' ; echo; \
 	 else \
@@ -70,18 +70,30 @@ PQ:
 	   echo; \
 	 fi
 
+PQG:
+	@echo
+	@echo '  +++ Building $(BINNAME) with P, Q and G conditions active'
+	@echo	
+	$(MAKE) $(BRIGHT_ROOT)/$(BINNAME) DEFS="-DPQG"
+	@if test $?; then \
+	   echo; echo '*************** FAILED! ***************' ; echo; \
+	 else \
+	   echo; echo '  +++ $(BINNAME) has been built with P, Q and G conditions successfully!'; \
+	   echo; \
+	 fi
+
 # -----------------------------------------------------------------------------
 #   The default way to compile all source modules
 # -----------------------------------------------------------------------------
-%.o:	%.for Makefile
+%.o:	%.for makefile
 	@echo; echo "Compiling $(@:.o=.for) ..."
 	$(FF) -c $(FFLAGS) $(SFLAGS) $(@:.o=.for) -o $@
 
-%.o:	%.c Makefile
+%.o:	%.c makefile
 	@echo; echo "Compiling $(@:.o=.c) ..."
 	$(CC) -c $(CFLAGS) $(SFLAGS) $(@:.o=.c) -o $@
 
-%.o:	%.cpp Makefile
+%.o:	%.cpp makefile
 	@echo; echo "Compiling $(@:.o=.cpp) ..."
 	$(CXX) -c $(CFLAGS) $(SFLAGS) $(DEFS) $(@:.o=.cpp) -o $@
 
@@ -89,7 +101,7 @@ PQ:
 # -----------------------------------------------------------------------------
 #   Link everything together
 # -----------------------------------------------------------------------------
-$(BRIGHT_ROOT)/$(BINNAME):	Makefile $(OBJ) 
+$(BRIGHT_ROOT)/$(BINNAME):	makefile $(OBJ) 
 	@echo; echo "Linker: creating $(BRIGHT_ROOT)/$(BINNAME) ..."
 	$(CXX) $(LDFLAGS) $(SFLAGS) -o $(BRIGHT_ROOT)/$(BINNAME) $(OBJ) $(LIBS)
 
@@ -107,5 +119,10 @@ clean:
 	@rm -f $(OBJ)
 	@echo 'Done.'
 
+# -----------------------------------------------------------------------------
+#   Make new documentation using doxygen
+# -----------------------------------------------------------------------------
+doc:
+	@doxygen doc-config
 
-# ====================== End of file 'Makefile.in' ========================== #
+# ====================== End of file 'makefile.in' ========================== #

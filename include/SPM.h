@@ -11,20 +11,20 @@ using std::ostream;
 /**
  * @author Brecht Verstichel
  * @date 18-02-2010\n\n
- * Deze klasse SPM stelt een single particle matrix voor. Hij erft van de klasse Matrix en breidt die uit met wat 
- * specifieke memberfuncties en een kennis van deeltjesaantal en aantal orbitalen.
+ * This class SPM was written for single particle matrices. It inherits from the class Matrix and expands it with
+ * specific memberfunction and a knowledge of the nr of sp orbitals and particles.
  */
 
 class SPM : public Matrix {
 
    /**
-    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
-    * ifstream object aan en doe \n\n
+    * Output stream operator overloaded, the usage is simple, if you want to print to a file, make an
+    * ifstream object and type:\n\n
     * object << spm_p << endl;\n\n
-    * Wil je naar het scherm printen:\n\n
+    * For output onto the screen type: \n\n
     * cout << spm_p << endl;\n\n
-    * @param output de stream waarnaar je toe schrijft.
-    * @param spm_p de te printen matrix
+    * @param output The stream to which you are writing (e.g. cout)
+    * @param spm_p de SPM you want to print
     */
    friend ostream &operator<<(ostream &output,SPM &spm_p);
 
@@ -46,11 +46,10 @@ class SPM : public Matrix {
       int gM();
 
       /**
-       * construeert een SPM uit een TPM of PHM. Definitie van deze bewerkingen staan in andere nota's.\n
-       * Eigenlijk is deze functie bar * scale.
-       * @param scale de factor waarmee de bar(MT) vermendigvuldigd wordt vb. 1/(N - 1) in het geval van een 
-       * gewone eendeeltjesdichtheidsmatrix.
-       * @param MT de PHM of TPM inputmatrix.
+       * constructs a SPM from a TPM or a PHM. Definition of these functions are in different notes.
+       * Actually this function is defined as bar * scale.
+       * @param scale The factor that multiplies the bar(MT), e.g. 1/(N - 1) for a normal single particle density matrix
+       * @param MT PHM or TPM inputmatrix.
        */
       template<class MatrixType>
          void constr(double scale,MatrixType &MT){
@@ -72,10 +71,9 @@ class SPM : public Matrix {
          }
 
       /**
-       * Constructor van een SPM object met initialisatie door middel van de functie constr .
-       * @param scale de factor waarmee de bar(MT) vermendigvuldigd wordt vb. 1/(N - 1) in het geval van een 
-       * gewone eendeeltjesdichtheidsmatrix.
-       * @param MT de PHM of TPM inputmatrix.
+       * Constructor of an SPM object with initialisation by means of the function SPM::constr
+       * @param scale The factor that multiplies the bar(MT), e.g. 1/(N - 1) for a normal single particle density matrix
+       * @param MT the PHM or TPM inputmatrix.
        */
       template<class MatrixType>
          SPM(double scale,MatrixType &MT) : Matrix(MT.gM()) {
@@ -88,8 +86,9 @@ class SPM : public Matrix {
          }
 
       /**
-       * construeert een SPM uit een TPM of PHM. Definitie van deze bewerkingen staan in andere nota's.\n
-       * @param MT de PHM of TPM inputmatrix.
+       * construeert een SPM uit een TPM of PHM. \n\n
+       * SPM(a,c) = sum_b MT(a,b,c,b)\n\n
+       * @param MT the PHM or TPM inputmatrix.
        */
       template<class MatrixType>
          void bar(MatrixType &MT){
@@ -110,10 +109,10 @@ class SPM : public Matrix {
 
    private:
 
-      //!dimensie van de eendeeltjesruimte, tevens ook dimensie van de matrix
+      //!dimension of single particle space
       int M;
 
-      //!Aantal deeltjes
+      //!nr of particles
       int N;
 
 };
