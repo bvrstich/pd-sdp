@@ -255,33 +255,6 @@ void TPM::hubbard(double U){
 }
 
 /**
- * "Collaps" a SUP matrix onto a traceless TPM means:\n\n
- * B -> sum_i Tr (B u^i) f_i = this\n\n
- * @param B input SUP matrix
- */
-void TPM::collaps(SUP &B){
-
-   *this = B.tpm(0);
-
-   TPM hulp(M,N);
-
-   hulp.Q(1,B.tpm(1));
-
-   *this += hulp;
-
-#ifdef __G_CON
-
-   hulp.G(1,B.phm());
-
-   *this += hulp;
-
-#endif
-
-   this->proj_Tr();
-
-}
-
-/**
  * De Q afbeelding
  * @param option = 1, gewone Q afbeelding , = -1 inverse Q afbeelding
  * @param tpm_d De TPM waarvan de Q-like afbeelding genomen wordt en in this gestoken wordt

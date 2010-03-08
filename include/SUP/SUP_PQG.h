@@ -72,11 +72,6 @@ class SUP_PQG : public SUP_PQ {
 
       void dscal(double alpha);
 
-      void proj_U();
-
-      //maak de matrix D, nodig voor de hessiaan van het stelsel
-      void D(SUP_PQG &S,SUP_PQG &Z);
-
       //positieve of negatieve vierkantswortel uit een supermatrix
       void sqrt(int option);
 
@@ -88,25 +83,15 @@ class SUP_PQG : public SUP_PQ {
 
       double U_trace();
 
-      void proj_C();
-
       SUP_PQG &mprod(SUP_PQG &,SUP_PQG &);
 
       void fill(TPM &);
 
-      int solve(SUP_PQG &B,SUP_PQG &D);
-
-      void H(SUP_PQG &B,SUP_PQG &D);
-
       void proj_U_Tr();
 
-      EIG_PQ diagonalize();
+      EIG_PQG diagonalize();
 
-      virtual EIG_PQ *get_EIG();
-
-      double center_dev(SUP_PQG &Z);
-
-      double line_search(SUP_PQG &DZ,SUP_PQG &S,SUP_PQG &Z,double max_dev);
+      virtual EIG_PQG *get_EIG();
 
    private:
 

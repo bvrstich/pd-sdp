@@ -13,6 +13,28 @@ class SUP;
 class PHM;
 class DPM;
 
+//nog enkele definities, zijn hier ook nodig door de template functie collaps
+#ifdef PQ
+
+#define __Q_CON
+
+#endif
+
+#ifdef PQG
+
+#define __Q_CON
+#define __G_CON
+
+#endif
+
+#ifdef PQGT1
+
+#define __Q_CON
+#define __G_CON
+#define __T1_CON
+
+#endif
+
 /**
  * @author Brecht Verstichel
  * @date 18-02-2010\n\n
@@ -63,7 +85,34 @@ class TPM : public Matrix {
 
       void hubbard(double U);
 
-      void collaps(SUP &B);
+      /**
+       * "Collaps" a SUP matrix onto a traceless TPM means:\n\n
+       * B -> sum_i Tr (B u^i) f_i = this\n\n
+       * @param B input SUP matrix
+       * @note template function because it is used by all the SUP_PQ* classes "in" their member-functions
+       */
+      template<class SUP_type>
+         void collaps(SUP_type &ST){
+
+            *this = ST.tpm(0);
+
+            TPM hulp(M,N);
+
+            hulp.Q(1,ST.tpm(1));
+
+            *this += hulp;
+
+#ifdef __G_CON
+
+            hulp.G(1,ST.phm());
+
+            *this += hulp;
+
+#endif
+
+            this->proj_Tr();
+
+         }
 
       //Q afbeelding en zijn inverse
       void Q(int option,TPM &);
