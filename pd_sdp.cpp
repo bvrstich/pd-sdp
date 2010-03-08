@@ -3,9 +3,8 @@
  * This is an implementation of a primal dual interior point method
  * for optimizing the second order density matrix using the P Q and G N-representability conditions.
  * The method used is a path following algorithm with predictor corrector steps.
- * When compiled with option PQ only the P and Q conditions will be used.
  * @author Brecht Verstichel
- * @date 18-02-2010
+ * @date 08-03-2010
  */
 
 #include <iostream>
@@ -36,17 +35,6 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   int n_tp = M*(M - 1)/2;//dim van tp ruimte
-
-   int dim = 2*n_tp;
-
-#ifndef PQ
-
-   int n_ph = M*M;//dim van ph ruimte
-   dim += n_ph;
-
-#endif
-
    //hamiltoniaan
    TPM ham(M,N);
    ham.hubbard(1.0);
@@ -56,6 +44,8 @@ int main(void){
 
    SUP Z(M,N);
    Z.init_Z(10.0,ham,S);
+
+   int dim = Z.gdim();
 
    //eerste primal dual gap:
    double pd_gap = S.ddot(Z);
