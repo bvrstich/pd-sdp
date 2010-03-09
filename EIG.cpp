@@ -5,188 +5,149 @@
 using std::ostream;
 using std::endl;
 
-#include "EIG.h"
-#include "SUP.h"
-#include "lapack.h"
+#include "include.h"
 
 /**
- * standard constructor\n
- * Alloceert twee array's met dimensie n_tp en een met dimensie n_ph en zorg ervoor dat de daartoe voorziene pointers ernaar verwijzen.
- * @param M aantal sp orbitals
- * @param N aantal deeltjes
+ * standard constructor, allocates the memory for the eigenvalues of a SUP object
+ * @param M dimension of sp space
+ * @param N nr of particles
  */
 EIG::EIG(int M,int N){
-   
+
    this->N = N;
    this->M = M;
    this->n_tp = M*(M - 1)/2;
 
-#ifndef PQ
+   this->dim = 2*n_tp;
 
+#ifdef __G_CON
+   
    this->n_ph = M*M;
 
-   dim = 2*n_tp + n_ph;
-
-   eig = new double * [3];
-   eig[0] = new double [dim];
-
-   for(int i = 1;i < 3;++i)
-      eig[i] = eig[i - 1] + n_tp;
-
-#else
-   
-   dim = 2*n_tp;
-
-   eig = new double * [2];
-   eig[0] = new double [dim];
-
-   for(int i = 1;i < 2;++i)
-      eig[i] = eig[i - 1] + n_tp;
+   dim += n_ph;
 
 #endif
+   
+   eig = new double [dim];
 
 }
 
 /**
  * Copy constructor\n
- * Alloceert twee array's met dimensie n_tp en een met dimensie n_ph en zorg ervoor dat de daartoe voorziene pointers ernaar verwijzen. 
- * De inhoud van eig_c wordt dan gekopieerd naar this.
- * @param eig_c De EIG waarvan de inhoud gekopieerd zal worden naar this
+ * allocates the memory for the eigenvalues of a SUP object and copies the content of eig_c into it.
+ * @param eig_c The input EIG that will be copied into this.
  */
 EIG::EIG(EIG &eig_c){
 
-   this->N = N;
-   this->M = M;
+   this->N = eig_c.N;
+   this->M = eig_c.M;
+
    this->n_tp = M*(M - 1)/2;
 
-#ifndef PQ
+   this->dim = 2*n_tp;
 
+#ifdef __G_CON
+   
    this->n_ph = M*M;
 
-   dim = 2*n_tp + n_ph;
-
-   eig = new double * [3];
-   eig[0] = new double [dim];
-
-   for(int i = 1;i < 3;++i)
-      eig[i] = eig[i - 1] + n_tp;
-
-#else
-   
-   dim = 2*n_tp;
-
-   eig = new double * [2];
-   eig[0] = new double [dim];
-
-   for(int i = 1;i < 2;++i)
-      eig[i] = eig[i - 1] + n_tp;
+   dim += n_ph;
 
 #endif
+   
+   eig = new double [dim];
 
    int inc = 1;
 
-   dcopy_(&dim,eig_c.eig[0],&inc,eig[0],&inc);
+   dcopy_(&dim,eig_c.eig,&inc,eig,&inc);
 
 }
- 
+
 /**
  * overload equality operator
- * @param eig_c Deze EIG zal gekopieerd worden in this.
+ * @param eig_c object that will be copied into this.
  */
 EIG &EIG::operator=(EIG &eig_c){
 
    int inc = 1;
 
-   dcopy_(&dim,eig_c.eig[0],&inc,eig[0],&inc);
+   dcopy_(&dim,eig_c.eig,&inc,eig,&inc);
 
    return *this;
 
 }
 
-/**
- * Toegang tot de afzonderlijke vectoren.
- * @param i index die aangeeft welke vector je terugkrijgt: i = 0: vector van het bovenste blok(TPM), i = 1 vector van het middenste blok(TPM), i = 2 vector van het onderste blok (PHM).
- * @return de overeenkomstige pointer
+/** 
+ * get pointer to the eigenvalues
+ * @param i == 0, the eigenvalues of the P block will be returned, i == 1, the eigenvalues of the Q block will be returned, i == 2 eigenvalues of the G block, etc.
+ * @return array of eigenvalues
  */
 double *EIG::operator[](int i){
 
-   return eig[i];
+   return eig + i*n_tp;
 
 }
 
 /**
- * Constructor op basis van een SUP matrix. Alloceert twee array's met dimensie n_tp en een met dimensie n_ph en zorg ervoor dat de daartoe voorziene pointers ernaar verwijzen. 
- * This wordt dan opgevult met de eigenwaarden van de SUP matrix SZ, opgelet, SZ wordt hierbij vernield en bevat zijn eigenvectoren in de kolommen.
- * @param SZ de bewuste SUP matrix
+ * standard constructor with initialization on the eigenvalues of a SUP object.
+ * @param SZ input SUP object that will be destroyed after this function is called. The eigenvectors
+ * of the matrix will be stored in the columns of the original SUP matrix.
  */
 EIG::EIG(SUP &SZ){
 
+   //first allocate the memory
    this->N = SZ.gN();
    this->M = SZ.gM();
    this->n_tp = SZ.gn_tp();
 
-#ifndef PQ
+   this->dim = 2*n_tp;
 
+#ifdef __G_CON
+   
    this->n_ph = M*M;
 
-   dim = 2*n_tp + n_ph;
-
-   eig = new double * [3];
-   eig[0] = new double [dim];
-
-   for(int i = 1;i < 3;++i)
-      eig[i] = eig[i - 1] + n_tp;
-
-#else
-   
-   dim = 2*n_tp;
-
-   eig = new double * [2];
-   eig[0] = new double [dim];
-
-   for(int i = 1;i < 2;++i)
-      eig[i] = eig[i - 1] + n_tp;
+   dim += n_ph;
 
 #endif
+   
+   eig = new double [dim];
 
-   //dit vernietigd de originele matrix!
+   //then diagonalize the SUP
    for(int i = 0;i < 2;++i)
-      (SZ.tpm(i)).diagonalize(eig[i]);
+      (SZ.tpm(i)).diagonalize(eig + i*n_tp);
 
-#ifndef PQ
+#ifdef __G_CON
 
-   (SZ.phm()).diagonalize(eig[2]);
+   (SZ.phm()).diagonalize(eig + 2*n_tp);
 
 #endif
 
 }
 
 /**
- * Destructor, deallocatie van het geheugen.
+ * Destructor, deallocation of the memory
  */
 EIG::~EIG(){
 
-   delete [] eig[0];
    delete [] eig;
 
 }
 
-ostream &operator<<(ostream &output,const EIG &eig_p){
+ostream &operator<<(ostream &output,EIG &eig_p){
 
    for(int i = 0;i < eig_p.n_tp;++i)
-      std::cout << i << "\t" << eig_p.eig[0][i] << std::endl;
+      std::cout << i << "\t" << eig_p(0,i) << std::endl;
 
    std::cout << std::endl;
 
    for(int i = 0;i < eig_p.n_tp;++i)
-      std::cout << i << "\t" << eig_p.eig[1][i] << std::endl;
+      std::cout << i << "\t" << eig_p(1,i) << std::endl;
 
-#ifndef PQ
+#ifdef __G_CON
 
    std::cout << std::endl;
 
    for(int i = 0;i < eig_p.n_ph;++i)
-      std::cout << i << "\t" << eig_p.eig[2][i] << std::endl;
+      std::cout << i << "\t" << eig_p(2,i) << std::endl;
 
 #endif
 
@@ -195,33 +156,35 @@ ostream &operator<<(ostream &output,const EIG &eig_p){
 }
 
 /**
- * operator () overloaded\n
- * Toegang van buitenaf tot de elementen in de array
- * @param block in welk blok zit het element dat je wil
- * @param index op welke plaats in dat blok staat het element dat je wil
- * @return het gewenste getal eig[block][index]
+ * acces to the numbers
+ * @param block == 0, get element "index" from P block, == 1 get element index from Q block, == 2 get element index from G block 
+ * @param index which element in block you want
+ * @return eig[block][index]
  */
 double EIG::operator()(int block,int index){
 
-   return eig[block][index];
+   return eig[block*n_tp + index];
 
 }
 
 /**
- * @return het minimum van de elementen in de EIG\n
- * Opgelet, dit werkt enkel als de EIG gevuld is door diagonalisatie van een SUP.
+ * @return the minimal element present in this EIG object.
+ * watch out, only works when EIG is filled with the eigenvalues of a diagonalized SUP matrix
  */
 double EIG::min(){
 
-   double ward = eig[0][0];
+   //lowest eigenvalue of P block
+   double ward = eig[0];
 
-   if(ward > eig[1][0])
-      ward = eig[1][0];
+   //lowest eigenvalue of Q block
+   if(ward > eig[n_tp])
+      ward = eig[n_tp];
 
-#ifndef PQ
+#ifdef __G_CON
 
-   if(ward > eig[2][0])
-      ward = eig[2][0];
+   //lowest eigenvalue of G block
+   if(ward > eig[2*n_tp])
+      ward = eig[2*n_tp];
 
 #endif
 
@@ -230,20 +193,23 @@ double EIG::min(){
 }
 
 /**
- * @return het maximum van de elementen in de EIG\n
- * Opgelet, dit werkt enkel als de EIG gevuld is door diagonalisatie van een SUP.
+ * @return the maximum element present in this EIG object.
+ * watch out, only works when EIG is filled with the eigenvalues of a diagonalized SUP matrix
  */
 double EIG::max(){
 
-   double ward = eig[0][n_tp - 1];
+   //maximum of P block
+   double ward = eig[n_tp - 1];
 
-   if(ward < eig[1][n_tp - 1])
-      ward = eig[1][n_tp - 1];
+   //maximum of Q block
+   if(ward < eig[2*n_tp - 1])
+      ward = eig[2*n_tp - 1];
 
-#ifndef PQ
+#ifdef __G_CON
 
-   if(ward < eig[2][n_ph - 1])
-      ward = eig[2][n_ph - 1];
+   //maximum of G block
+   if(ward < eig[2*n_tp + n_ph - 1])
+      ward = eig[2*n_tp + n_ph - 1];
 
 #endif
 
@@ -252,59 +218,43 @@ double EIG::max(){
 }
 
 /**
- * @return de afwijking van het centraal pad berekend met de logaritmische potentiaalbarriere (zie notes)
+ * @return The deviation of the central path as calculated with the logarithmic barrierfunction, the EIG object is calculated
+ * in SUP::center_dev.
  */
 double EIG::center_dev(){
 
    double sum = 0.0;
 
-   for(int i = 0;i < n_tp;++i)
-      sum += eig[0][i];
-
-   for(int i = 0;i < n_tp;++i)
-      sum += eig[1][i];
+   for(int i = 0;i < dim;++i)
+      sum += eig[i];
 
    double log_product = 0.0;
 
-   for(int i = 0;i < n_tp;++i)
-      log_product += log(eig[0][i]);
-
-   for(int i = 0;i < n_tp;++i)
-      log_product += log(eig[1][i]);
-
-#ifndef PQ
-
-   for(int i = 0;i < n_ph;++i)
-      sum += eig[2][i];
-
-   for(int i = 0;i < n_ph;++i)
-      log_product += log(eig[2][i]);
-
-#endif
+   for(int i = 0;i < dim;++i)
+      log_product += log(eig[i]);
 
    return dim*log(sum/(double)dim) - log_product;
 
 }
 
 /**
- * Geeft terug wat de afwijking is van het centraal pad (grootte van de potentiaal) wanneer je stapgrootte 
- * alpha zet langs de primal dual Newton richting, d.m.v. de eigenwaarden eigen_S en eigen_Z berekend in SUP::line_search.\n
- * (*this) = eigen_S --> de eigenwaarden voor de DS stap
- * @param alpha afstand langs de Newton richting
- * @param eigen_Z  --> de eigenwaarden voor de DZ stap
- * @param c_S = Tr (DS Z)/Tr (SZ): parameter berekend in SUP::line_search
- * @param c_Z = Tr (S DZ)/Tr (SZ): parameter berekend in SUP::line_search
- * @return de afwijking van het centraal pad bij stapgrootte alpha langs de Newton richting
+ * @return the deviation of the central path measured trough the logarithmic potential barrier (see primal_dual.pdf), when you take a stepsize alpha from
+ * the point (S,Z) in the primal dual newton direction (DS,DZ), for which you have calculated the generalized eigenvalues eigen_S and eigen_Z in SUP::line_search.
+ * (*this) = eigen_S --> generalized eignevalues for the DS step
+ * @param alpha the stepsize
+ * @param eigen_Z --> generalized eignevalues for the DS step
+ * @param c_S = Tr (DS Z)/Tr (SZ): parameter calculated in SUP::line_search
+ * @param c_Z = Tr (S DZ)/Tr (SZ): parameter calculated in SUP::line_search
  */
 double EIG::centerpot(double alpha,EIG &eigen_Z,double c_S,double c_Z){
 
    double ward = dim*log(1.0 + alpha*(c_S + c_Z));
 
    for(int i = 0;i < dim;++i)
-      ward -= log(1.0 + alpha*eig[0][i]);
+      ward -= log(1.0 + alpha*eig[i]);
 
    for(int i = 0;i < dim;++i)
-      ward -= log(1.0 + alpha*eigen_Z.eig[0][i]);
+      ward -= log(1.0 + alpha*eigen_Z.eig[i]);
 
    return ward;
 
