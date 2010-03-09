@@ -1,11 +1,11 @@
 /**
  * @mainpage 
  * This is an implementation of a primal dual interior point method
- * for optimizing the second order density matrix using the P Q and G N-representability conditions.
+ * for optimizing the second order density matrix using the P Q G and T1 N-representability conditions.
  * The method used is a path following algorithm with predictor corrector steps.
- * When compiled with option PQ only the P and Q conditions will be used.
+ * At compile time you can decide which condtions will be active compile with make PQ, PQG, PQGT1.
  * @author Brecht Verstichel
- * @date 18-02-2010
+ * @date 09-03-2010
  */
 
 #include <iostream>
@@ -33,8 +33,8 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 8;//dim sp hilbert space
-   int N = 4;//nr of particles
+   int M = 12;//dim sp hilbert space
+   int N = 6;//nr of particles
 
    //hamiltoniaan
    TPM ham(M,N);
@@ -143,7 +143,7 @@ int main(void){
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,2.0);
+         a = DS.line_search(DZ,S,Z,1.0);
 
          S.daxpy(a,DS);
          Z.daxpy(a,DZ);

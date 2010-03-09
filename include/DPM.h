@@ -63,6 +63,9 @@ class DPM : public Matrix {
       //maak een DPM van een TPM via de hat functie
       void hat(TPM &);
 
+      //deduct scale times T1(1) matrix
+      void min_tunit(double scale);
+
    private:
 
       //!static counter that counts the number of DPM objects running in the program

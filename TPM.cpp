@@ -358,8 +358,8 @@ void TPM::proj_Tr(){
 
 /**
  * Primal hessian map:\n\n
- * Hb = D_1 b D_1 + D_2 Q(b) D_2 + D_3 G(b) D_3\n\n
- * with D_1,D_2 and D_3 the P,Q and G blocks of the SUP D. (when compiled with PQ, no G block operations will be performed)
+ * Hb = D_1 b D_1 + D_2 Q(b) D_2 + D_3 G(b) D_3 + D_4 T1(b) D_4 \n\n
+ * with D_1, D_2, D_3 and D_3 the P,Q, G and T1 blocks of the SUP D. 
  * @param b TPM domain matrix, hessian will act on it and the image will be put in this
  * @param D SUP matrix that defines the structure of the hessian map. (see primal-dual.pdf for more info)
  */
@@ -394,6 +394,21 @@ void TPM::H(TPM &b,SUP &D){
    hulpje.L_map(D.phm(),Gb);
 
    hulp.G(1,hulpje);
+
+   *this += hulp;
+
+#endif
+
+#ifdef __T1_CON
+
+   DPM Tb(M,N);
+   Tb.T(1,b);
+
+   DPM hulp_T(M,N);
+
+   hulp_T.L_map(D.dpm(),Tb);
+
+   hulp.T(1,hulp_T);
 
    *this += hulp;
 
@@ -534,6 +549,14 @@ void TPM::S(int option,TPM &tpm_d){
 
 #endif
 
+#ifdef __T1_CON
+   
+   a += M - 4.0;
+   b += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
+   c -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
+
+#endif
+
    this->Q(option,a,b,c,tpm_d);
 
 }
@@ -648,6 +671,14 @@ void TPM::collaps(int option,SUP &S){
 #ifdef __G_CON
 
    hulp.G(1,S.phm());
+
+   *this += hulp;
+
+#endif
+
+#ifdef __T1_CON
+   
+   hulp.T(1,S.dpm());
 
    *this += hulp;
 

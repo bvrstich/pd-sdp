@@ -82,6 +82,18 @@ PQG:
 	   echo; \
 	 fi
 
+PQGT1:
+	@echo
+	@echo '  +++ Building $(BINNAME) with P, Q ,G and T1 conditions active'
+	@echo	
+	$(MAKE) $(BRIGHT_ROOT)/$(BINNAME) DEFS="-DPQGT1"
+	@if test $?; then \
+	   echo; echo '*************** FAILED! ***************' ; echo; \
+	 else \
+	   echo; echo '  +++ $(BINNAME) has been built with P, Q, G and T1 conditions successfully!'; \
+	   echo; \
+	 fi
+
 # -----------------------------------------------------------------------------
 #   The default way to compile all source modules
 # -----------------------------------------------------------------------------

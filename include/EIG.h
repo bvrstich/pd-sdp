@@ -72,6 +72,12 @@ class EIG{
 
 #endif
 
+#ifdef __T1_CON
+   
+      int gn_dp();
+
+#endif
+
    private:
 
       //!single pointer to doubles, the eigenvalues of the SUP matrix will be stored here.
@@ -90,6 +96,12 @@ class EIG{
       
       //!dimension of ph space
       int n_ph;
+
+#endif
+
+#ifdef __T1_CON
+      
+      int n_dp;
 
 #endif
 

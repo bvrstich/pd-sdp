@@ -23,6 +23,14 @@ using std::ostream;
 
 #endif
 
+#ifdef PQGT1
+
+#define __Q_CON
+#define __G_CON
+#define __T1_CON
+
+#endif
+
 class EIG;
 
 /**
@@ -141,6 +149,14 @@ class SUP{
 
 #endif
 
+#ifdef __T1_CON
+      
+      DPM &dpm();
+
+      int gn_dp();
+
+#endif
+
    private:
 
       //!double pointer of TPM's, will contain the P and Q block of the SUP in the first and second block.
@@ -165,6 +181,16 @@ class SUP{
 
       //!dimenson of particle hole space
       int n_ph;
+
+#endif
+
+#ifdef __T1_CON
+      
+      //!pointer tot he three particles matrix DPM
+      DPM *SZ_dp;
+
+      //!dimension of three particle space
+      int n_dp;
 
 #endif
 

@@ -27,6 +27,14 @@ EIG::EIG(int M,int N){
    dim += n_ph;
 
 #endif
+
+#ifdef __T1_CON
+   
+   this->n_dp = M*(M - 1)*(M - 2)/6;
+
+   dim += n_dp;
+
+#endif
    
    eig = new double [dim];
 
@@ -54,6 +62,14 @@ EIG::EIG(EIG &eig_c){
 
 #endif
    
+#ifdef __T1_CON
+   
+   this->n_dp = M*(M - 1)*(M - 2)/6;
+
+   dim += n_dp;
+
+#endif
+
    eig = new double [dim];
 
    int inc = 1;
@@ -83,7 +99,18 @@ EIG &EIG::operator=(EIG &eig_c){
  */
 double *EIG::operator[](int i){
 
-   return eig + i*n_tp;
+#ifndef PQGT1
+
+      return eig + i*n_tp;
+
+#else
+   
+      if(i < 3)
+         return eig + i*n_tp;
+      else
+         return eig + 2*n_tp + n_ph;
+
+#endif
 
 }
 
@@ -108,7 +135,15 @@ EIG::EIG(SUP &SZ){
    dim += n_ph;
 
 #endif
+
+#ifdef __T1_CON
    
+   this->n_dp = M*(M - 1)*(M - 2)/6;
+
+   dim += n_dp;
+
+#endif
+ 
    eig = new double [dim];
 
    //then diagonalize the SUP
@@ -118,6 +153,12 @@ EIG::EIG(SUP &SZ){
 #ifdef __G_CON
 
    (SZ.phm()).diagonalize(eig + 2*n_tp);
+
+#endif
+
+#ifdef __T1_CON
+   
+   (SZ.dpm()).diagonalize(eig + 2*n_tp + n_ph);
 
 #endif
 
@@ -151,6 +192,15 @@ ostream &operator<<(ostream &output,EIG &eig_p){
 
 #endif
 
+#ifdef __T1_CON
+
+   std::cout << std::endl;
+
+   for(int i = 0;i < eig_p.n_dp;++i)
+      std::cout << i << "\t" << eig_p(3,i) << std::endl;
+
+#endif
+
    return output;
 
 }
@@ -163,7 +213,19 @@ ostream &operator<<(ostream &output,EIG &eig_p){
  */
 double EIG::operator()(int block,int index){
 
+#ifndef PQGT1
+
    return eig[block*n_tp + index];
+
+#else
+
+   if(block < 3)
+      return eig[block*n_tp + index];
+   else
+      return eig[2*n_tp + n_ph + index];
+
+#endif
+
 
 }
 
@@ -207,6 +269,19 @@ int EIG::gn_ph(){
 
 #endif
 
+#ifdef __T1_CON
+
+/**
+ * @return dimension of tp space
+ */
+int EIG::gn_dp(){
+
+   return n_dp;
+
+}
+
+#endif
+
 /**
  * @return total dimension of the EIG object
  */
@@ -238,6 +313,14 @@ double EIG::min(){
 
 #endif
 
+#ifdef __T1_CON
+
+   //lowest eigenvalue of T1 block
+   if(ward > eig[2*n_tp + n_ph])
+      ward = eig[2*n_tp + n_ph];
+
+#endif
+
    return ward;
 
 }
@@ -260,6 +343,14 @@ double EIG::max(){
    //maximum of G block
    if(ward < eig[2*n_tp + n_ph - 1])
       ward = eig[2*n_tp + n_ph - 1];
+
+#endif
+
+#ifdef __T1_CON
+
+   //maximum of T1 block
+   if(ward < eig[2*n_tp + n_ph + n_dp - 1])
+      ward = eig[2*n_tp + n_ph + n_dp - 1];
 
 #endif
 

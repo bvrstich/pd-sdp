@@ -35,6 +35,16 @@ SUP::SUP(int M,int N){
 
 #endif
 
+#ifdef __T1_CON
+   
+   this->n_dp = M*(M - 1)*(M - 2)/6;
+
+   SZ_dp = new DPM(M,N);
+
+   dim += n_dp;
+
+#endif
+
 }
 
 /**
@@ -70,6 +80,18 @@ SUP::SUP(SUP &SZ_c){
 
 #endif
 
+#ifdef __T1_CON
+   
+   this->n_dp = M*(M - 1)*(M - 2)/6;
+
+   SZ_dp = new DPM(M,N);
+
+   dim += n_dp;
+
+   *SZ_dp = *SZ_c.SZ_dp;
+
+#endif
+
 }
 
 /**
@@ -88,6 +110,12 @@ SUP::~SUP(){
 
 #endif
 
+#ifdef __T1_CON
+
+   delete SZ_dp;
+
+#endif
+
 }
 
 /**
@@ -102,6 +130,12 @@ SUP &SUP::operator+=(SUP &SZ_pl){
 #ifdef __G_CON
    
    (*SZ_ph) += (*SZ_pl.SZ_ph);
+
+#endif
+
+#ifdef __T1_CON
+
+   (*SZ_dp) += (*SZ_pl.SZ_dp);
 
 #endif
 
@@ -124,6 +158,12 @@ SUP &SUP::operator-=(SUP &SZ_pl){
 
 #endif
 
+#ifdef __T1_CON
+
+   (*SZ_dp) -= (*SZ_pl.SZ_dp);
+
+#endif
+
    return *this;
 
 }
@@ -140,6 +180,12 @@ SUP &SUP::operator=(SUP &SZ_c){
 #ifdef __G_CON
 
    (*SZ_ph) = (*SZ_c.SZ_ph);
+
+#endif
+
+#ifdef __T1_CON
+
+   (*SZ_dp) = (*SZ_c.SZ_dp);
 
 #endif
 
@@ -160,6 +206,12 @@ SUP &SUP::operator=(double &a){
 #ifdef __G_CON
 
    (*SZ_ph) = a;
+
+#endif
+
+#ifdef __T1_CON
+
+   (*SZ_dp) = a;
 
 #endif
 
@@ -190,6 +242,19 @@ PHM &SUP::phm(){
 
 #endif
 
+#ifdef __T1_CON
+
+/**
+ * @return pointer to the DPM block: SZ_dp
+ */
+DPM &SUP::dpm(){
+
+   return *SZ_dp;
+
+}
+
+#endif
+
 /**
  * Initialization of the SUP matrix S, is just u^0: see primal_dual.pdf for more information
  */
@@ -213,6 +278,13 @@ ostream &operator<<(ostream &output,SUP &SZ_p){
 
 #endif
 
+#ifdef __T1_CON
+
+   output << std::endl;
+   output << (*SZ_p.SZ_dp);
+
+#endif
+
    return output;
 
 }
@@ -226,6 +298,12 @@ void SUP::fill_Random(){
    SZ_tp[1]->fill_Random();
 
 #ifdef __G_CON
+
+   SZ_ph->fill_Random();
+
+#endif
+
+#ifdef __T1_CON
 
    SZ_ph->fill_Random();
 
@@ -287,6 +365,19 @@ int SUP::gn_ph(){
 
 #endif
 
+#ifdef __T1_CON
+
+/**
+ * @return dimension of dp space
+ */
+int SUP::gn_dp(){
+
+   return n_dp;
+
+}
+
+#endif
+
 /**
  * @return total dimension of SUP (carrier) space
  */
@@ -313,6 +404,12 @@ double SUP::ddot(SUP &SZ_i){
 
 #endif
 
+#ifdef __T1_CON
+
+   ward += SZ_dp->ddot(*SZ_i.SZ_dp);
+
+#endif
+
    return ward;
 
 }
@@ -332,6 +429,12 @@ void SUP::invert(){
 
 #endif
 
+#ifdef __T1_CON
+   
+   SZ_dp->invert();
+
+#endif
+
 }
 
 /**
@@ -346,6 +449,12 @@ void SUP::dscal(double alpha){
 #ifdef __G_CON
    
    SZ_ph->dscal(alpha);
+
+#endif
+
+#ifdef __T1_CON
+   
+   SZ_dp->dscal(alpha);
 
 #endif
 
@@ -448,6 +557,11 @@ void SUP::sqrt(int option){
 
 #endif
 
+#ifdef __T1_CON
+
+   SZ_dp->sqrt(option);
+
+#endif
 
 }
 
@@ -465,6 +579,12 @@ void SUP::L_map(SUP &map,SUP &object){
 #ifdef __G_CON
 
    SZ_ph->L_map(map.phm(),object.phm());
+
+#endif
+
+#ifdef __T1_CON
+
+   SZ_dp->L_map(map.dpm(),object.dpm());
 
 #endif
 
@@ -486,6 +606,12 @@ void SUP::daxpy(double alpha,SUP &SZ_p){
 
 #endif
 
+#ifdef __T1_CON
+   
+   SZ_dp->daxpy(alpha,SZ_p.dpm());
+
+#endif
+
 }
 
 /**
@@ -501,6 +627,12 @@ double SUP::trace(){
 #ifdef __G_CON
    
    ward += SZ_ph->trace();
+
+#endif
+
+#ifdef __T1_CON
+   
+   ward += SZ_dp->trace();
 
 #endif
 
@@ -525,7 +657,7 @@ void SUP::proj_C(){
 }
 
 /**
- * General matrixproduct between two SUP matrices, three times Matrix::mprod
+ * General matrixproduct between two SUP matrices, act with Matrix::mprod on every block
  * 
  * @param A left hand matrix
  * @param B right hand matrix
@@ -542,12 +674,18 @@ SUP &SUP::mprod(SUP &A,SUP &B){
 
 #endif
 
+#ifdef __T1_CON
+
+   SZ_dp->mprod(A.dpm(),B.dpm());
+
+#endif
+
    return *this;
 
 }
 
 /**
- * Fill the SUP matrix (*this) with a TPM matrix like: this = diag[tpm  Q(tpm)  G(tpm)]
+ * Fill the SUP matrix (*this) with a TPM matrix like: this = diag[tpm  Q(tpm)  G(tpm) T1(tpm)]
  * @param tpm input TPM
  */
 void SUP::fill(TPM &tpm){
@@ -561,11 +699,17 @@ void SUP::fill(TPM &tpm){
 
 #endif
 
+#ifdef __T1_CON
+   
+   SZ_dp->T(1,tpm);
+
+#endif
+
 }
 
 /**
  * fill the SUP matrix with the TPM matrix stored in the first block:\n\n
- * this = diag[this->tpm(0) Q(this->tpm(0)) G(this->tpm(0))]
+ * this = diag[this->tpm(0) Q(this->tpm(0)) G(this->tpm(0)) T1(this->tpm(0))]
  */
 void SUP::fill(){
 
@@ -574,6 +718,12 @@ void SUP::fill(){
 #ifdef __G_CON
 
    SZ_ph->G(1,*SZ_tp[0]);
+
+#endif 
+
+#ifdef __T1_CON
+
+   SZ_dp->T(1,*SZ_tp[0]);
 
 #endif 
 
@@ -650,23 +800,29 @@ void SUP::H(SUP &B,SUP &D){
  */
 double SUP::U_norm(){
 
+   double norm;
+
    double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
 
-#ifdef PQ
-   
-   return M*(M - 1)/2 * (1 + q*q);
+   norm = M*(M - 1)/2 * (1 + q*q);
 
-#else
-
-#ifdef PQG
+#ifdef __G_CON
 
    double g = (M - N)/(N - 1.0);
 
-   return M*(M - 1)/2 * (1.0 + q*q) + M*M * (1.0 + g*g) + 2*g*M;
+   norm += M*M * (1.0 + g*g) + 2*g*M;
 
 #endif
 
+#ifdef __T1_CON
+   
+   double t1 = (M*(M - 1.0) - 3.0*(M - N)*N)/(N*(N - 1.0));
+
+   norm += M*(M - 1.0)*(M - 2.0)/6.0 * t1 * t1;
+
 #endif
+
+   return norm;
 
 }
 
@@ -688,10 +844,17 @@ void SUP::proj_U_Tr(){
 
 #endif
 
+#ifdef __T1_CON
+
+   //dan deze factor aftrekken met u^0
+   SZ_dp->min_tunit(ward);
+
+#endif
+
 }
 
 /**
- * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) G(1)]
+ * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) G(1) T1(1)]
  */
 double SUP::U_trace(){
 
@@ -714,6 +877,14 @@ double SUP::U_trace(){
 
 #endif
 
+#ifdef __T1_CON
+
+   double t = (M*(M - 1.0) - 3.0*N*(M - N))/(N*(N - 1.0));
+
+   ward += t*SZ_dp->trace();
+
+#endif
+
    return ward;
 
 }
@@ -732,6 +903,12 @@ void SUP::diagonalize(EIG &eig){
 #ifdef __G_CON
 
    SZ_ph->diagonalize(eig[2]);
+
+#endif
+
+#ifdef __T1_CON
+
+   SZ_dp->diagonalize(eig[3]);
 
 #endif
 
