@@ -5,7 +5,8 @@
 using std::endl;
 using std::ostream;
 
-#include "include.h"
+#include "Matrix.h"
+#include "lapack.h"
 
 /**
  * constructor 

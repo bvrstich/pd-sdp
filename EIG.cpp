@@ -168,6 +168,56 @@ double EIG::operator()(int block,int index){
 }
 
 /**
+ * @return nr of particles
+ */
+int EIG::gN(){
+
+   return N;
+
+}
+
+/**
+ * @return dimension of sp space
+ */
+int EIG::gM(){
+
+   return M;
+
+}
+
+/**
+ * @return dimension of tp space
+ */
+int EIG::gn_tp(){
+
+   return n_tp;
+
+}
+
+#ifdef __G_CON
+
+/**
+ * @return dimension of tp space
+ */
+int EIG::gn_ph(){
+
+   return n_ph;
+
+}
+
+#endif
+
+/**
+ * @return total dimension of the EIG object
+ */
+int EIG::gdim(){
+
+   return dim;
+
+}
+
+
+/**
  * @return the minimal element present in this EIG object.
  * watch out, only works when EIG is filled with the eigenvalues of a diagonalized SUP matrix
  */

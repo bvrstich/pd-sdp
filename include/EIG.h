@@ -49,8 +49,9 @@ class EIG{
 
       int gn_tp();
 
-      double centerpot(double,EIG &,double,double);
+      int gdim();
 
+      double centerpot(double,EIG &,double,double);
 
       double operator()(int,int);
 
