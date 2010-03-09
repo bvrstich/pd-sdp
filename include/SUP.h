@@ -7,10 +7,19 @@
 using std::ostream;
 
 #include "TPM.h"
-
-#ifndef PQ
-
 #include "PHM.h"
+
+//definitions:
+#ifdef PQ
+
+#define __Q_CON
+
+#endif
+
+#ifdef PQG
+
+#define __Q_CON
+#define __G_CON
 
 #endif
 
@@ -18,22 +27,22 @@ class EIG;
 
 /**
  * @author Brecht Verstichel
- * @date 18-02-2010\n\n
- * De klasse SUP (supermatrix) is een blokmatrix over de carrierspace's van de verschillende condities:\n
- * Belangrijk om hierbij te onthouden dat dit een algemene blokmatrix is met twee TPM's en een PHM die niet 
- * noodzakelijk met elkaar in verband staan. Zie ook notes primal_dual.pdf .
+ * @date 09-03-2010\n\n
+ * This class, SUP is a blockmatrix over the carrierspace's of active N-representability conditions. 
+ * This class contains two TPM objects, and if compiled with the right option a PHM or DPM object, 
+ * You have to remember that these matrices are independent of each other (by which I mean that TPM::Q(SUP_PQ::tpm (0))
+ * is not neccesarily equal to SUP_PQ::tpm (1)) etc. .
  */
-
 class SUP{
   
    /**
-    * Output stream operator overloaded, het gebruik is simpel: wil je naar een file printen, maak dan een
-    * ifstream object aan en doe \n\n
+    * Output stream operator overloaded, the usage is simple, if you want to print to a file, make an
+    * ifstream object and type:\n\n
     * object << sup_p << endl;\n\n
-    * Wil je naar het scherm printen:\n\n
+    * For output onto the screen type: \n\n
     * cout << sup_p << endl;\n\n
-    * @param output de stream waarnaar je toe schrijft.
-    * @param sup_p de te printen SUP-matrix
+    * @param output The stream to which you are writing (e.g. cout)
+    * @param sup_p the SUP you want to print
     */
    friend ostream &operator<<(ostream &output,SUP &sup_p);
 
@@ -62,12 +71,6 @@ class SUP{
 
       TPM &tpm(int i);
 
-#ifndef PQ
-
-      PHM &phm();
-
-#endif
-
       //initialiseer S
       void init_S();
 
@@ -80,11 +83,6 @@ class SUP{
 
       int gn_tp();
 
-#ifndef PQ
-      
-      int gn_ph();
-
-#endif
       int gdim();
 
       double ddot(SUP &);
@@ -125,6 +123,8 @@ class SUP{
 
       void proj_U_Tr();
 
+      double U_norm();
+
       void diagonalize(EIG &);
 
       double center_dev(SUP &Z);
@@ -133,33 +133,41 @@ class SUP{
 
       void fill_Random();
 
+#ifdef __G_CON
+
+      PHM &phm();
+
+      int gn_ph();
+
+#endif
+
    private:
 
-      //!dubbele pointer van TPM's, deze zullen verwijzen naar de twee TPM matrices
+      //!double pointer of TPM's, will contain the P and Q block of the SUP in the first and second block.
       TPM **SZ_tp;
 
-      //!aantal sp orbitalen
+      //!number of sp orbitals
       int M;
 
-      //!aantal deeltjes
+      //!nr of particles
       int N;
 
-      //!diminsie van tp space
+      //!dimension of tp space
       int n_tp;
 
-      //!totale dimensie van de supermatrix
+      //!total dimension of the SUP matrix
       int dim;
 
-#ifndef PQ
-      
-      //!pointer naar de particle hole matrix
+#ifdef __G_CON
+
+      //!pointer to the particle hole matrix
       PHM *SZ_ph;
 
-      //!dimensie van de particle hole ruimte
+      //!dimenson of particle hole space
       int n_ph;
 
 #endif
-      
+
 };
 
 #endif
