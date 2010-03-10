@@ -42,6 +42,9 @@ class TPM : public Matrix {
       //copy constructor
       TPM(TPM &);
 
+      //file constructor
+      TPM(const char *);
+
       //destructor
       virtual ~TPM();
 
@@ -94,6 +97,8 @@ class TPM : public Matrix {
       void min_qunit(double scale);
 
       void collaps(int option,SUP &);
+
+      void out(const char *filename);
 
    private:
 

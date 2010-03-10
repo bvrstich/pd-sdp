@@ -33,8 +33,8 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 12;//dim sp hilbert space
-   int N = 6;//nr of particles
+   int M = 8;//dim sp hilbert space
+   int N = 3;//nr of particles
 
    //hamiltoniaan
    TPM ham(M,N);
@@ -199,6 +199,9 @@ int main(void){
    cout << endl;
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
+
+   //print density matrix to file
+   (S.tpm(0)).out("workspace/input/rdm.in");
 
    return 0;
 

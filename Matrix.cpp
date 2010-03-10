@@ -1,9 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include <time.h>
 #include <cmath>
 
 using std::endl;
 using std::ostream;
+using std::ofstream;
+using std::ifstream;
 
 #include "Matrix.h"
 #include "lapack.h"
@@ -43,6 +46,30 @@ Matrix::Matrix(Matrix &mat_copy){
    int incy = 1;
 
    dcopy_(&dim,mat_copy.matrix[0],&incx,matrix[0],&incy);
+
+}
+
+/**
+ * construct from file: matrix is allocated and is filled with number from the file "filename"
+ * @param filename char containing the name of the input file
+ */
+Matrix::Matrix(const char *filename){
+
+   ifstream input(filename);
+
+   input >> this->n;
+
+   matrix = new double * [n];
+   matrix[0] = new double [n*n];
+
+   for(int i = 1;i < n;++i)
+      matrix[i] = matrix[i - 1] + n;
+
+   int I,J;
+
+   for(int i = 0;i < n;++i)
+      for(int j = 0;j < n;++j)
+         input >> I >> J >> matrix[j][i];
 
 }
 
@@ -408,5 +435,23 @@ ostream &operator<<(ostream &output,Matrix &matrix_p){
          output << i << "\t" << j << "\t" << matrix_p(i,j) << endl;
 
    return output;
+
+}
+
+/**
+ * print the matrix in a file with name and location filename
+ * @param filename char with name and location
+ */
+void Matrix::out(const char *filename){
+
+   ofstream output(filename);
+   output.precision(10);
+
+   //first the bare essentials:
+   output << n << endl;
+
+   for(int i = 0;i < n;++i)
+      for(int j = 0;j < n;++j)
+         output << i << "\t" << j << "\t" << matrix[j][i] << endl;
 
 }

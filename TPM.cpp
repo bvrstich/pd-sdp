@@ -3,7 +3,10 @@
 #include <fstream>
 
 using std::ostream;
+using std::ofstream;
+using std::ifstream;
 using std::endl;
+using std::ios;
 
 #include "include.h"
 
@@ -76,6 +79,67 @@ TPM::TPM(TPM &tpm_c) : Matrix(tpm_c){
    this->n = M*(M - 1)/2;
 
    if(counter == 0){
+
+      //allocatie van sp2tp
+      s2t = new int * [M];
+      s2t[0] = new int [M*M];
+
+      for(int i = 1;i < M;++i)
+         s2t[i] = s2t[i - 1] + M;
+
+      //allocatie van tp2sp
+      t2s = new int * [n];
+
+      for(int i = 0;i < n;++i)
+         t2s[i] = new int [2];
+
+      //initialisatie van de twee arrays
+      int teller = 0;
+
+      for(int i = 0;i < M;++i)
+         for(int j = i + 1;j < M;++j){
+
+            s2t[i][j] = teller;
+
+            t2s[teller][0] = i;
+            t2s[teller][1] = j;
+
+            ++teller;
+
+         }
+
+      for(int i = 0;i < M;++i)
+         for(int j = i + 1;j < M;++j)
+            s2t[j][i] = s2t[i][j];
+
+   }
+
+   ++counter;
+
+}
+
+/**
+ * construct from file: constructs Matrix object of dimension M*(M - 1)/2 and fills it with the content of the file
+ * if counter == 0, the lists containing the relationship between sp and tp basis.
+ * @param filename name of the input file
+ */
+TPM::TPM(const char *filename) : Matrix(filename){
+
+   ifstream input(filename);
+
+   input >> this->n;
+
+   int I,J;
+   double value;
+
+   //inefficient way of going to the last line of the file:
+   for(int i = 0;i < n;++i)
+      for(int j = 0;j < n;++j)
+         input >> I >> J >> value;
+
+   input >> this->M >> this->N;
+
+  if(counter == 0){
 
       //allocatie van sp2tp
       s2t = new int * [M];
@@ -686,5 +750,23 @@ void TPM::collaps(int option,SUP &S){
 
    if(option == 1)
       this->proj_Tr();
+
+}
+
+/**
+ * Print TPM matrix to file called filename
+ * @param filename char containing the name and location of the file
+ */
+void TPM::out(const char *filename){
+
+   this->Matrix::out(filename);
+
+   ofstream output;
+
+   output.precision(10);
+
+   output.open(filename,ios::app);
+
+   output << M << "\t" << N << endl;
 
 }

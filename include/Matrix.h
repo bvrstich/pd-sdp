@@ -34,6 +34,9 @@ class Matrix{
       //copy constructor
       Matrix(Matrix &);
 
+      //construct with filename
+      Matrix(const char *filename);
+
       //destructor
       virtual ~Matrix();
 
@@ -85,6 +88,8 @@ class Matrix{
       void L_map(Matrix &,Matrix &);
 
       void symmetrize();
+
+      void out(const char*);
 
    private:
 
