@@ -237,9 +237,9 @@ ostream &operator<<(ostream &output,TPM &tpm_p){
    for(int i = 0;i < tpm_p.n;++i)
       for(int j = 0;j < tpm_p.n;++j){
 
-         output << i << "\t" << j << "\t|\t" << tpm_p.t2s[i][0] << "\t" << tpm_p.t2s[i][1]
+         output << i << "\t" << j << /*"\t|\t" << tpm_p.t2s[i][0] << "\t" << tpm_p.t2s[i][1]
 
-            << "\t" << tpm_p.t2s[j][0] << "\t" << tpm_p.t2s[j][1] << "\t" << tpm_p(i,j) << endl;
+            << "\t" << tpm_p.t2s[j][0] << "\t" << tpm_p.t2s[j][1] << */"\t" << tpm_p(i,j) << endl;
 
       }
 
@@ -277,8 +277,9 @@ int TPM::gn(){
 /**
  * construct the hubbard hamiltonian with on site repulsion U
  * @param U onsite repulsion term
+ * @param option == 0 use periodic boundary conditions, == 1 use no pbc
  */
-void TPM::hubbard(double U){
+void TPM::hubbard(int option,double U){
 
    int a,b,c,d;//sp orbitals
 
@@ -296,15 +297,32 @@ void TPM::hubbard(double U){
 
          (*this)(i,j) = 0;
 
-         //eerst hopping
-         if( (a == c) && ( ( (b + 2)%M == d ) || ( b == (d + 2)%M ) ) )
-            (*this)(i,j) -= ward;
+         if(option == 0){//pbc
 
-         if( (b == c) && ( ( (a + 2)%M == d ) || ( a == (d + 2)%M ) ) )
-            (*this)(i,j) += ward;
+            //eerst hopping
+            if( (a == c) && ( ( (b + 2)%M == d ) || ( b == (d + 2)%M ) ) )
+               (*this)(i,j) -= ward;
 
-         if( (b == d) && ( ( (a + 2)%M == c ) || ( a == (c + 2)%M ) ) )
-            (*this)(i,j) -= ward;
+            if( (b == c) && ( ( (a + 2)%M == d ) || ( a == (d + 2)%M ) ) )
+               (*this)(i,j) += ward;
+
+            if( (b == d) && ( ( (a + 2)%M == c ) || ( a == (c + 2)%M ) ) )
+               (*this)(i,j) -= ward;
+
+         }
+         else{//no pbc
+
+            //eerst hopping
+            if( (a == c) && ( ( (b + 2) == d ) || ( b == (d + 2) ) ) )
+               (*this)(i,j) -= ward;
+
+            if( (b == c) && ( ( (a + 2) == d ) || ( a == (d + 2) ) ) )
+               (*this)(i,j) += ward;
+
+            if( (b == d) && ( ( (a + 2) == c ) || ( a == (c + 2) ) ) )
+               (*this)(i,j) -= ward;
+
+         }
 
          //on site interaction
          if( (a % 2) == 0 && (c % 2) == 0 )
@@ -614,7 +632,7 @@ void TPM::S(int option,TPM &tpm_d){
 #endif
 
 #ifdef __T1_CON
-   
+
    a += M - 4.0;
    b += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
    c -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
@@ -717,6 +735,99 @@ void TPM::T(int option,DPM &dpm){
 }
 
 /**
+ * Map a PPHM (pphm) object on a TPM (*this) object by tracing one pair of indices from the pphm (for more info, see primal_dual.pdf)
+ * @param pphm input PPHM
+ */
+void TPM::bar(PPHM &pphm){
+
+   int a,b,c,d;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l = 0;l < M;++l)
+            (*this)(i,j) += pphm(a,b,l,c,d,l);
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * Map a PPHM (pphm) onto a TPM object (*this) with a T2 down map, see primal_dual.pdf for more information
+ * @param pphm input PPHM
+ */
+void TPM::T(PPHM &pphm){
+
+   //first make some necessary derivate matrices of pphm
+   TPM bar(M,N);
+   bar.bar(pphm);
+
+   PHM phm(M,N);
+   phm.bar(pphm);
+
+   //watch out, scaling for spm is not the usual!
+   SPM spm(M,N);
+
+   for(int a = 0;a < M;++a)
+      for(int b = a;b < M;++b){
+
+         spm(a,b) = 0;
+
+         for(int c = 0;c < M;++c)
+            spm(a,b) += phm(c,a,c,b);
+
+         spm(a,b) *= 0.5/(N - 1.0);
+
+      }
+
+   int a,b,c,d;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         //first the tp part:
+         (*this)(i,j) = bar(i,j);
+
+         //then the ph part:
+         (*this)(i,j) -= phm(d,a,b,c) - phm(d,b,a,c) - phm(c,a,b,d) + phm(c,b,a,d);
+
+         //finaly the three sp parts:
+         if(b == d)
+            (*this)(i,j) += spm(a,c);
+
+         if(b == c)
+            (*this)(i,j) -= spm(a,d);
+
+         if(a == c)
+            (*this)(i,j) += spm(b,d);
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
+/**
  * Collaps a SUP matrix S onto a TPM matrix like this:\n\n
  * sum_i Tr (S u^i)f^i = this
  * @param option = 0, project onto full symmetric matrix space, = 1 project onto traceless symmetric matrix space
@@ -741,7 +852,7 @@ void TPM::collaps(int option,SUP &S){
 #endif
 
 #ifdef __T1_CON
-   
+
    hulp.T(1,S.dpm());
 
    *this += hulp;

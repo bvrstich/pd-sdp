@@ -122,7 +122,7 @@ DPM::DPM(DPM &dpm_c) : Matrix(dpm_c){
 }
 
 /**
- * destructor: if counter == 1 the memory for the static lists dp2s en s2dp twill be deleted.
+ * destructor: if counter == 1 the memory for the static lists dp2s en s2dp will be deleted.
  */
 DPM::~DPM(){
 

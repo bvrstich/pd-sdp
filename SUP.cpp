@@ -751,7 +751,7 @@ int SUP::solve(SUP &B,SUP &D){
 
    int cg_iter = 0;
 
-   while(rr > 1.0e-3){
+   while(rr > 1.0e-5){
 
       ++cg_iter;
 
