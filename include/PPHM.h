@@ -55,7 +55,11 @@ class PPHM : public Matrix {
       int gn();
 
       //maak een PPHM van een TPM via de T2 conditie
-      void T(TPM &);
+      void T(int option,TPM &);
+
+      void min_tunit(double );
+
+      double skew_trace();
 
    private:
 

@@ -8,6 +8,8 @@ using std::ostream;
 
 #include "TPM.h"
 #include "PHM.h"
+#include "DPM.h"
+#include "PPHM.h"
 
 //definitions:
 #ifdef PQ
@@ -28,6 +30,23 @@ using std::ostream;
 #define __Q_CON
 #define __G_CON
 #define __T1_CON
+
+#endif
+
+#ifdef PQGT2
+
+#define __Q_CON
+#define __G_CON
+#define __T1_CON
+
+#endif
+
+#ifdef PQGT
+
+#define __Q_CON
+#define __G_CON
+#define __T1_CON
+#define __T2_CON
 
 #endif
 
@@ -157,6 +176,14 @@ class SUP{
 
 #endif
 
+#ifdef __T2_CON
+
+      PPHM &pphm();
+
+      int gn_pph();
+
+#endif
+
    private:
 
       //!double pointer of TPM's, will contain the P and Q block of the SUP in the first and second block.
@@ -191,6 +218,16 @@ class SUP{
 
       //!dimension of three particle space
       int n_dp;
+
+#endif
+
+#ifdef __T2_CON
+
+      //!pointer tot he three particles matrix DPM
+      PPHM *SZ_pph;
+
+      //!dimension of three particle space
+      int n_pph;
 
 #endif
 

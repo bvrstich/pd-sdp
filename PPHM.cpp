@@ -242,55 +242,160 @@ int PPHM::gn(){
 
 /**
  * The T2-map: maps a TPM object (tpm) on a PPHM object (*this). see primal_dual.pdf for more information
+ * @param option == 0, regular T2, == 1, special (incorrect) T2, keep for test in program with regular T2
  * @param tpm input TPM
  */
-void PPHM::T(TPM &tpm){
+void PPHM::T(int option,TPM &tpm){
 
-   //construct the spm
-   SPM spm(1.0/(N - 1.0),tpm);
+   if(option == 0){
 
-   int a,b,c,d,e,z;
+      //construct the spm
+      SPM spm(1.0/(N - 1.0),tpm);
 
-   for(int i = 0;i < n;++i){
+      int a,b,c,d,e,z;
 
-      a = pph2s[i][0];
-      b = pph2s[i][1];
-      c = pph2s[i][2];
+      for(int i = 0;i < n;++i){
 
-      for(int j = i;j < n;++j){
+         a = pph2s[i][0];
+         b = pph2s[i][1];
+         c = pph2s[i][2];
 
-         d = pph2s[j][0];
-         e = pph2s[j][1];
-         z = pph2s[j][2];
+         for(int j = i;j < n;++j){
 
-         //initialize
-         (*this)(i,j) = 0.0;
+            d = pph2s[j][0];
+            e = pph2s[j][1];
+            z = pph2s[j][2];
 
-         if(a == d){
+            //initialize
+            (*this)(i,j) = 0.0;
 
-            //sp part
+            if(a == d){
+
+               //sp part
+               if(b == e)
+                  (*this)(i,j) += spm(c,z);
+
+               //tp part
+               (*this)(i,j) -= tpm(c,e,z,b);
+
+            }
+
+            //now only tp parts left:
+            if(c == z)
+               (*this)(i,j) += tpm(a,b,d,e);
+
+            if(b == d)
+               (*this)(i,j) += tpm(c,e,z,a);
+
             if(b == e)
-               (*this)(i,j) += spm(c,z);
-
-            //tp part
-            (*this)(i,j) -= tpm(c,e,z,b);
+               (*this)(i,j) -= tpm(c,d,z,a);
 
          }
-
-         //now only tp parts left:
-         if(c == z)
-            (*this)(i,j) += tpm(a,b,d,e);
-
-         if(b == d)
-            (*this)(i,j) += tpm(c,e,z,a);
-
-         if(b == e)
-            (*this)(i,j) -= tpm(c,d,z,a);
-
       }
+   }
+   else{
+
+      TPM Q(M,N);
+      Q.Q(1,tpm);
+
+      DPM T(M,N);
+      T.T(1,tpm);
+
+      int a,b,c,d,e,z;
+
+      for(int i = 0;i < n;++i){
+
+         a = pph2s[i][0];
+         b = pph2s[i][1];
+         c = pph2s[i][2];
+
+         for(int j = i;j < n;++j){
+
+            d = pph2s[j][0];
+            e = pph2s[j][1];
+            z = pph2s[j][2];
+
+            //initialize
+            (*this)(i,j) = 0.0;
+
+            if(c == z)
+               (*this)(i,j) += tpm(a,b,d,e) + Q(a,b,d,e);
+
+            (*this)(i,j) -= T(a,b,z,d,e,c);
+
+         }
+      }
+
    }
 
    //and symmetrize
    this->symmetrize();
+
+}
+
+void PPHM::min_tunit(double scale){
+
+   int i,j;
+
+   for(int a = 0;a < M;++a){
+
+      //first a > b 
+      for(int b = 0;b < a;++b)
+         for(int c = a;c < M;++c){//c always >= a
+
+            i = s2pph[b][a][a];
+            j = s2pph[b][c][c];
+
+            (*this)(i,j) -= scale;
+
+         }
+
+      //then a < b
+      for(int b = a + 1;b < M;++b){
+
+         //first c < b
+         for(int c = a;c < b;++c){
+
+            i = s2pph[a][b][a];
+            j = s2pph[c][b][c];
+
+            (*this)(i,j) -= scale;
+
+         }
+
+         //then c > b
+         for(int c = b + 1;c < M;++c){
+
+            i = s2pph[a][b][a];
+            j = s2pph[b][c][c];
+
+            (*this)(i,j) += scale;
+
+         }
+
+      }
+   }
+
+   double t2 = (M - N)/(N - 1.0);
+
+   scale = t2*scale;
+
+   for(int k = 0;k < n;++k)
+      (*this)(k,k) -= scale;
+
+   this->symmetrize();
+
+}
+
+double PPHM::skew_trace(){
+
+   double ward = 0.0;
+
+   for(int a = 0;a < M;++a)
+      for(int b = 0;b < M;++b)
+         for(int c = 0;c < M;++c)
+            ward += (*this)(a,b,a,c,b,c);
+
+   return ward;
 
 }

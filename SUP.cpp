@@ -8,7 +8,7 @@ using std::ostream;
 
 /**
  * standard constructor\n
- * Allocates two TPM matrices and optionally a PHM or DPM matrix.
+ * Allocates two TPM matrices and optionally a PHM, DPM or PPHM matrix.
  * @param M number of sp orbitals
  * @param N number of particles
  */
@@ -45,11 +45,21 @@ SUP::SUP(int M,int N){
 
 #endif
 
+#ifdef __T2_CON
+
+   this->n_pph = M*M*(M - 1)/2;
+
+   SZ_pph = new PPHM(M,N);
+
+   dim += n_pph;
+
+#endif
+
 }
 
 /**
  * standard constructor\n
- * Allocates two TPM matrices and optionally a PHM or DPM matrix, then copies the content of
+ * Allocates two TPM matrices and optionally a PHM, DPM or PPHM matrix, then copies the content of
  * input SUP SZ_c into it.
  * @param SZ_c input SUP
  */
@@ -92,6 +102,18 @@ SUP::SUP(SUP &SZ_c){
 
 #endif
 
+#ifdef __T2_CON
+
+   this->n_pph = M*M*(M - 1)/2;
+
+   SZ_pph = new PPHM(M,N);
+
+   dim += n_pph;
+
+   *SZ_pph = *SZ_c.SZ_pph;
+
+#endif
+
 }
 
 /**
@@ -116,6 +138,12 @@ SUP::~SUP(){
 
 #endif
 
+#ifdef __T2_CON
+   
+   delete SZ_pph;
+
+#endif
+
 }
 
 /**
@@ -136,6 +164,12 @@ SUP &SUP::operator+=(SUP &SZ_pl){
 #ifdef __T1_CON
 
    (*SZ_dp) += (*SZ_pl.SZ_dp);
+
+#endif
+
+#ifdef __T2_CON
+
+   (*SZ_pph) += (*SZ_pl.SZ_pph);
 
 #endif
 
@@ -164,6 +198,12 @@ SUP &SUP::operator-=(SUP &SZ_pl){
 
 #endif
 
+#ifdef __T2_CON
+
+   (*SZ_pph) -= (*SZ_pl.SZ_pph);
+
+#endif
+
    return *this;
 
 }
@@ -186,6 +226,12 @@ SUP &SUP::operator=(SUP &SZ_c){
 #ifdef __T1_CON
 
    (*SZ_dp) = (*SZ_c.SZ_dp);
+
+#endif
+
+#ifdef __T2_CON
+
+   (*SZ_pph) = (*SZ_c.SZ_pph);
 
 #endif
 
@@ -212,6 +258,12 @@ SUP &SUP::operator=(double &a){
 #ifdef __T1_CON
 
    (*SZ_dp) = a;
+
+#endif
+
+#ifdef __T2_CON
+
+   (*SZ_pph) = a;
 
 #endif
 
@@ -255,6 +307,19 @@ DPM &SUP::dpm(){
 
 #endif
 
+#ifdef __T2_CON
+
+/**
+ * @return pointer to the PPHM block: SZ_pph
+ */
+PPHM &SUP::pphm(){
+
+   return *SZ_pph;
+
+}
+
+#endif
+
 /**
  * Initialization of the SUP matrix S, is just u^0: see primal_dual.pdf for more information
  */
@@ -285,6 +350,13 @@ ostream &operator<<(ostream &output,SUP &SZ_p){
 
 #endif
 
+#ifdef __T2_CON
+
+   output << std::endl;
+   output << (*SZ_p.SZ_pph);
+
+#endif
+
    return output;
 
 }
@@ -305,7 +377,13 @@ void SUP::fill_Random(){
 
 #ifdef __T1_CON
 
-   SZ_ph->fill_Random();
+   SZ_dp->fill_Random();
+
+#endif
+
+#ifdef __T1_CON
+
+   SZ_pph->fill_Random();
 
 #endif
 
@@ -378,6 +456,19 @@ int SUP::gn_dp(){
 
 #endif
 
+#ifdef __T2_CON
+
+/**
+ * @return dimension of dp space
+ */
+int SUP::gn_pph(){
+
+   return n_pph;
+
+}
+
+#endif
+
 /**
  * @return total dimension of SUP (carrier) space
  */
@@ -410,6 +501,12 @@ double SUP::ddot(SUP &SZ_i){
 
 #endif
 
+#ifdef __T2_CON
+
+   ward += SZ_pph->ddot(*SZ_i.SZ_pph);
+
+#endif
+
    return ward;
 
 }
@@ -432,6 +529,12 @@ void SUP::invert(){
 #ifdef __T1_CON
    
    SZ_dp->invert();
+
+#endif
+
+#ifdef __T2_CON
+   
+   SZ_pph->invert();
 
 #endif
 
@@ -458,15 +561,21 @@ void SUP::dscal(double alpha){
 
 #endif
 
+#ifdef __T2_CON
+   
+   SZ_pph->dscal(alpha);
+
+#endif
+
 }
 
 /**
- * Orthogonal projection of a general SUP matrix diag[ M M_Q M_G] onto U space: diag[M_u Q(M_u) G(M_u)]
+ * Orthogonal projection of a general SUP matrix diag[ M M_Q ( M_G M_T1 M_T2 ) ] onto U space: diag[ M_u Q(M_u) ( G(M_u) T1(M_u) T2(M_u) ) ]
  * for more information see primal_dual.pdf
  */
 void SUP::proj_U(){
   
-   //eerst M_Gamma + Q(M_Q) + G(M_G) in O stoppen
+   //eerst M_Gamma + Q(M_Q) + ( G(M_G) + T1(M_T1) + T2(M_T2) ) in O stoppen
    TPM O(M,N);
 
    O.collaps(0,*this);
@@ -563,6 +672,12 @@ void SUP::sqrt(int option){
 
 #endif
 
+#ifdef __T2_CON
+
+   SZ_pph->sqrt(option);
+
+#endif
+
 }
 
 /**
@@ -585,6 +700,12 @@ void SUP::L_map(SUP &map,SUP &object){
 #ifdef __T1_CON
 
    SZ_dp->L_map(map.dpm(),object.dpm());
+
+#endif
+
+#ifdef __T2_CON
+
+   SZ_pph->L_map(map.pphm(),object.pphm());
 
 #endif
 
@@ -612,6 +733,12 @@ void SUP::daxpy(double alpha,SUP &SZ_p){
 
 #endif
 
+#ifdef __T1_CON
+   
+   SZ_pph->daxpy(alpha,SZ_p.pphm());
+
+#endif
+
 }
 
 /**
@@ -636,12 +763,18 @@ double SUP::trace(){
 
 #endif
 
+#ifdef __T1_CON
+   
+   ward += SZ_pph->trace();
+
+#endif
+
    return ward;
 
 }
 
 /**
- * Orthogonal projection of a general SUP matrix [ M M_Q M_G] onto the orthogonal complement of the U space (C space)
+ * Orthogonal projection of a general SUP matrix [ M M_Q ( M_G M_T1 M_T2 ) ] onto the orthogonal complement of the U space (C space)
  * See primal_dual.pdf for more information
  */
 void SUP::proj_C(){
@@ -680,12 +813,18 @@ SUP &SUP::mprod(SUP &A,SUP &B){
 
 #endif
 
+#ifdef __T2_CON
+
+   SZ_pph->mprod(A.pphm(),B.pphm());
+
+#endif
+
    return *this;
 
 }
 
 /**
- * Fill the SUP matrix (*this) with a TPM matrix like: this = diag[tpm  Q(tpm)  G(tpm) T1(tpm)]
+ * Fill the SUP matrix (*this) with a TPM matrix like: this = diag[tpm  Q(tpm)  ( G(tpm) T1(tpm) T2(tpm) ) ]
  * @param tpm input TPM
  */
 void SUP::fill(TPM &tpm){
@@ -705,11 +844,17 @@ void SUP::fill(TPM &tpm){
 
 #endif
 
+#ifdef __T2_CON
+   
+   SZ_pph->T(0,tpm);
+
+#endif
+
 }
 
 /**
  * fill the SUP matrix with the TPM matrix stored in the first block:\n\n
- * this = diag[this->tpm(0) Q(this->tpm(0)) G(this->tpm(0)) T1(this->tpm(0))]
+ * this = diag[this->tpm(0) Q(this->tpm(0)) ( G(this->tpm(0)) T1(this->tpm(0)) T2(this-tpm(0)) ) ]
  */
 void SUP::fill(){
 
@@ -724,6 +869,12 @@ void SUP::fill(){
 #ifdef __T1_CON
 
    SZ_dp->T(1,*SZ_tp[0]);
+
+#endif 
+
+#ifdef __T2_CON
+
+   SZ_pph->T(0,*SZ_tp[0]);
 
 #endif 
 
@@ -796,7 +947,7 @@ void SUP::H(SUP &B,SUP &D){
 }
 
 /**
- * @return the value Tr (1_u 1_u) for the condition active
+ * @return the value Tr (1_u 1_u) for the conditions active
  */
 double SUP::U_norm(){
 
@@ -819,6 +970,14 @@ double SUP::U_norm(){
    double t1 = (M*(M - 1.0) - 3.0*(M - N)*N)/(N*(N - 1.0));
 
    norm += M*(M - 1.0)*(M - 2.0)/6.0 * t1 * t1;
+
+#endif
+
+#ifdef __T2_CON
+
+   double t2 = (M - N)/(N - 1.0);
+
+   norm += t2* t2 * (M - 1.0)* M*M /2.0 + 2.0 * t2 * (M - 1.0)*M + M*(M - 1.0)*(M - 1.0);
 
 #endif
 
@@ -851,10 +1010,17 @@ void SUP::proj_U_Tr(){
 
 #endif
 
+#ifdef __T2_CON
+
+   //dan deze factor aftrekken met u^0
+   SZ_pph->min_tunit(ward);
+
+#endif
+
 }
 
 /**
- * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) G(1) T1(1)]
+ * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) ( G(1) T1(1) T2(1) ) ]
  */
 double SUP::U_trace(){
 
@@ -879,9 +1045,17 @@ double SUP::U_trace(){
 
 #ifdef __T1_CON
 
-   double t = (M*(M - 1.0) - 3.0*N*(M - N))/(N*(N - 1.0));
+   double t1 = (M*(M - 1.0) - 3.0*N*(M - N))/(N*(N - 1.0));
 
-   ward += t*SZ_dp->trace();
+   ward += t1*SZ_dp->trace();
+
+#endif
+
+#ifdef __T2_CON
+
+   double t2 = (M - N)/(N - 1.0);
+
+   ward += t2*SZ_pph->trace() + SZ_pph->skew_trace();
 
 #endif
 
@@ -909,6 +1083,12 @@ void SUP::diagonalize(EIG &eig){
 #ifdef __T1_CON
 
    SZ_dp->diagonalize(eig[3]);
+
+#endif
+
+#ifdef __T2_CON
+
+   SZ_pph->diagonalize(eig[4]);
 
 #endif
 
