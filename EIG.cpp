@@ -18,11 +18,15 @@ EIG::EIG(int M,int N){
    this->M = M;
    this->n_tp = M*(M - 1)/2;
 
+   eig_tp = new double [2*n_tp];
+
    this->dim = 2*n_tp;
 
 #ifdef __G_CON
    
    this->n_ph = M*M;
+
+   eig_ph = new double [n_ph];
 
    dim += n_ph;
 
@@ -32,11 +36,21 @@ EIG::EIG(int M,int N){
    
    this->n_dp = M*(M - 1)*(M - 2)/6;
 
+   eig_dp = new double [n_dp];
+
    dim += n_dp;
 
 #endif
-   
-   eig = new double [dim];
+
+#ifdef __T2_CON
+
+   this->n_pph = M*M*(M - 1)/2;
+
+   eig_pph = new double [n_pph];
+
+   dim += n_pph;
+
+#endif
 
 }
 
@@ -52,13 +66,23 @@ EIG::EIG(EIG &eig_c){
 
    this->n_tp = M*(M - 1)/2;
 
+   eig_tp = new double [2*n_tp];
+
    this->dim = 2*n_tp;
+
+   int inc = 1;
+
+   dcopy_(&dim,eig_c.eig_tp,&inc,eig_tp,&inc);
 
 #ifdef __G_CON
    
    this->n_ph = M*M;
 
+   eig_ph = new double [n_ph];
+
    dim += n_ph;
+
+   dcopy_(&n_ph,eig_c.eig_ph,&inc,eig_ph,&inc);
 
 #endif
    
@@ -66,15 +90,26 @@ EIG::EIG(EIG &eig_c){
    
    this->n_dp = M*(M - 1)*(M - 2)/6;
 
+   eig_dp = new double [n_dp];
+
    dim += n_dp;
+
+   dcopy_(&n_dp,eig_c.eig_dp,&inc,eig_dp,&inc);
 
 #endif
 
-   eig = new double [dim];
+#ifdef __T2_CON
+   
+   this->n_pph = M*M*(M - 1)/2;
 
-   int inc = 1;
+   eig_pph = new double [n_pph];
 
-   dcopy_(&dim,eig_c.eig,&inc,eig,&inc);
+   dim += n_pph;
+
+   dcopy_(&n_pph,eig_c.eig_pph,&inc,eig_pph,&inc);
+
+#endif
+
 
 }
 
@@ -86,31 +121,29 @@ EIG &EIG::operator=(EIG &eig_c){
 
    int inc = 1;
 
-   dcopy_(&dim,eig_c.eig,&inc,eig,&inc);
+   int n = 2*n_tp;
 
-   return *this;
+   dcopy_(&n,eig_c.eig_tp,&inc,eig_tp,&inc);
 
-}
+#ifdef __G_CON
 
-/** 
- * get pointer to the eigenvalues
- * @param i == 0, the eigenvalues of the P block will be returned, i == 1, the eigenvalues of the Q block will be returned, i == 2 eigenvalues of the G block, etc.
- * @return array of eigenvalues
- */
-double *EIG::operator[](int i){
-
-#ifndef PQGT1
-
-      return eig + i*n_tp;
-
-#else
-   
-      if(i < 3)
-         return eig + i*n_tp;
-      else
-         return eig + 2*n_tp + n_ph;
+   dcopy_(&n_ph,eig_c.eig_ph,&inc,eig_ph,&inc);
 
 #endif
+
+#ifdef __T1_CON
+
+   dcopy_(&n_dp,eig_c.eig_dp,&inc,eig_dp,&inc);
+
+#endif
+
+#ifdef __T2_CON
+
+   dcopy_(&n_pph,eig_c.eig_pph,&inc,eig_pph,&inc);
+
+#endif
+
+   return *this;
 
 }
 
@@ -126,13 +159,24 @@ EIG::EIG(SUP &SZ){
    this->M = SZ.gM();
    this->n_tp = SZ.gn_tp();
 
+   eig_tp = new double [2*n_tp];
+
    this->dim = 2*n_tp;
+
+   //diagonalize
+   for(int i = 0;i < 2;++i)
+      (SZ.tpm(i)).diagonalize(eig_tp + i*n_tp);
 
 #ifdef __G_CON
    
    this->n_ph = M*M;
 
+   eig_ph = new double [n_ph];
+
    dim += n_ph;
+
+   //diagonalize
+   (SZ.phm()).diagonalize(eig_ph);
 
 #endif
 
@@ -140,26 +184,26 @@ EIG::EIG(SUP &SZ){
    
    this->n_dp = M*(M - 1)*(M - 2)/6;
 
+   eig_dp = new double [n_dp];
+
    dim += n_dp;
 
+   //diagonalize
+   (SZ.dpm()).diagonalize(eig_dp);
+
 #endif
+
+#ifdef __T2_CON
+
+   this->n_pph = M*M*(M - 1)/2;
+
+   eig_pph = new double [n_pph];
+
+   dim += n_pph;
+
+   //diagonalize
+   (SZ.pphm()).diagonalize(eig_pph);
  
-   eig = new double [dim];
-
-   //then diagonalize the SUP
-   for(int i = 0;i < 2;++i)
-      (SZ.tpm(i)).diagonalize(eig + i*n_tp);
-
-#ifdef __G_CON
-
-   (SZ.phm()).diagonalize(eig + 2*n_tp);
-
-#endif
-
-#ifdef __T1_CON
-   
-   (SZ.dpm()).diagonalize(eig + 2*n_tp + n_ph);
-
 #endif
 
 }
@@ -169,26 +213,44 @@ EIG::EIG(SUP &SZ){
  */
 EIG::~EIG(){
 
-   delete [] eig;
+   delete [] eig_tp;
+
+#ifdef __G_CON
+   
+   delete [] eig_ph;
+
+#endif
+
+#ifdef __T1_CON
+
+   delete [] eig_dp;
+
+#endif
+
+#ifdef __T2_CON
+
+   delete [] eig_pph;
+
+#endif
 
 }
 
 ostream &operator<<(ostream &output,EIG &eig_p){
 
-   for(int i = 0;i < eig_p.n_tp;++i)
-      std::cout << i << "\t" << eig_p(0,i) << std::endl;
+   for(int i = 0;i < eig_p.gn_tp();++i)
+      std::cout << i << "\t" << eig_p.tpm(0)[i] << std::endl;
 
    std::cout << std::endl;
 
-   for(int i = 0;i < eig_p.n_tp;++i)
-      std::cout << i << "\t" << eig_p(1,i) << std::endl;
+   for(int i = 0;i < eig_p.gn_tp();++i)
+      std::cout << i << "\t" << eig_p.tpm(1)[i] << std::endl;
 
 #ifdef __G_CON
 
    std::cout << std::endl;
 
-   for(int i = 0;i < eig_p.n_ph;++i)
-      std::cout << i << "\t" << eig_p(2,i) << std::endl;
+   for(int i = 0;i < eig_p.gn_ph();++i)
+      std::cout << i << "\t" << eig_p.phm()[i] << std::endl;
 
 #endif
 
@@ -196,36 +258,21 @@ ostream &operator<<(ostream &output,EIG &eig_p){
 
    std::cout << std::endl;
 
-   for(int i = 0;i < eig_p.n_dp;++i)
-      std::cout << i << "\t" << eig_p(3,i) << std::endl;
+   for(int i = 0;i < eig_p.gn_dp();++i)
+      std::cout << i << "\t" << eig_p.dpm()[i] << std::endl;
+
+#endif
+
+#ifdef __T2_CON
+
+   std::cout << std::endl;
+
+   for(int i = 0;i < eig_p.gn_pph();++i)
+      std::cout << i << "\t" << eig_p.pphm()[i] << std::endl;
 
 #endif
 
    return output;
-
-}
-
-/**
- * acces to the numbers
- * @param block == 0, get element "index" from P block, == 1 get element index from Q block, == 2 get element index from G block 
- * @param index which element in block you want
- * @return eig[block][index]
- */
-double EIG::operator()(int block,int index){
-
-#ifndef PQGT1
-
-   return eig[block*n_tp + index];
-
-#else
-
-   if(block < 3)
-      return eig[block*n_tp + index];
-   else
-      return eig[2*n_tp + n_ph + index];
-
-#endif
-
 
 }
 
@@ -256,14 +303,36 @@ int EIG::gn_tp(){
 
 }
 
+/** 
+ * get pointer to the eigenvalues of the TPM blocks P and Q
+ * @param i == 0, the eigenvalues of the P block will be returned, i == 1, the eigenvalues of the Q block will be returned
+ * @return array of eigenvalues
+ */
+double *EIG::tpm(int i){
+
+   return eig_tp + i*n_tp;
+
+}
+
+
 #ifdef __G_CON
 
 /**
- * @return dimension of tp space
+ * @return dimension of ph space
  */
 int EIG::gn_ph(){
 
    return n_ph;
+
+}
+
+/** 
+ * get pointer to the eigenvalues of the PHM block of the SUP
+ * @return array of eigenvalues
+ */
+double *EIG::phm(){
+
+   return eig_ph;
 
 }
 
@@ -272,11 +341,44 @@ int EIG::gn_ph(){
 #ifdef __T1_CON
 
 /**
- * @return dimension of tp space
+ * @return dimension of dp space
  */
 int EIG::gn_dp(){
 
    return n_dp;
+
+}
+
+/** 
+ * get pointer to the eigenvalues of the DPM block of the SUP
+ * @return array of eigenvalues
+ */
+double *EIG::dpm(){
+
+   return eig_dp;
+
+}
+
+#endif
+
+#ifdef __T2_CON
+
+/**
+ * @return dimension of pph space
+ */
+int EIG::gn_pph(){
+
+   return n_pph;
+
+}
+
+/** 
+ * get pointer to the eigenvalues of the PPHM block of the SUP
+ * @return array of eigenvalues
+ */
+double *EIG::pphm(){
+
+   return eig_pph;
 
 }
 
@@ -299,25 +401,33 @@ int EIG::gdim(){
 double EIG::min(){
 
    //lowest eigenvalue of P block
-   double ward = eig[0];
+   double ward = eig_tp[0];
 
    //lowest eigenvalue of Q block
-   if(ward > eig[n_tp])
-      ward = eig[n_tp];
+   if(ward > eig_tp[n_tp])
+      ward = eig_tp[n_tp];
 
 #ifdef __G_CON
 
    //lowest eigenvalue of G block
-   if(ward > eig[2*n_tp])
-      ward = eig[2*n_tp];
+   if(ward > eig_ph[0])
+      ward = eig_ph[0];
 
 #endif
 
 #ifdef __T1_CON
 
    //lowest eigenvalue of T1 block
-   if(ward > eig[2*n_tp + n_ph])
-      ward = eig[2*n_tp + n_ph];
+   if(ward > eig_dp[0])
+      ward = eig_dp[0];
+
+#endif
+
+#ifdef __T2_CON
+
+   //lowest eigenvalue of T2 block
+   if(ward > eig_pph[0])
+      ward = eig_pph[0];
 
 #endif
 
@@ -332,25 +442,33 @@ double EIG::min(){
 double EIG::max(){
 
    //maximum of P block
-   double ward = eig[n_tp - 1];
+   double ward = eig_tp[n_tp - 1];
 
    //maximum of Q block
-   if(ward < eig[2*n_tp - 1])
-      ward = eig[2*n_tp - 1];
+   if(ward < eig_tp[2*n_tp - 1])
+      ward = eig_tp[2*n_tp - 1];
 
 #ifdef __G_CON
 
    //maximum of G block
-   if(ward < eig[2*n_tp + n_ph - 1])
-      ward = eig[2*n_tp + n_ph - 1];
+   if(ward < eig_ph[n_ph - 1])
+      ward = eig_ph[n_ph - 1];
 
 #endif
 
 #ifdef __T1_CON
 
    //maximum of T1 block
-   if(ward < eig[2*n_tp + n_ph + n_dp - 1])
-      ward = eig[2*n_tp + n_ph + n_dp - 1];
+   if(ward < eig_dp[n_dp - 1])
+      ward = eig_dp[n_dp - 1];
+
+#endif
+
+#ifdef __T2_CON
+
+   //maximum of T2 block
+   if(ward < eig_pph[n_pph - 1])
+      ward = eig_pph[n_pph - 1];
 
 #endif
 
@@ -366,13 +484,43 @@ double EIG::center_dev(){
 
    double sum = 0.0;
 
-   for(int i = 0;i < dim;++i)
-      sum += eig[i];
+   for(int i = 0;i < 2*n_tp;++i)
+      sum += eig_tp[i];
 
    double log_product = 0.0;
 
-   for(int i = 0;i < dim;++i)
-      log_product += log(eig[i]);
+   for(int i = 0;i < 2*n_tp;++i)
+      log_product += log(eig_tp[i]);
+
+#ifdef __G_CON
+
+   for(int i = 0;i < n_ph;++i)
+      sum += eig_ph[i];
+
+   for(int i = 0;i < n_ph;++i)
+      log_product += log(eig_ph[i]);
+
+#endif
+
+#ifdef __T1_CON
+
+   for(int i = 0;i < n_dp;++i)
+      sum += eig_dp[i];
+
+   for(int i = 0;i < n_dp;++i)
+      log_product += log(eig_dp[i]);
+
+#endif
+
+#ifdef __T2_CON
+
+   for(int i = 0;i < n_pph;++i)
+      sum += eig_pph[i];
+
+   for(int i = 0;i < n_pph;++i)
+      log_product += log(eig_pph[i]);
+
+#endif
 
    return dim*log(sum/(double)dim) - log_product;
 
@@ -383,7 +531,7 @@ double EIG::center_dev(){
  * the point (S,Z) in the primal dual newton direction (DS,DZ), for which you have calculated the generalized eigenvalues eigen_S and eigen_Z in SUP::line_search.
  * (*this) = eigen_S --> generalized eignevalues for the DS step
  * @param alpha the stepsize
- * @param eigen_Z --> generalized eignevalues for the DS step
+ * @param eigen_Z --> generalized eigenvalues for the DS step
  * @param c_S = Tr (DS Z)/Tr (SZ): parameter calculated in SUP::line_search
  * @param c_Z = Tr (S DZ)/Tr (SZ): parameter calculated in SUP::line_search
  */
@@ -391,11 +539,41 @@ double EIG::centerpot(double alpha,EIG &eigen_Z,double c_S,double c_Z){
 
    double ward = dim*log(1.0 + alpha*(c_S + c_Z));
 
-   for(int i = 0;i < dim;++i)
-      ward -= log(1.0 + alpha*eig[i]);
+   for(int i = 0;i < 2*n_tp;++i)
+      ward -= log(1.0 + alpha*eig_tp[i]);
 
-   for(int i = 0;i < dim;++i)
-      ward -= log(1.0 + alpha*eigen_Z.eig[i]);
+   for(int i = 0;i < 2*n_tp;++i)
+      ward -= log(1.0 + alpha*eigen_Z.eig_tp[i]);
+
+#ifdef __G_CON
+
+   for(int i = 0;i < n_ph;++i)
+      ward -= log(1.0 + alpha*eig_ph[i]);
+
+   for(int i = 0;i < n_ph;++i)
+      ward -= log(1.0 + alpha*eigen_Z.eig_ph[i]);
+
+#endif
+
+#ifdef __T1_CON
+
+   for(int i = 0;i < n_dp;++i)
+      ward -= log(1.0 + alpha*eig_dp[i]);
+
+   for(int i = 0;i < n_dp;++i)
+      ward -= log(1.0 + alpha*eigen_Z.eig_dp[i]);
+
+#endif
+
+#ifdef __T2_CON
+
+   for(int i = 0;i < n_pph;++i)
+      ward -= log(1.0 + alpha*eig_pph[i]);
+
+   for(int i = 0;i < n_pph;++i)
+      ward -= log(1.0 + alpha*eigen_Z.eig_pph[i]);
+
+#endif
 
    return ward;
 

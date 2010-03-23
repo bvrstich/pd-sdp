@@ -53,12 +53,34 @@ class EIG{
 
       double centerpot(double,EIG &,double,double);
 
-      double operator()(int,int);
-
       //overload equality operator
       EIG &operator=(EIG &);
 
-      double *operator[](int);
+      double *tpm(int);
+
+#ifdef __G_CON
+
+      int gn_ph();
+
+      double *phm();
+
+#endif
+
+#ifdef __T1_CON
+
+      int gn_dp();
+
+      double *dpm();
+
+#endif
+
+#ifdef __T2_CON
+
+      int gn_pph();
+
+      double *pphm();
+
+#endif
 
       double min();
 
@@ -66,22 +88,10 @@ class EIG{
 
       double center_dev();
 
-#ifdef __G_CON
-
-      int gn_ph();
-
-#endif
-
-#ifdef __T1_CON
-   
-      int gn_dp();
-
-#endif
-
    private:
 
-      //!single pointer to doubles, the eigenvalues of the SUP matrix will be stored here.
-      double *eig;
+      //!single pointer to doubles, the eigenvalues of the P and Q part of a SUP matrix will be stored here.
+      double *eig_tp;
 
       //!number of particles
       int N;
@@ -93,6 +103,9 @@ class EIG{
       int n_tp;
 
 #ifdef __G_CON
+
+      //!single pointer to doubles, the eigenvalues of the G part of a SUP matrix will be stored here.
+      double *eig_ph;
       
       //!dimension of ph space
       int n_ph;
@@ -100,12 +113,24 @@ class EIG{
 #endif
 
 #ifdef __T1_CON
+
+      //!single pointer to doubles, the eigenvalues of the T1 part of a SUP matrix will be stored here.
+      double *eig_dp;
       
       int n_dp;
 
 #endif
 
-      //!total dimensie of the EIG object
+#ifdef __T2_CON
+
+      //!single pointer to doubles, the eigenvalues of the T1 part of a SUP matrix will be stored here.
+      double *eig_pph;
+
+      int n_pph;
+
+#endif
+
+      //!total dimension of the EIG object
       int dim;
 
 };

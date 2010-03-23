@@ -237,9 +237,9 @@ ostream &operator<<(ostream &output,TPM &tpm_p){
    for(int i = 0;i < tpm_p.n;++i)
       for(int j = 0;j < tpm_p.n;++j){
 
-         output << i << "\t" << j << /*"\t|\t" << tpm_p.t2s[i][0] << "\t" << tpm_p.t2s[i][1]
+         output << i << "\t" << j << "\t|\t" << tpm_p.t2s[i][0] << "\t" << tpm_p.t2s[i][1]
 
-            << "\t" << tpm_p.t2s[j][0] << "\t" << tpm_p.t2s[j][1] << */"\t" << tpm_p(i,j) << endl;
+            << "\t" << tpm_p.t2s[j][0] << "\t" << tpm_p.t2s[j][1] << "\t" << tpm_p(i,j) << endl;
 
       }
 
@@ -440,8 +440,8 @@ void TPM::proj_Tr(){
 
 /**
  * Primal hessian map:\n\n
- * Hb = D_1 b D_1 + D_2 Q(b) D_2 + D_3 G(b) D_3 + D_4 T1(b) D_4 \n\n
- * with D_1, D_2, D_3 and D_3 the P,Q, G and T1 blocks of the SUP D. 
+ * Hb = D_1 b D_1 + D_2 Q(b) D_2 + D_3 G(b) D_3 + D_4 T1(b) D_4 + D_5 T2(b) D5 \n\n
+ * with D_1, D_2, D_3 and D_3 the P, Q, G, T1 and T2 blocks of the SUP D. 
  * @param b TPM domain matrix, hessian will act on it and the image will be put in this
  * @param D SUP matrix that defines the structure of the hessian map. (see primal-dual.pdf for more info)
  */
@@ -483,14 +483,29 @@ void TPM::H(TPM &b,SUP &D){
 
 #ifdef __T1_CON
 
-   DPM Tb(M,N);
-   Tb.T(1,b);
+   DPM T1b(M,N);
+   T1b.T(1,b);
 
-   DPM hulp_T(M,N);
+   DPM hulp_T1(M,N);
 
-   hulp_T.L_map(D.dpm(),Tb);
+   hulp_T1.L_map(D.dpm(),T1b);
 
-   hulp.T(1,hulp_T);
+   hulp.T(1,hulp_T1);
+
+   *this += hulp;
+
+#endif
+
+#ifdef __T2_CON
+
+   PPHM T2b(M,N);
+   T2b.T(0,b);
+
+   PPHM hulp_T2(M,N);
+
+   hulp_T2.L_map(D.pphm(),T2b);
+
+   hulp.T(hulp_T2);
 
    *this += hulp;
 
@@ -523,7 +538,7 @@ int TPM::solve(TPM &b,SUP &D){
 
    int cg_iter = 0;
 
-   while(rr > 1.0e-7){
+   while(rr > 1.0e-10){
 
       ++cg_iter;
 
@@ -636,6 +651,14 @@ void TPM::S(int option,TPM &tpm_d){
    a += M - 4.0;
    b += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
    c -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
+
+#endif
+
+#ifdef __T2_CON
+   
+   a += 5.0*M - 8.0;
+   b += 2.0/(N - 1.0);
+   c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
 
 #endif
 
@@ -854,6 +877,14 @@ void TPM::collaps(int option,SUP &S){
 #ifdef __T1_CON
 
    hulp.T(1,S.dpm());
+
+   *this += hulp;
+
+#endif
+
+#ifdef __T2_CON
+   
+   hulp.T(S.pphm());
 
    *this += hulp;
 

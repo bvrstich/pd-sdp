@@ -381,7 +381,7 @@ void SUP::fill_Random(){
 
 #endif
 
-#ifdef __T1_CON
+#ifdef __T2_CON
 
    SZ_pph->fill_Random();
 
@@ -459,7 +459,7 @@ int SUP::gn_dp(){
 #ifdef __T2_CON
 
 /**
- * @return dimension of dp space
+ * @return dimension of pph space
  */
 int SUP::gn_pph(){
 
@@ -733,7 +733,7 @@ void SUP::daxpy(double alpha,SUP &SZ_p){
 
 #endif
 
-#ifdef __T1_CON
+#ifdef __T2_CON
    
    SZ_pph->daxpy(alpha,SZ_p.pphm());
 
@@ -763,7 +763,7 @@ double SUP::trace(){
 
 #endif
 
-#ifdef __T1_CON
+#ifdef __T2_CON
    
    ward += SZ_pph->trace();
 
@@ -1071,24 +1071,24 @@ double SUP::U_trace(){
  */
 void SUP::diagonalize(EIG &eig){
 
-   SZ_tp[0]->diagonalize(eig[0]);
-   SZ_tp[1]->diagonalize(eig[1]);
+   SZ_tp[0]->diagonalize(eig.tpm(0));
+   SZ_tp[1]->diagonalize(eig.tpm(1));
 
 #ifdef __G_CON
 
-   SZ_ph->diagonalize(eig[2]);
+   SZ_ph->diagonalize(eig.phm());
 
 #endif
 
 #ifdef __T1_CON
 
-   SZ_dp->diagonalize(eig[3]);
+   SZ_dp->diagonalize(eig.dpm());
 
 #endif
 
 #ifdef __T2_CON
 
-   SZ_pph->diagonalize(eig[4]);
+   SZ_pph->diagonalize(eig.pphm());
 
 #endif
 

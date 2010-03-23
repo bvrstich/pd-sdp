@@ -142,7 +142,7 @@ int main(void){
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,2.0);
+         a = DS.line_search(DZ,S,Z,5.0);
 
          S.daxpy(a,DS);
          Z.daxpy(a,DZ);
