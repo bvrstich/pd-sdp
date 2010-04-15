@@ -923,13 +923,13 @@ void TPM::sp_pairing(double pair_coupling){
 
    //single particle spectrum
    for(int a = -M/2;a < 0;++a)
-      E[M/2 + a] = a;
+      E[M/2 + a] = (double) a*2/M;
 
    double *x = new double [M/2];
 
    //pairing interaction term
    for(int a = 0;a < M/2;++a)
-      x[a] = 1.0;
+      x[a] = a;//1.0;
 
    //normeren op 1/2
    double ward = 0.0;

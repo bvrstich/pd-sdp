@@ -14,6 +14,7 @@
 
 using std::cout;
 using std::endl;
+using std::ofstream;
 
 #include "include.h"
 
@@ -33,19 +34,27 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 8;//dim sp hilbert space
+   int M = 16;//dim sp hilbert space
    int N = 4;//nr of particles
+
+   ofstream test("pair_PQGT");
+   test.precision(10);
+
+   for(int i = 10;i < 50;++i){
 
    //hamiltoniaan
    TPM ham(M,N);
- //  ham.hubbard(0,1.0);
-   ham.sp_pairing(1.0);
+   //ham.hubbard(0,100.0);
+
+   double pair_coupling = (double)i/10.0;
+
+   ham.sp_pairing(pair_coupling);
 
    SUP S(M,N);
    S.init_S();
 
    SUP Z(M,N);
-   Z.init_Z(100.0,ham,S);
+   Z.init_Z(200.0,ham,S);
 
    int dim = Z.gdim();
 
@@ -202,6 +211,10 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("workspace/input/rdm.in");
+
+   test << pair_coupling << "\t" << energy << endl;
+
+   }
 
    return 0;
 
