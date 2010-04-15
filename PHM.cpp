@@ -18,7 +18,6 @@ int **PHM::s2ph;
  * @param M nr of sp orbitals
  * @param N nr of particles
  */
-
 PHM::PHM(int M,int N) : Matrix(M*M) {
    
    this->N = N;

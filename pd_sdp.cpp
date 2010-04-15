@@ -34,27 +34,18 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 16;//dim sp hilbert space
+   int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
-
-   ofstream test("pair_PQGT");
-   test.precision(10);
-
-   for(int i = 10;i < 50;++i){
 
    //hamiltoniaan
    TPM ham(M,N);
-   //ham.hubbard(0,100.0);
-
-   double pair_coupling = (double)i/10.0;
-
-   ham.sp_pairing(pair_coupling);
+   ham.hubbard(0,1.0);
 
    SUP S(M,N);
    S.init_S();
 
    SUP Z(M,N);
-   Z.init_Z(200.0,ham,S);
+   Z.init_Z(100.0,ham,S);
 
    int dim = Z.gdim();
 
@@ -152,7 +143,7 @@ int main(void){
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,1.0);
+         a = DS.line_search(DZ,S,Z,5.0);
 
          S.daxpy(a,DS);
          Z.daxpy(a,DZ);
@@ -209,12 +200,12 @@ int main(void){
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
 
+   Vector<TPM> vector(S.tpm(0));
+
+   cout << vector;
+
    //print density matrix to file
 //   (S.tpm(0)).out("workspace/input/rdm.in");
-
-   test << pair_coupling << "\t" << energy << endl;
-
-   }
 
    return 0;
 
