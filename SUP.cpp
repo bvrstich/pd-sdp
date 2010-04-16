@@ -1064,31 +1064,32 @@ double SUP::U_trace(){
 }
 
 /**
- * Diagonalization of all the blockmatrix by means of the Matrix::diagonalize function, eigenvalues are stored in the EIG object
+ * Diagonalization of all the blockmatrices by means of the Matrix::diagonalize function, eigenvalues are stored in the EIG object
  * that is passed to this function, eigenvectors will be stored in the (*this) object on the collums. So the original matrix is
  * destroyed.
- * @param eig input EIG object that will contain the eigenvalues after calling the function
+ * @param eig input EIG object that will contain the eigenvalues after calling the function, the Vector<MatrixType>'s in the EIG object
+ * will be allocated in this function.
  */
 void SUP::diagonalize(EIG &eig){
 
-   SZ_tp[0]->diagonalize(eig.tpm(0));
-   SZ_tp[1]->diagonalize(eig.tpm(1));
+   SZ_tp[0]->diagonalize(eig.tpv(0));
+   SZ_tp[1]->diagonalize(eig.tpv(1));
 
 #ifdef __G_CON
 
-   SZ_ph->diagonalize(eig.phm());
+   SZ_ph->diagonalize(eig.phv());
 
 #endif
 
 #ifdef __T1_CON
 
-   SZ_dp->diagonalize(eig.dpm());
+   SZ_dp->diagonalize(eig.dpv());
 
 #endif
 
 #ifdef __T2_CON
 
-   SZ_pph->diagonalize(eig.pphm());
+   SZ_pph->diagonalize(eig.pphv());
 
 #endif
 

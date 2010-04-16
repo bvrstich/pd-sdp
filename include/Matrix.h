@@ -6,6 +6,8 @@
 
 using std::ostream;
 
+#include "Vector.h"
+
 /**
  * @author Brecht Verstichel
  * @date 18-02-2010\n\n
@@ -72,6 +74,29 @@ class Matrix{
 
       void diagonalize(double *eigenvalues);
 
+      template<class MatrixType>
+         void diagonalize(Vector<MatrixType> &v){
+
+            //if the memory hasn't been allocated yet, allocate it
+            if(v.gflag() == 0)
+               v.init(n);
+
+            char jobz = 'V';
+            char uplo = 'U';
+
+            int lwork = 3*n - 1;
+
+            double *work = new double [lwork];
+
+            int info;
+
+            dsyev_(&jobz,&uplo,&n,matrix[0],&n,v.gVector(),work,&lwork,&info);
+
+            delete [] work;
+
+
+         }
+
       double ddot(Matrix &);
 
       void invert();
@@ -83,7 +108,7 @@ class Matrix{
       //positieve of negatieve vierkantswortel uit de matrix
       void sqrt(int option);
 
-      void mdiag(double *diag);
+      void mdiag(Vector<Matrix> &diag);
 
       void L_map(Matrix &,Matrix &);
 

@@ -236,29 +236,6 @@ double Matrix::trace(){
 }
 
 /**
- * Diagonalizes symmetric matrices. Watch out! The current matrix (*this) is destroyed, in it
- * the eigenvectors will be stored (one in every column).
- * @param eigenvalues the pointer of doubles in which the eigenvalues will be storen, Watch out, its memory
- * has to be allocated on the dimension of the matrix before you call the function.
- */
-void Matrix::diagonalize(double *eigenvalues){
-
-   char jobz = 'V';
-   char uplo = 'U';
-
-   int lwork = 3*n - 1;
-
-   double *work = new double [lwork];
-
-   int info;
-
-   dsyev_(&jobz,&uplo,&n,matrix[0],&n,eigenvalues,work,&lwork,&info);
-
-   delete [] work;
-
-}
-
-/**
  * @return inproduct of (*this) matrix with matrix_i, defined as Tr (A B)
  * @param matrix_i input matrix
  */
@@ -327,9 +304,7 @@ void Matrix::sqrt(int option){
 
    Matrix hulp(*this);
 
-   double *eigen = new double [n];
-
-   hulp.diagonalize(eigen);
+   Vector<Matrix> eigen(hulp);
 
    if(option == 1)
       for(int i = 0;i < n;++i)
@@ -353,20 +328,18 @@ void Matrix::sqrt(int option){
 
    dgemm_(&transA,&transB,&n,&n,&n,&alpha,hulp_c.matrix[0],&n,hulp.matrix[0],&n,&beta,matrix[0],&n);
 
-   delete [] eigen;
-
 }
 
 /**
  * Multiply this matrix with diagonal matrix
  * @param diag Diagonal matrix to multiply with this, has to be allocated on matrix dimension.
  */
-void Matrix::mdiag(double *diag){
+void Matrix::mdiag(Vector<Matrix> &diag){
 
    int inc = 1;
 
    for(int i = 0;i < n;++i)
-      dscal_(&n,diag + i,matrix[i],&inc);
+      dscal_(&n,&diag[i],matrix[i],&inc);
 
 }
 

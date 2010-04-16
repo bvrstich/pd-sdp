@@ -8,142 +8,11 @@ using std::endl;
 #include "include.h"
 
 /**
- * standard constructor, allocates the memory for the eigenvalues of a SUP object
- * @param M dimension of sp space
- * @param N nr of particles
+ * Default constructor, sets flag to 0
  */
-EIG::EIG(int M,int N){
+EIG::EIG(){
 
-   this->N = N;
-   this->M = M;
-   this->n_tp = M*(M - 1)/2;
-
-   eig_tp = new double [2*n_tp];
-
-   this->dim = 2*n_tp;
-
-#ifdef __G_CON
-   
-   this->n_ph = M*M;
-
-   eig_ph = new double [n_ph];
-
-   dim += n_ph;
-
-#endif
-
-#ifdef __T1_CON
-   
-   this->n_dp = M*(M - 1)*(M - 2)/6;
-
-   eig_dp = new double [n_dp];
-
-   dim += n_dp;
-
-#endif
-
-#ifdef __T2_CON
-
-   this->n_pph = M*M*(M - 1)/2;
-
-   eig_pph = new double [n_pph];
-
-   dim += n_pph;
-
-#endif
-
-}
-
-/**
- * Copy constructor\n
- * allocates the memory for the eigenvalues of a SUP object and copies the content of eig_c into it.
- * @param eig_c The input EIG that will be copied into this.
- */
-EIG::EIG(EIG &eig_c){
-
-   this->N = eig_c.N;
-   this->M = eig_c.M;
-
-   this->n_tp = M*(M - 1)/2;
-
-   eig_tp = new double [2*n_tp];
-
-   this->dim = 2*n_tp;
-
-   int inc = 1;
-
-   dcopy_(&dim,eig_c.eig_tp,&inc,eig_tp,&inc);
-
-#ifdef __G_CON
-   
-   this->n_ph = M*M;
-
-   eig_ph = new double [n_ph];
-
-   dim += n_ph;
-
-   dcopy_(&n_ph,eig_c.eig_ph,&inc,eig_ph,&inc);
-
-#endif
-   
-#ifdef __T1_CON
-   
-   this->n_dp = M*(M - 1)*(M - 2)/6;
-
-   eig_dp = new double [n_dp];
-
-   dim += n_dp;
-
-   dcopy_(&n_dp,eig_c.eig_dp,&inc,eig_dp,&inc);
-
-#endif
-
-#ifdef __T2_CON
-   
-   this->n_pph = M*M*(M - 1)/2;
-
-   eig_pph = new double [n_pph];
-
-   dim += n_pph;
-
-   dcopy_(&n_pph,eig_c.eig_pph,&inc,eig_pph,&inc);
-
-#endif
-
-
-}
-
-/**
- * overload equality operator
- * @param eig_c object that will be copied into this.
- */
-EIG &EIG::operator=(EIG &eig_c){
-
-   int inc = 1;
-
-   int n = 2*n_tp;
-
-   dcopy_(&n,eig_c.eig_tp,&inc,eig_tp,&inc);
-
-#ifdef __G_CON
-
-   dcopy_(&n_ph,eig_c.eig_ph,&inc,eig_ph,&inc);
-
-#endif
-
-#ifdef __T1_CON
-
-   dcopy_(&n_dp,eig_c.eig_dp,&inc,eig_dp,&inc);
-
-#endif
-
-#ifdef __T2_CON
-
-   dcopy_(&n_pph,eig_c.eig_pph,&inc,eig_pph,&inc);
-
-#endif
-
-   return *this;
+   flag = 0;
 
 }
 
@@ -157,26 +26,25 @@ EIG::EIG(SUP &SZ){
    //first allocate the memory
    this->N = SZ.gN();
    this->M = SZ.gM();
-   this->n_tp = SZ.gn_tp();
 
-   eig_tp = new double [2*n_tp];
+   this->n_tp = SZ.gn_tp();
 
    this->dim = 2*n_tp;
 
-   //diagonalize
+   v_tp = new Vector<TPM> * [2];
+
    for(int i = 0;i < 2;++i)
-      (SZ.tpm(i)).diagonalize(eig_tp + i*n_tp);
+      v_tp[i] = new Vector<TPM>(SZ.tpm(i));
+
+   flag = 1;
 
 #ifdef __G_CON
    
    this->n_ph = M*M;
 
-   eig_ph = new double [n_ph];
-
    dim += n_ph;
 
-   //diagonalize
-   (SZ.phm()).diagonalize(eig_ph);
+   v_ph = new Vector<PHM>(SZ.phm());
 
 #endif
 
@@ -184,12 +52,9 @@ EIG::EIG(SUP &SZ){
    
    this->n_dp = M*(M - 1)*(M - 2)/6;
 
-   eig_dp = new double [n_dp];
-
    dim += n_dp;
 
-   //diagonalize
-   (SZ.dpm()).diagonalize(eig_dp);
+   v_dp = new Vector<DPM>(SZ.dpm());
 
 #endif
 
@@ -197,14 +62,95 @@ EIG::EIG(SUP &SZ){
 
    this->n_pph = M*M*(M - 1)/2;
 
-   eig_pph = new double [n_pph];
+   dim += n_pph;
+
+   v_pph = new Vector<PPHM>(SZ.pphm());
+ 
+#endif
+
+}
+
+/**
+ * Copy constructor\n
+ * allocates the memory for the eigenvalues of a SUP object and copies the content of eig_c into it.
+ * @param eig_c The input EIG that will be copied into this.
+ */
+EIG::EIG(EIG &eig_c){
+
+   flag = 1;
+
+   this->N = eig_c.N;
+   this->M = eig_c.M;
+
+   this->n_tp = eig_c.n_tp;
+
+   this->dim = 2*n_tp;
+
+   v_tp = new Vector<TPM> * [2];
+
+   for(int i = 0;i < 2;++i)
+      v_tp[i] = new Vector<TPM>(eig_c.tpv(i));
+
+#ifdef __G_CON
+
+   this->n_ph = M*M;
+
+   dim += n_ph;
+
+   v_ph = new Vector<PHM>(eig_c.phv());
+
+#endif
+
+#ifdef __T1_CON
+
+   this->n_dp = M*(M - 1)*(M - 2)/6;
+
+   dim += n_dp;
+
+   v_dp = new Vector<DPM>(eig_c.dpv());
+
+#endif
+
+#ifdef __T2_CON
+
+   this->n_pph = M*M*(M - 1)/2;
 
    dim += n_pph;
 
-   //diagonalize
-   (SZ.pphm()).diagonalize(eig_pph);
- 
+   v_pph = new Vector<PPHM>(eig_c.pphv());
+
 #endif
+
+}
+
+/**
+ * overload equality operator
+ * @param eig_c object that will be copied into this.
+ */
+EIG &EIG::operator=(EIG &eig_c){
+
+   for(int i = 0;i < 2;++i)
+      *v_tp[i] = *eig_c.v_tp[i];
+
+#ifdef __G_CON
+
+   *v_ph = *eig_c.v_ph;
+
+#endif
+
+#ifdef __T1_CON
+
+   *v_dp = *eig_c.v_dp;
+
+#endif
+
+#ifdef __T2_CON
+
+   *v_pph = *eig_c.v_pph;
+
+#endif
+
+   return *this;
 
 }
 
@@ -213,62 +159,55 @@ EIG::EIG(SUP &SZ){
  */
 EIG::~EIG(){
 
-   delete [] eig_tp;
+   if(flag == 1){
+
+      for(int i = 0;i < 2;++i)
+         delete v_tp[i];
+
+      delete [] v_tp;
 
 #ifdef __G_CON
-   
-   delete [] eig_ph;
+
+      delete v_ph;
 
 #endif
 
 #ifdef __T1_CON
 
-   delete [] eig_dp;
+      delete v_dp;
 
 #endif
 
 #ifdef __T2_CON
 
-   delete [] eig_pph;
+      delete v_pph;
 
 #endif
+
+   }
 
 }
 
 ostream &operator<<(ostream &output,EIG &eig_p){
 
-   for(int i = 0;i < eig_p.gn_tp();++i)
-      std::cout << i << "\t" << eig_p.tpm(0)[i] << std::endl;
-
-   std::cout << std::endl;
-
-   for(int i = 0;i < eig_p.gn_tp();++i)
-      std::cout << i << "\t" << eig_p.tpm(1)[i] << std::endl;
+   for(int i = 0;i < 2;++i)
+      std::cout << eig_p.tpv(i) << std::endl;
 
 #ifdef __G_CON
 
-   std::cout << std::endl;
-
-   for(int i = 0;i < eig_p.gn_ph();++i)
-      std::cout << i << "\t" << eig_p.phm()[i] << std::endl;
+   std::cout << eig_p.phv() << std::endl;
 
 #endif
 
 #ifdef __T1_CON
 
-   std::cout << std::endl;
-
-   for(int i = 0;i < eig_p.gn_dp();++i)
-      std::cout << i << "\t" << eig_p.dpm()[i] << std::endl;
+   std::cout << eig_p.dpv() << std::endl;
 
 #endif
 
 #ifdef __T2_CON
 
-   std::cout << std::endl;
-
-   for(int i = 0;i < eig_p.gn_pph();++i)
-      std::cout << i << "\t" << eig_p.pphm()[i] << std::endl;
+   std::cout << eig_p.pphv() << std::endl;
 
 #endif
 
@@ -304,13 +243,13 @@ int EIG::gn_tp(){
 }
 
 /** 
- * get pointer to the eigenvalues of the TPM blocks P and Q
+ * get the Vector<TPM> object containing the eigenvalues of the TPM blocks P and Q
  * @param i == 0, the eigenvalues of the P block will be returned, i == 1, the eigenvalues of the Q block will be returned
- * @return array of eigenvalues
+ * @return a Vector<TPM> object containing the desired eigenvalues
  */
-double *EIG::tpm(int i){
+Vector<TPM> &EIG::tpv(int i){
 
-   return eig_tp + i*n_tp;
+   return *v_tp[i];
 
 }
 
@@ -327,12 +266,12 @@ int EIG::gn_ph(){
 }
 
 /** 
- * get pointer to the eigenvalues of the PHM block of the SUP
- * @return array of eigenvalues
+ * get the Vector<PHM> object containing the eigenvalues of the PHM block G
+ * @return a Vector<PHM> object containing the desired eigenvalues
  */
-double *EIG::phm(){
+Vector<PHM> &EIG::phv(){
 
-   return eig_ph;
+   return *v_ph;
 
 }
 
@@ -350,12 +289,12 @@ int EIG::gn_dp(){
 }
 
 /** 
- * get pointer to the eigenvalues of the DPM block of the SUP
- * @return array of eigenvalues
+ * get the Vector<DPM> object containing the eigenvalues of the DPM block T1
+ * @return a Vector<DPM> object containing the desired eigenvalues
  */
-double *EIG::dpm(){
+Vector<DPM> &EIG::dpv(){
 
-   return eig_dp;
+   return *v_dp;
 
 }
 
@@ -373,12 +312,12 @@ int EIG::gn_pph(){
 }
 
 /** 
- * get pointer to the eigenvalues of the PPHM block of the SUP
- * @return array of eigenvalues
+ * get the Vector<PPHM> object containing the eigenvalues of the PPHM block T2
+ * @return a Vector<PPHM> object containing the desired eigenvalues
  */
-double *EIG::pphm(){
+Vector<PPHM> &EIG::pphv(){
 
-   return eig_pph;
+   return *v_pph;
 
 }
 
@@ -401,33 +340,33 @@ int EIG::gdim(){
 double EIG::min(){
 
    //lowest eigenvalue of P block
-   double ward = eig_tp[0];
+   double ward = v_tp[0]->min();
 
    //lowest eigenvalue of Q block
-   if(ward > eig_tp[n_tp])
-      ward = eig_tp[n_tp];
+   if(ward > v_tp[1]->min())
+      ward = v_tp[1]->min();
 
 #ifdef __G_CON
 
    //lowest eigenvalue of G block
-   if(ward > eig_ph[0])
-      ward = eig_ph[0];
+   if(ward > v_ph->min())
+      ward = v_ph->min();
 
 #endif
 
 #ifdef __T1_CON
 
    //lowest eigenvalue of T1 block
-   if(ward > eig_dp[0])
-      ward = eig_dp[0];
+   if(ward > v_dp->min())
+      ward = v_dp->min();
 
 #endif
 
 #ifdef __T2_CON
 
    //lowest eigenvalue of T2 block
-   if(ward > eig_pph[0])
-      ward = eig_pph[0];
+   if(ward > v_pph->min())
+      ward = v_pph->min();
 
 #endif
 
@@ -441,34 +380,34 @@ double EIG::min(){
  */
 double EIG::max(){
 
-   //maximum of P block
-   double ward = eig_tp[n_tp - 1];
+   //highest eigenvalue of P block
+   double ward = v_tp[0]->max();
 
-   //maximum of Q block
-   if(ward < eig_tp[2*n_tp - 1])
-      ward = eig_tp[2*n_tp - 1];
+   //highest eigenvalue of Q block
+   if(ward < v_tp[1]->max())
+      ward = v_tp[1]->max();
 
 #ifdef __G_CON
 
-   //maximum of G block
-   if(ward < eig_ph[n_ph - 1])
-      ward = eig_ph[n_ph - 1];
+   //highest eigenvalue of G block
+   if(ward < v_ph->max())
+      ward = v_ph->max();
 
 #endif
 
 #ifdef __T1_CON
 
-   //maximum of T1 block
-   if(ward < eig_dp[n_dp - 1])
-      ward = eig_dp[n_dp - 1];
+   //highest eigenvalue of T1 block
+   if(ward < v_dp->max())
+      ward = v_dp->max();
 
 #endif
 
 #ifdef __T2_CON
 
-   //maximum of T2 block
-   if(ward < eig_pph[n_pph - 1])
-      ward = eig_pph[n_pph - 1];
+   //highest eigenvalue of T2 block
+   if(ward < v_pph->max())
+      ward = v_pph->max();
 
 #endif
 
@@ -482,43 +421,31 @@ double EIG::max(){
  */
 double EIG::center_dev(){
 
-   double sum = 0.0;
+   double sum = v_tp[0]->sum() + v_tp[1]->sum();
 
-   for(int i = 0;i < 2*n_tp;++i)
-      sum += eig_tp[i];
-
-   double log_product = 0.0;
-
-   for(int i = 0;i < 2*n_tp;++i)
-      log_product += log(eig_tp[i]);
+   double log_product = v_tp[0]->log_product() + v_tp[1]->log_product();
 
 #ifdef __G_CON
 
-   for(int i = 0;i < n_ph;++i)
-      sum += eig_ph[i];
+   sum += v_ph->sum();
 
-   for(int i = 0;i < n_ph;++i)
-      log_product += log(eig_ph[i]);
+   log_product += v_ph->log_product();
 
 #endif
 
 #ifdef __T1_CON
 
-   for(int i = 0;i < n_dp;++i)
-      sum += eig_dp[i];
+   sum += v_dp->sum();
 
-   for(int i = 0;i < n_dp;++i)
-      log_product += log(eig_dp[i]);
+   log_product += v_dp->log_product();
 
 #endif
 
 #ifdef __T2_CON
 
-   for(int i = 0;i < n_pph;++i)
-      sum += eig_pph[i];
+   sum += v_pph->sum();
 
-   for(int i = 0;i < n_pph;++i)
-      log_product += log(eig_pph[i]);
+   log_product += v_pph->log_product();
 
 #endif
 
@@ -539,39 +466,24 @@ double EIG::centerpot(double alpha,EIG &eigen_Z,double c_S,double c_Z){
 
    double ward = dim*log(1.0 + alpha*(c_S + c_Z));
 
-   for(int i = 0;i < 2*n_tp;++i)
-      ward -= log(1.0 + alpha*eig_tp[i]);
-
-   for(int i = 0;i < 2*n_tp;++i)
-      ward -= log(1.0 + alpha*eigen_Z.eig_tp[i]);
+   for(int i = 0;i < 2;++i)
+      ward -= v_tp[i]->centerpot(alpha) + (eigen_Z.tpv(i)).centerpot(alpha);
 
 #ifdef __G_CON
 
-   for(int i = 0;i < n_ph;++i)
-      ward -= log(1.0 + alpha*eig_ph[i]);
-
-   for(int i = 0;i < n_ph;++i)
-      ward -= log(1.0 + alpha*eigen_Z.eig_ph[i]);
+   ward -= v_ph->centerpot(alpha) + (eigen_Z.phv()).centerpot(alpha);
 
 #endif
 
 #ifdef __T1_CON
 
-   for(int i = 0;i < n_dp;++i)
-      ward -= log(1.0 + alpha*eig_dp[i]);
-
-   for(int i = 0;i < n_dp;++i)
-      ward -= log(1.0 + alpha*eigen_Z.eig_dp[i]);
+   ward -= v_dp->centerpot(alpha) + (eigen_Z.dpv()).centerpot(alpha);
 
 #endif
 
 #ifdef __T2_CON
 
-   for(int i = 0;i < n_pph;++i)
-      ward -= log(1.0 + alpha*eig_pph[i]);
-
-   for(int i = 0;i < n_pph;++i)
-      ward -= log(1.0 + alpha*eigen_Z.eig_pph[i]);
+   ward -= v_pph->centerpot(alpha) + (eigen_Z.pphv()).centerpot(alpha);
 
 #endif
 

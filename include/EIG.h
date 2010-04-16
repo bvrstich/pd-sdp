@@ -6,6 +6,7 @@
 
 using std::ostream;
 
+#include "Vector.h"
 #include "SUP.h"
 
 //definitions:
@@ -69,15 +70,15 @@ class EIG{
    friend ostream &operator<<(ostream &output,EIG &eig_p);
 
    public:
-      
-      //constructor
-      EIG(int M,int N);
 
-      //copy constructor
-      EIG(EIG &);
-
+      //default constructor
+      EIG();
+   
       //constructor met initialisatie op 
       EIG(SUP &);
+      
+      //copy constructor
+      EIG(EIG &);
 
       //destructor
       ~EIG();
@@ -95,13 +96,13 @@ class EIG{
       //overload equality operator
       EIG &operator=(EIG &);
 
-      double *tpm(int);
+      Vector<TPM> &tpv(int);
 
 #ifdef __G_CON
 
       int gn_ph();
 
-      double *phm();
+      Vector<PHM> &phv();
 
 #endif
 
@@ -109,7 +110,7 @@ class EIG{
 
       int gn_dp();
 
-      double *dpm();
+      Vector<DPM> &dpv();
 
 #endif
 
@@ -117,7 +118,7 @@ class EIG{
 
       int gn_pph();
 
-      double *pphm();
+      Vector<PPHM> &pphv();
 
 #endif
 
@@ -129,8 +130,11 @@ class EIG{
 
    private:
 
-      //!single pointer to doubles, the eigenvalues of the P and Q part of a SUP matrix will be stored here.
-      double *eig_tp;
+      //!variable that tells if the memory has been allocated (flag = 1) or not (flag = 0)
+      int flag;
+
+      //!double pointer to a Vector<TPM> object, the eigenvalues of the P and Q part of a SUP matrix will be stored here.
+      Vector<TPM> **v_tp;
 
       //!number of particles
       int N;
@@ -143,8 +147,8 @@ class EIG{
 
 #ifdef __G_CON
 
-      //!single pointer to doubles, the eigenvalues of the G part of a SUP matrix will be stored here.
-      double *eig_ph;
+      //!pointer to a Vector<PHM> object that will contain the eigenvalues of the G part of a SUP matrix
+      Vector<PHM> *v_ph;
       
       //!dimension of ph space
       int n_ph;
@@ -153,8 +157,8 @@ class EIG{
 
 #ifdef __T1_CON
 
-      //!single pointer to doubles, the eigenvalues of the T1 part of a SUP matrix will be stored here.
-      double *eig_dp;
+      //!pointer to a Vector<DPM> object that will contain the eigenvalues of the T1 part of a SUP matrix
+      Vector<DPM> *v_dp;
       
       int n_dp;
 
@@ -162,8 +166,8 @@ class EIG{
 
 #ifdef __T2_CON
 
-      //!single pointer to doubles, the eigenvalues of the T1 part of a SUP matrix will be stored here.
-      double *eig_pph;
+      //!pointer to a Vector<PPHM> object that will contain the eigenvalues of the T1 part of a SUP matrix
+      Vector<PPHM> *v_pph;
 
       int n_pph;
 

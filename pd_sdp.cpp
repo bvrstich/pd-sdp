@@ -200,10 +200,6 @@ int main(void){
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
 
-   Vector<TPM> vector(S.tpm(0));
-
-   cout << vector;
-
    //print density matrix to file
 //   (S.tpm(0)).out("workspace/input/rdm.in");
 

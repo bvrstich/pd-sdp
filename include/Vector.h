@@ -3,8 +3,11 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 
 using std::ostream;
+
+#include "lapack.h"
 
 template<class MatrixType>
 class Vector;
@@ -33,6 +36,9 @@ class Vector{
 
    public:
 
+      //default constructor
+      Vector();
+
       //construct with as input a MatrixType
       Vector(MatrixType& );
 
@@ -41,6 +47,8 @@ class Vector{
 
       //destructor
       virtual ~Vector();
+
+      void init(int );
 
       //overload equality operator
       Vector &operator=(Vector<MatrixType> &);
@@ -68,7 +76,13 @@ class Vector{
 
       int gn();
 
+      int gflag();
+
+      void sflag(int);
+
       double sum();
+
+      double log_product();
 
       double ddot(Vector<MatrixType> &);
 
@@ -78,6 +92,8 @@ class Vector{
       
       double max();
 
+      double centerpot(double );
+
    private:
 
       //!pointer of doubles, contains the numbers, the vector
@@ -86,10 +102,23 @@ class Vector{
       //!dimension of the vector
       int n;
 
+      //!flag that gives the info if the memory for the vector has been allocated allready or not, 1 if alloc, 0 if not alloc.
+      int flag;
+
 };
 
 /**
- * Construct and initialize the Vector object by diagonalizing a Matrix object:
+ * Default constructor: just sets the flag on 0
+ */
+template<class MatrixType>
+Vector<MatrixType>::Vector(){
+
+   flag = 0;
+
+}
+
+/**
+ * Construct and initialize the Vector object by diagonalizing a Matrix object
  */
 template<class MatrixType>
 Vector<MatrixType>::Vector(MatrixType &MT){
@@ -98,6 +127,9 @@ Vector<MatrixType>::Vector(MatrixType &MT){
    this->n = MT.gn();
 
    vector = new double [n];
+
+   //allocated the memory
+   flag = 1;
 
    //initialize
    char jobz = 'V';
@@ -117,12 +149,14 @@ Vector<MatrixType>::Vector(MatrixType &MT){
 
 /**
  * copy constructor 
- * @param mat_copy The vector you want to be copied into the object you are constructing
+ * @param vec_copy The vector you want to be copied into the object you are constructing, make sure that it is an allocated and filled vector!
  */
 template<class MatrixType>
 Vector<MatrixType>::Vector(Vector<MatrixType> &vec_copy){
 
    this->n = vec_copy.n;
+
+   flag = 1;
 
    vector = new double [n];
 
@@ -138,7 +172,24 @@ Vector<MatrixType>::Vector(Vector<MatrixType> &vec_copy){
 template<class MatrixType>
 Vector<MatrixType>::~Vector(){
 
-   delete [] vector;
+   if(flag == 1)
+      delete [] vector;
+
+}
+
+/**
+ * Allocate the memory of the vector on the dimension passed as an argument
+ * @param dim the dimension to be allocated to the vector
+ */
+template<class MatrixType>
+void Vector<MatrixType>::init(int n){
+
+   //set the flag to 1
+   flag = 1;
+
+   this->n = n;
+
+   vector = new double [n];
 
 }
 
@@ -146,7 +197,6 @@ Vector<MatrixType>::~Vector(){
  * overload the equality operator
  * @param vector_copy The vector you want to be copied into this
  */
-
 template<class MatrixType>
 Vector<MatrixType> &Vector<MatrixType>::operator=(Vector<MatrixType> &vector_copy){
 
@@ -282,6 +332,27 @@ int Vector<MatrixType>::gn(){
 }
 
 /**
+ * @return the value of the flag
+ */
+template<class MatrixType>
+int Vector<MatrixType>::gflag(){
+
+   return flag;
+
+}
+
+/**
+ * set the value of the flag
+ * @value set the flag equal to value, being 0 or 1
+ */
+template<class MatrixType>
+void Vector<MatrixType>::sflag(int value){
+
+   flag = value;
+
+}
+
+/**
  * @return the sum of all the elements in the vector
  */
 template<class MatrixType>
@@ -291,6 +362,21 @@ double Vector<MatrixType>::sum(){
 
    for(int i = 0;i < n;++i)
       ward += vector[i];
+
+   return ward;
+
+}
+
+/**
+ * @return the logarithm of the product of all the elements in the vector (so the sum of all the logarithms)
+ */
+template<class MatrixType>
+double Vector<MatrixType>::log_product(){
+
+   double ward = 0;
+
+   for(int i = 0;i < n;++i)
+      ward += log(vector[i]);
 
    return ward;
 
@@ -351,6 +437,18 @@ template<class MatrixType>
 double Vector<MatrixType>::max(){
 
    return vector[n - 1];
+
+}
+
+template<class MatrixType>
+double Vector<MatrixType>::centerpot(double alpha){
+
+   double ward = 0.0;
+
+   for(int i = 0;i < n;++i)
+      ward += log(1.0 + alpha*vector[i]);
+
+   return ward;
 
 }
 
