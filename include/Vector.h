@@ -36,9 +36,6 @@ class Vector{
 
    public:
 
-      //default constructor
-      Vector();
-
       //construct with as input a MatrixType
       Vector(MatrixType& );
 
@@ -47,8 +44,6 @@ class Vector{
 
       //destructor
       virtual ~Vector();
-
-      void init(int );
 
       //overload equality operator
       Vector &operator=(Vector<MatrixType> &);
@@ -76,10 +71,6 @@ class Vector{
 
       int gn();
 
-      int gflag();
-
-      void sflag(int);
-
       double sum();
 
       double log_product();
@@ -102,20 +93,7 @@ class Vector{
       //!dimension of the vector
       int n;
 
-      //!flag that gives the info if the memory for the vector has been allocated allready or not, 1 if alloc, 0 if not alloc.
-      int flag;
-
 };
-
-/**
- * Default constructor: just sets the flag on 0
- */
-template<class MatrixType>
-Vector<MatrixType>::Vector(){
-
-   flag = 0;
-
-}
 
 /**
  * Construct and initialize the Vector object by diagonalizing a Matrix object
@@ -127,9 +105,6 @@ Vector<MatrixType>::Vector(MatrixType &MT){
    this->n = MT.gn();
 
    vector = new double [n];
-
-   //allocated the memory
-   flag = 1;
 
    //initialize
    char jobz = 'V';
@@ -156,8 +131,6 @@ Vector<MatrixType>::Vector(Vector<MatrixType> &vec_copy){
 
    this->n = vec_copy.n;
 
-   flag = 1;
-
    vector = new double [n];
 
    int inc = 1;
@@ -172,24 +145,7 @@ Vector<MatrixType>::Vector(Vector<MatrixType> &vec_copy){
 template<class MatrixType>
 Vector<MatrixType>::~Vector(){
 
-   if(flag == 1)
-      delete [] vector;
-
-}
-
-/**
- * Allocate the memory of the vector on the dimension passed as an argument
- * @param dim the dimension to be allocated to the vector
- */
-template<class MatrixType>
-void Vector<MatrixType>::init(int n){
-
-   //set the flag to 1
-   flag = 1;
-
-   this->n = n;
-
-   vector = new double [n];
+   delete [] vector;
 
 }
 
@@ -328,27 +284,6 @@ template<class MatrixType>
 int Vector<MatrixType>::gn(){
 
    return n;
-
-}
-
-/**
- * @return the value of the flag
- */
-template<class MatrixType>
-int Vector<MatrixType>::gflag(){
-
-   return flag;
-
-}
-
-/**
- * set the value of the flag
- * @value set the flag equal to value, being 0 or 1
- */
-template<class MatrixType>
-void Vector<MatrixType>::sflag(int value){
-
-   flag = value;
 
 }
 

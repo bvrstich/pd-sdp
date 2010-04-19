@@ -152,8 +152,6 @@ class SUP{
 
       double U_norm();
 
-      void diagonalize(EIG &);
-
       double center_dev(SUP &Z);
 
       double line_search(SUP &DZ,SUP &S,SUP &Z,double max_dev);

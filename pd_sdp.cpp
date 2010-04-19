@@ -5,7 +5,7 @@
  * The method used is a path following algorithm with predictor corrector steps.
  * At compile time you can decide which condtions will be active compile with make PQ, PQG, PQGT1, PQGT2 or PQGT=(for all conditions).
  * @author Brecht Verstichel
- * @date 09-03-2010
+ * @date 16-04-2010
  */
 
 #include <iostream>
