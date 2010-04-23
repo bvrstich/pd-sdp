@@ -973,3 +973,26 @@ void TPM::sp_pairing(double pair_coupling){
    delete [] E;
 
 }
+
+void TPM::in_sp(const char *filename){
+
+   ifstream input(filename);
+
+   double value;
+
+   int a,b,c,d;
+
+   int i,j;
+
+   while(input >> a >> b >> c >> d >> value){
+
+      i = s2t[a][b];
+      j = s2t[c][d];
+
+      (*this)(i,j) = value;
+
+   }
+
+   this->symmetrize();
+
+}

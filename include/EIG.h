@@ -83,6 +83,8 @@ class EIG{
       //destructor
       ~EIG();
 
+      void diagonalize(SUP &);
+
       int gN();
 
       int gM();

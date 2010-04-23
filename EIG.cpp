@@ -243,6 +243,36 @@ int EIG::gn_tp(){
 }
 
 /** 
+ * Diagonalize a SUP matrix and put the eigenvalues in the EIG object (*this) when it has allready been
+ * allocated before
+ * @param sup the SUP matrix that has to be diagonalized
+ */
+void EIG::diagonalize(SUP &sup){
+
+   for(int i = 0;i < 2;++i)
+      v_tp[i]->diagonalize(sup.tpm(i));
+
+#ifdef __G_CON
+   
+      v_ph->diagonalize(sup.phm());
+
+#endif
+
+#ifdef __T1_CON
+   
+      v_dp->diagonalize(sup.dpm());
+
+#endif
+
+#ifdef __T2_CON
+   
+      v_pph->diagonalize(sup.pphm());
+
+#endif
+
+}
+
+/** 
  * get the Vector<TPM> object containing the eigenvalues of the TPM blocks P and Q
  * @param i == 0, the eigenvalues of the P block will be returned, i == 1, the eigenvalues of the Q block will be returned
  * @return a Vector<TPM> object containing the desired eigenvalues

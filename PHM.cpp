@@ -1,8 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cmath>
 
 using std::ostream;
+using std::ifstream;
 using std::endl;
 
 #include "include.h"
@@ -292,6 +294,21 @@ void PHM::bar(PPHM &pphm){
 
       }
    }
+
+   this->symmetrize();
+
+}
+
+void PHM::in_sp(const char *filename){
+
+   ifstream input(filename);
+
+   double value;
+
+   int a,b,c,d;
+
+   while(input >> a >> b >> c >> d >> value)
+      (*this)(a,b,c,d) = value;
 
    this->symmetrize();
 

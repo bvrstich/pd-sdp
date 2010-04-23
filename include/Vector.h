@@ -75,6 +75,8 @@ class Vector{
 
       double log_product();
 
+      void diagonalize(MatrixType &);
+
       double ddot(Vector<MatrixType> &);
 
       void dscal(double alpha);
@@ -314,6 +316,29 @@ double Vector<MatrixType>::log_product(){
       ward += log(vector[i]);
 
    return ward;
+
+}
+
+/**
+ * diagonalize a MatrixType object when the memory has allready been allocated, make sure the MT object has the same dimension as the Vector.
+ * @param MT the MatrixType object that will be diagonalized
+ */
+template<class MatrixType>
+void Vector<MatrixType>::diagonalize(MatrixType &MT){
+
+   //initialize
+   char jobz = 'V';
+   char uplo = 'U';
+
+   int lwork = 3*n - 1;
+
+   double *work = new double [lwork];
+
+   int info;
+
+   dsyev_(&jobz,&uplo,&n,(MT.gMatrix())[0],&n,vector,work,&lwork,&info);
+
+   delete [] work;
 
 }
 
