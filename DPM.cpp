@@ -1,8 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cmath>
 
 using std::ostream;
+using std::ifstream;
 using std::endl;
 
 #include "include.h"
@@ -455,5 +457,34 @@ void DPM::min_tunit(double scale){
 
    for(int i = 0;i < n;++i)
       (*this)(i,i) -= scale;
+
+}
+
+/**
+ * fill the DPM from a file with name filename, where the elements are indicated by their sp-indices
+ * @param filename Name of the inputfile
+ */
+void DPM::in_sp(const char *filename){
+
+   ifstream input(filename);
+
+   double value;
+
+   int a,b,c,d,e,z;
+
+   int i,j;
+
+   while(input >> a >> b >> c >> d >> e >> z >> value){
+
+      i = s2dp[a][b][c];
+      j = s2dp[d][e][z];
+
+      std::cout << i << "\t" << j << "\t" << value << endl;
+
+      (*this)(i,j) = value;
+
+   }
+
+   this->symmetrize();
 
 }

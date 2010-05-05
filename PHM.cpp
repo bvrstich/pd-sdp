@@ -299,6 +299,10 @@ void PHM::bar(PPHM &pphm){
 
 }
 
+/**
+ * fill the phm from a file with name filename, where the elements are indicated by their sp-indices
+ * @param filename name of the inputfile
+ */
 void PHM::in_sp(const char *filename){
 
    ifstream input(filename);

@@ -333,6 +333,10 @@ void PPHM::T(int option,TPM &tpm){
 
 }
 
+/**
+ * Deduct scale times the T2 of the unit matrix from (*this).
+ * @param scale The number by which to scale the unitmatrix.
+ */
 void PPHM::min_tunit(double scale){
 
    int i,j;
@@ -387,6 +391,9 @@ void PPHM::min_tunit(double scale){
 
 }
 
+/** 
+ * @return the skew trace, for PPHM matrices defined as sum_abc PPHM(a,b,a,c,b,c)
+ */
 double PPHM::skew_trace(){
 
    double ward = 0.0;

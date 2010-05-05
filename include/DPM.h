@@ -66,6 +66,9 @@ class DPM : public Matrix {
       //deduct scale times T1(1) matrix
       void min_tunit(double scale);
 
+      //input from file with sp indices
+      void in_sp(const char *);
+
    private:
 
       //!static counter that counts the number of DPM objects running in the program
