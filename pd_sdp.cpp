@@ -34,37 +34,8 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 4;//dim sp hilbert space
-   int N = 2;//nr of particles
-
-   TPM tpm(M,N);
-
-   tpm.in_sp("tpm.in");
-
-   PPHM pphm(M,N);
-
-   pphm.T(0,tpm);
-
-   PHM phm(M,N);
-
-   phm.bar(pphm);
-
-   //watch out, scaling for spm is not the usual!
-   SPM spm(M,N);
-
-   for(int a = 0;a < M;++a)
-      for(int b = 0;b < M;++b){
-
-         spm(a,b) = 0;
-
-         for(int c = 0;c < M;++c)
-            spm(a,b) += phm(c,a,c,b);
-
-         spm(a,b) *= 0.5/(N - 1.0);
-
-      }
-
-   cout << spm;
+   int M = 8;//dim sp hilbert space
+   int N = 4;//nr of particles
 
 /*
    //hamiltoniaan
