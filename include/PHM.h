@@ -7,6 +7,7 @@ using std::ostream;
 
 #include "Matrix.h"
 #include "TPM.h"
+#include "PPHM.h"
 
 /**
  * @author Brecht Verstichel
@@ -62,6 +63,10 @@ class PHM : public Matrix {
       double skew_trace();
 
       void min_gunit(double scale);
+
+      void bar(PPHM &);
+
+      void in_sp(const char *filename);
 
    private:
 

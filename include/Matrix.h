@@ -6,6 +6,8 @@
 
 using std::ostream;
 
+#include "Vector.h"
+
 /**
  * @author Brecht Verstichel
  * @date 18-02-2010\n\n
@@ -33,6 +35,9 @@ class Matrix{
 
       //copy constructor
       Matrix(Matrix &);
+
+      //construct with filename
+      Matrix(const char *filename);
 
       //destructor
       virtual ~Matrix();
@@ -67,8 +72,6 @@ class Matrix{
 
       double trace();
 
-      void diagonalize(double *eigenvalues);
-
       double ddot(Matrix &);
 
       void invert();
@@ -80,11 +83,13 @@ class Matrix{
       //positieve of negatieve vierkantswortel uit de matrix
       void sqrt(int option);
 
-      void mdiag(double *diag);
+      void mdiag(Vector<Matrix> &diag);
 
       void L_map(Matrix &,Matrix &);
 
       void symmetrize();
+
+      void out(const char*);
 
    private:
 

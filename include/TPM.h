@@ -12,6 +12,7 @@ class SPM;
 class SUP;
 class PHM;
 class DPM;
+class PPHM;
 
 /**
  * @author Brecht Verstichel
@@ -42,6 +43,9 @@ class TPM : public Matrix {
       //copy constructor
       TPM(TPM &);
 
+      //file constructor
+      TPM(const char *);
+
       //destructor
       virtual ~TPM();
 
@@ -61,7 +65,7 @@ class TPM : public Matrix {
       //geef n terug
       int gn();
 
-      void hubbard(double U);
+      void hubbard(int option,double U);
 
       //Q afbeelding en zijn inverse
       void Q(int option,TPM &);
@@ -85,15 +89,29 @@ class TPM : public Matrix {
       //de G down en inverse G up
       void G(int option,PHM &);
 
+      //trace one pair of indices of DPM
       void bar(DPM &);
 
+      //trace one pair of indices of PPHM
+      void bar(PPHM &);
+
+      //T1 down
       void T(int option,DPM &);
+
+      //T2 down
+      void T(PPHM &);
 
       void min_unit(double scale);
 
       void min_qunit(double scale);
 
       void collaps(int option,SUP &);
+
+      void out(const char *filename);
+
+      void sp_pairing(double );
+
+      void in_sp(const char *);
 
    private:
 

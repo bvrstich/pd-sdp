@@ -1,11 +1,11 @@
 /**
  * @mainpage 
  * This is an implementation of a primal dual interior point method
- * for optimizing the second order density matrix using the P Q and G N-representability conditions.
+ * for optimizing the second order density matrix using the P Q G T1 and T2 N-representability conditions.
  * The method used is a path following algorithm with predictor corrector steps.
- * When compiled with option PQ only the P and Q conditions will be used.
+ * At compile time you can decide which condtions will be active compile with make PQ, PQG, PQGT1, PQGT2 or PQGT=(for all conditions).
  * @author Brecht Verstichel
- * @date 18-02-2010
+ * @date 16-04-2010
  */
 
 #include <iostream>
@@ -14,6 +14,7 @@
 
 using std::cout;
 using std::endl;
+using std::ofstream;
 
 #include "include.h"
 
@@ -36,15 +37,16 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
+/*
    //hamiltoniaan
    TPM ham(M,N);
-   ham.hubbard(1.0);
+   ham.hubbard(0,1.0);
 
    SUP S(M,N);
    S.init_S();
 
    SUP Z(M,N);
-   Z.init_Z(20.0,ham,S);
+   Z.init_Z(100.0,ham,S);
 
    int dim = Z.gdim();
 
@@ -133,7 +135,6 @@ int main(void){
       cout << DZ.solve(B,D) << endl;
 
       //welke stapgrootte moet ik nemen?
-
       if(flag == 0 || flag == 2){//voor centering
 
          S += DS;
@@ -143,7 +144,7 @@ int main(void){
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,1.0);
+         a = DS.line_search(DZ,S,Z,5.0);
 
          S.daxpy(a,DS);
          Z.daxpy(a,DZ);
@@ -200,6 +201,9 @@ int main(void){
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
 
+   //print density matrix to file
+//   (S.tpm(0)).out("workspace/input/rdm.in");
+*/
    return 0;
 
 }

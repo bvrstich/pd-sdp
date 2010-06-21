@@ -1,8 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cmath>
 
 using std::ostream;
+using std::ifstream;
 using std::endl;
 
 #include "include.h"
@@ -122,7 +124,7 @@ DPM::DPM(DPM &dpm_c) : Matrix(dpm_c){
 }
 
 /**
- * destructor: if counter == 1 the memory for the static lists dp2s en s2dp twill be deleted.
+ * destructor: if counter == 1 the memory for the static lists dp2s en s2dp will be deleted.
  */
 DPM::~DPM(){
 
@@ -438,5 +440,51 @@ void DPM::hat(TPM &tpm){
    double c = 1.0/((M - 4.0)*(M - 3.0));
 
    this->T(a,b,c,tpm);
+
+}
+
+/**
+ * Deduct from (*this) the T1-map of the unit matrix times a constant (scale)\n\n
+ * this -= scale* T1(1) \n\n
+ * see notes primal_dual.pdf for more information.
+ * @param scale the constant
+ */
+void DPM::min_tunit(double scale){
+
+   double t = (M*(M - 1.0) - 3.0*N*(M - N))/(N*(N - 1.0));
+
+   scale *= t;
+
+   for(int i = 0;i < n;++i)
+      (*this)(i,i) -= scale;
+
+}
+
+/**
+ * fill the DPM from a file with name filename, where the elements are indicated by their sp-indices
+ * @param filename Name of the inputfile
+ */
+void DPM::in_sp(const char *filename){
+
+   ifstream input(filename);
+
+   double value;
+
+   int a,b,c,d,e,z;
+
+   int i,j;
+
+   while(input >> a >> b >> c >> d >> e >> z >> value){
+
+      i = s2dp[a][b][c];
+      j = s2dp[d][e][z];
+
+      std::cout << i << "\t" << j << "\t" << value << endl;
+
+      (*this)(i,j) = value;
+
+   }
+
+   this->symmetrize();
 
 }

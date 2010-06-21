@@ -1,8 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cmath>
 
 using std::ostream;
+using std::ifstream;
 using std::endl;
 
 #include "include.h"
@@ -18,7 +20,6 @@ int **PHM::s2ph;
  * @param M nr of sp orbitals
  * @param N nr of particles
  */
-
 PHM::PHM(int M,int N) : Matrix(M*M) {
    
    this->N = N;
@@ -265,5 +266,54 @@ void PHM::min_gunit(double scale){
 
    for(int i = 0;i < n;++i)
       (*this)(i,i) -= scale;
+
+}
+
+/**
+ * Map a PPHM (pphm) object onto a PHM (*this) object by tracing one pair of indices (see primal_dual.pdf for more info)
+ * @param pphm Input PPHM
+ */
+void PHM::bar(PPHM &pphm){
+
+   int a,b,c,d;
+
+   for(int i = 0;i < n;++i){
+
+      a = ph2s[i][0];
+      b = ph2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         c = ph2s[j][0];
+         d = ph2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l = 0;l < M;++l)
+            (*this)(i,j) += pphm(l,a,b,l,c,d);
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * fill the phm from a file with name filename, where the elements are indicated by their sp-indices
+ * @param filename name of the inputfile
+ */
+void PHM::in_sp(const char *filename){
+
+   ifstream input(filename);
+
+   double value;
+
+   int a,b,c,d;
+
+   while(input >> a >> b >> c >> d >> value)
+      (*this)(a,b,c,d) = value;
+
+   this->symmetrize();
 
 }
