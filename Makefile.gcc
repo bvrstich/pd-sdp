@@ -15,7 +15,8 @@ CPPSRC	= pd_sdp.cpp\
             PHM.cpp\
             SUP.cpp\
             EIG.cpp\
-	    DPM.cpp
+	    DPM.cpp\
+	    PPHM.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
@@ -94,20 +95,32 @@ PQGT1:
 	   echo; \
 	 fi
 
+PQGT:
+	@echo
+	@echo '  +++ Building $(BINNAME) with P, Q, G, T_1 and T_2 conditions'
+	@echo	
+	$(MAKE) $(BRIGHT_ROOT)/$(BINNAME) DEFS="-DPQGT"
+	@if test $?; then \
+	   echo; echo '*************** FAILED! ***************' ; echo; \
+	 else \
+	   echo; echo '  +++ $(BINNAME) has been built with P, Q, G, T_1 and T_2 conditions successfully!'; \
+	   echo; \
+	 fi
+
 # -----------------------------------------------------------------------------
 #   The default way to compile all source modules
 # -----------------------------------------------------------------------------
 %.o:	%.for Makefile
 	@echo; echo "Compiling $(@:.o=.for) ..."
-	$(FF) -c $(FFLAGS) $(SFLAGS) $(@:.o=.for) -o $@
+	$(FF) $(FFLAGS) $(SFLAGS) -c $(@:.o=.for) -o $@
 
 %.o:	%.c Makefile
 	@echo; echo "Compiling $(@:.o=.c) ..."
-	$(CC) -c $(CFLAGS) $(SFLAGS) $(@:.o=.c) -o $@
+	$(CC) $(CFLAGS) $(SFLAGS) -c $(@:.o=.c) -o $@
 
 %.o:	%.cpp Makefile
 	@echo; echo "Compiling $(@:.o=.cpp) ..."
-	$(CXX) -c $(CFLAGS) $(SFLAGS) $(DEFS) $(@:.o=.cpp) -o $@
+	$(CXX) $(CFLAGS) $(SFLAGS) $(DEFS) -c $(@:.o=.cpp) -o $@
 
 
 # -----------------------------------------------------------------------------
