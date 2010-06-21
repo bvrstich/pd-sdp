@@ -1160,3 +1160,5 @@ double SUP::line_search(SUP &DZ,SUP &S,SUP &Z,double max_dev){
    return c;
 
 }
+
+/* vim: set ts=3 sw=3 expandtab :*/

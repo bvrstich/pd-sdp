@@ -428,3 +428,5 @@ void Matrix::out(const char *filename){
          output << i << "\t" << j << "\t" << matrix[j][i] << endl;
 
 }
+
+/* vim: set ts=3 sw=3 expandtab :*/
