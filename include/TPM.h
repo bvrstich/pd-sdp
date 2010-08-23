@@ -13,6 +13,7 @@ class SUP;
 class PHM;
 class DPM;
 class PPHM;
+class T2PM;
 
 /**
  * @author Brecht Verstichel
@@ -112,6 +113,10 @@ class TPM : public Matrix {
       void sp_pairing(double );
 
       void in_sp(const char *);
+
+      void bar(T2PM &);
+
+      void T(T2PM &);
 
    private:
 

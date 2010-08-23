@@ -6,47 +6,7 @@
 
 using std::ostream;
 
-#include "Vector.h"
-#include "SUP.h"
-
-//definitions:
-#ifdef PQ
-
-#define __Q_CON
-
-#endif
-
-#ifdef PQG
-
-#define __Q_CON
-#define __G_CON
-
-#endif
-
-#ifdef PQGT1
-
-#define __Q_CON
-#define __G_CON
-#define __T1_CON
-
-#endif
-
-#ifdef PQGT2
-
-#define __Q_CON
-#define __G_CON
-#define __T1_CON
-
-#endif
-
-#ifdef PQGT
-
-#define __Q_CON
-#define __G_CON
-#define __T1_CON
-#define __T2_CON
-
-#endif
+#include "include.h"
 
 /**
  * @author Brecht Verstichel
@@ -124,6 +84,14 @@ class EIG{
 
 #endif
 
+#ifdef __T2P_CON
+
+      int gn_t2p();
+
+      Vector<T2PM> &t2pv();
+
+#endif
+
       double min();
 
       double max();
@@ -168,10 +136,19 @@ class EIG{
 
 #ifdef __T2_CON
 
-      //!pointer to a Vector<PPHM> object that will contain the eigenvalues of the T1 part of a SUP matrix
+      //!pointer to a Vector<PPHM> object that will contain the eigenvalues of the T2 part of a SUP matrix
       Vector<PPHM> *v_pph;
 
       int n_pph;
+
+#endif
+
+#ifdef __T2P_CON
+
+      //!pointer to a Vector<T2PM> object that will contain the eigenvalues of the T2P part of a SUP matrix
+      Vector<T2PM> *v_t2p;
+
+      int n_t2p;
 
 #endif
 

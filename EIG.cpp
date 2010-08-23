@@ -68,6 +68,16 @@ EIG::EIG(SUP &SZ){
  
 #endif
 
+#ifdef __T2P_CON
+
+   this->n_t2p = M*M*(M - 1)/2+M;
+
+   dim += n_t2p;
+
+   v_t2p = new Vector<T2PM>(SZ.t2pm());
+
+#endif
+
 }
 
 /**
@@ -121,6 +131,15 @@ EIG::EIG(EIG &eig_c){
 
 #endif
 
+#ifdef __T2P_CON
+
+   this->n_t2p = M*M*(M - 1)/2+M;
+
+   dim += n_t2p;
+
+   v_t2p = new Vector<T2PM>(eig_c.t2pv());
+
+#endif
 }
 
 /**
@@ -147,6 +166,12 @@ EIG &EIG::operator=(EIG &eig_c){
 #ifdef __T2_CON
 
    *v_pph = *eig_c.v_pph;
+
+#endif
+
+#ifdef __T2P_CON
+
+   *v_t2p = *eig_c.v_t2p;
 
 #endif
 
@@ -211,6 +236,12 @@ ostream &operator<<(ostream &output,EIG &eig_p){
 
 #endif
 
+#ifdef __T2P_CON
+
+   std::cout << eig_p.t2pv() << std::endl;
+
+#endif
+
    return output;
 
 }
@@ -267,6 +298,12 @@ void EIG::diagonalize(SUP &sup){
 #ifdef __T2_CON
    
       v_pph->diagonalize(sup.pphm());
+
+#endif
+
+#ifdef __T2P_CON
+
+      v_t2p->diagonalize(sup.t2pm());
 
 #endif
 
@@ -353,6 +390,29 @@ Vector<PPHM> &EIG::pphv(){
 
 #endif
 
+#ifdef __T2P_CON
+
+/**
+ * @return dimension of t2p space
+ */
+int EIG::gn_t2p(){
+
+   return n_t2p;
+
+}
+
+/** 
+ * get the Vector<T2PM> object containing the eigenvalues of the T2PM block T2P
+ * @return a Vector<T2PM> object containing the desired eigenvalues
+ */
+Vector<T2PM> &EIG::t2pv(){
+
+   return *v_t2p;
+
+}
+
+#endif
+
 /**
  * @return total dimension of the EIG object
  */
@@ -400,6 +460,14 @@ double EIG::min(){
 
 #endif
 
+#ifdef __T2P_CON
+
+   //lowest eigenvalue of T2P block
+   if(ward > v_t2p->min())
+      ward = v_t2p->min();
+
+#endif
+
    return ward;
 
 }
@@ -441,6 +509,14 @@ double EIG::max(){
 
 #endif
 
+#ifdef __T2P_CON
+
+   //highest eigenvalue of T2 block
+   if(ward < v_t2p->max())
+      ward = v_t2p->max();
+
+#endif
+
    return ward;
 
 }
@@ -479,6 +555,14 @@ double EIG::center_dev(){
 
 #endif
 
+#ifdef __T2P_CON
+
+   sum += v_t2p->sum();
+
+   log_product += v_t2p->log_product();
+
+#endif
+
    return dim*log(sum/(double)dim) - log_product;
 
 }
@@ -514,6 +598,12 @@ double EIG::centerpot(double alpha,EIG &eigen_Z,double c_S,double c_Z){
 #ifdef __T2_CON
 
    ward -= v_pph->centerpot(alpha) + (eigen_Z.pphv()).centerpot(alpha);
+
+#endif
+
+#ifdef __T2P_CON
+
+   ward -= v_t2p->centerpot(alpha) + (eigen_Z.t2pv()).centerpot(alpha);
 
 #endif
 

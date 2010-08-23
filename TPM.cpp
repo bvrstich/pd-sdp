@@ -511,6 +511,21 @@ void TPM::H(TPM &b,SUP &D){
 
 #endif
 
+#ifdef __T2P_CON
+
+   T2PM T2pb(M,N);
+   T2pb.T(b);
+
+   T2PM hulp_T2P(M,N);
+
+   hulp_T2P.L_map(D.t2pm(),T2pb);
+
+   hulp.T(hulp_T2P);
+
+   *this += hulp;
+
+#endif
+
    this->proj_Tr();
 
 }
@@ -659,6 +674,14 @@ void TPM::S(int option,TPM &tpm_d){
    a += 5.0*M - 8.0;
    b += 2.0/(N - 1.0);
    c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
+
+#endif
+
+#ifdef __T2P_CON
+
+   a += 5.0*M - 4.0;
+   b += 2.0/(N - 1.0);
+   c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M - 2.0)/(2.0*(N - 1.0)*(N - 1.0));
 
 #endif
 
@@ -890,6 +913,14 @@ void TPM::collaps(int option,SUP &S){
 
 #endif
 
+#ifdef __T2P_CON
+
+   hulp.T(S.t2pm());
+
+   *this += hulp;
+
+#endif
+
    if(option == 1)
       this->proj_Tr();
 
@@ -995,6 +1026,105 @@ void TPM::in_sp(const char *filename){
 
    this->symmetrize();
 
+}
+
+void TPM::bar(T2PM &t2pm)
+{
+   int a,b,c,d;
+
+   for(int i=0;i<n;i++)
+   {
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j=i;j<n;j++)
+      {
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l=0;l<M;l++)
+            (*this)(i,j) += t2pm(a,b,l,c,d,l);
+
+         (*this)(j,i) = (*this)(i,j);
+      }
+   }
+}
+
+void TPM::T(T2PM &t2pm)
+{
+   int a,b,c,d;
+   int n_pph = M*M*(M-1)/2;
+
+   double brecht = 1.0/(2*(N-1));
+   double matthias = 2*brecht;
+
+   // A bar
+   TPM tpm(M,N);
+   tpm.bar(t2pm);
+
+   // A dubble bar
+   SPM spm(M,N);
+   spm.bar(t2pm);
+
+   // A tilde bar
+   PHM phm(M,N);
+   phm.bar(t2pm);
+
+   for(int i=0;i<n;i++)
+   {
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j=i;j<n;j++)
+      {
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         (*this)(i,j) = 0;
+
+         // T2 part
+         if(b==d)
+            (*this)(i,j) += spm(a,c);
+
+         if(a==d)
+            (*this)(i,j) -= spm(b,c);
+
+         if(b==c)
+            (*this)(i,j) -= spm(a,d);
+
+         if(a==c)
+            (*this)(i,j) += spm(b,d);
+
+         (*this)(i,j) *= brecht;
+
+         (*this)(i,j) += tpm(i,j);
+
+         (*this)(i,j) -= phm(d,a,b,c)-phm(d,b,a,c)-phm(c,a,b,d)+phm(c,b,a,d);
+
+
+         // rho part
+         if( b == d )
+            (*this)(i,j) += matthias*t2pm(n_pph+c,n_pph+a);
+
+         if( a == d )
+            (*this)(i,j) -= matthias*t2pm(n_pph+c,n_pph+b);
+
+         if( b == c )
+            (*this)(i,j) -= matthias*t2pm(n_pph+d,n_pph+a);
+
+         if( a == c )
+            (*this)(i,j) += matthias*t2pm(n_pph+d,n_pph+b);
+
+
+         // up diagonal part
+         (*this)(i,j) += t2pm(a,b,d,c)+t2pm(d,c,a,b);
+         (*this)(i,j) -= t2pm(a,b,c,d)+t2pm(d,c,b,a);
+
+         (*this)(j,i) = (*this)(i,j);
+      }
+   }
 }
 
 /* vim: set ts=3 sw=3 expandtab :*/

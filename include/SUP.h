@@ -6,49 +6,7 @@
 
 using std::ostream;
 
-#include "TPM.h"
-#include "PHM.h"
-#include "DPM.h"
-#include "PPHM.h"
-
-//definitions:
-#ifdef PQ
-
-#define __Q_CON
-
-#endif
-
-#ifdef PQG
-
-#define __Q_CON
-#define __G_CON
-
-#endif
-
-#ifdef PQGT1
-
-#define __Q_CON
-#define __G_CON
-#define __T1_CON
-
-#endif
-
-#ifdef PQGT2
-
-#define __Q_CON
-#define __G_CON
-#define __T2_CON
-
-#endif
-
-#ifdef PQGT
-
-#define __Q_CON
-#define __G_CON
-#define __T1_CON
-#define __T2_CON
-
-#endif
+#include "include.h"
 
 class EIG;
 
@@ -182,6 +140,14 @@ class SUP{
 
 #endif
 
+#ifdef __T2P_CON
+
+      T2PM &t2pm();
+
+      int gn_t2p();
+
+#endif
+
    private:
 
       //!double pointer of TPM's, will contain the P and Q block of the SUP in the first and second block.
@@ -228,6 +194,17 @@ class SUP{
       int n_pph;
 
 #endif
+
+#ifdef __T2P_CON
+
+      //!pointer tot he three particles matrix DPM
+      T2PM *SZ_t2p;
+
+      //!dimension of three particle space
+      int n_t2p;
+
+#endif
+
 
 };
 

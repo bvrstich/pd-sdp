@@ -55,6 +55,16 @@ SUP::SUP(int M,int N){
 
 #endif
 
+#ifdef __T2P_CON
+
+   this->n_t2p = M*M*(M - 1)/2+M;
+
+   SZ_t2p = new T2PM(M,N);
+
+   dim += n_t2p;
+
+#endif
+
 }
 
 /**
@@ -114,6 +124,18 @@ SUP::SUP(SUP &SZ_c){
 
 #endif
 
+#ifdef __T2P_CON
+
+   this->n_t2p = M*M*(M - 1)/2+M;
+
+   SZ_t2p = new T2PM(M,N);
+
+   dim += n_t2p;
+
+   *SZ_t2p = *SZ_c.SZ_t2p;
+
+#endif
+
 }
 
 /**
@@ -144,6 +166,12 @@ SUP::~SUP(){
 
 #endif
 
+#ifdef __T2P_CON
+
+   delete SZ_t2p;
+
+#endif
+
 }
 
 /**
@@ -170,6 +198,12 @@ SUP &SUP::operator+=(SUP &SZ_pl){
 #ifdef __T2_CON
 
    (*SZ_pph) += (*SZ_pl.SZ_pph);
+
+#endif
+
+#ifdef __T2P_CON
+
+   (*SZ_t2p) += (*SZ_pl.SZ_t2p);
 
 #endif
 
@@ -204,6 +238,12 @@ SUP &SUP::operator-=(SUP &SZ_pl){
 
 #endif
 
+#ifdef __T2P_CON
+
+   (*SZ_t2p) -= (*SZ_pl.SZ_t2p);
+
+#endif
+
    return *this;
 
 }
@@ -232,6 +272,12 @@ SUP &SUP::operator=(SUP &SZ_c){
 #ifdef __T2_CON
 
    (*SZ_pph) = (*SZ_c.SZ_pph);
+
+#endif
+
+#ifdef __T2P_CON
+
+   (*SZ_t2p) = (*SZ_c.SZ_t2p);
 
 #endif
 
@@ -264,6 +310,12 @@ SUP &SUP::operator=(double &a){
 #ifdef __T2_CON
 
    (*SZ_pph) = a;
+
+#endif
+
+#ifdef __T2P_CON
+
+   (*SZ_t2p) = a;
 
 #endif
 
@@ -320,6 +372,19 @@ PPHM &SUP::pphm(){
 
 #endif
 
+#ifdef __T2P_CON
+
+/**
+ * @return pointer to the T2PM block: SZ_t2p
+ */
+T2PM &SUP::t2pm(){
+
+   return *SZ_t2p;
+
+}
+
+#endif
+
 /**
  * Initialization of the SUP matrix S, is just u^0: see primal_dual.pdf for more information
  */
@@ -357,6 +422,13 @@ ostream &operator<<(ostream &output,SUP &SZ_p){
 
 #endif
 
+#ifdef __T2P_CON
+
+   output << std::endl;
+   output << (*SZ_p.SZ_t2p);
+
+#endif
+
    return output;
 
 }
@@ -384,6 +456,12 @@ void SUP::fill_Random(){
 #ifdef __T2_CON
 
    SZ_pph->fill_Random();
+
+#endif
+
+#ifdef __T2P_CON
+
+   SZ_t2p->fill_Random();
 
 #endif
 
@@ -469,6 +547,19 @@ int SUP::gn_pph(){
 
 #endif
 
+#ifdef __T2P_CON
+
+/**
+ * @return dimension of t2p space
+ */
+int SUP::gn_t2p(){
+
+   return n_t2p;
+
+}
+
+#endif
+
 /**
  * @return total dimension of SUP (carrier) space
  */
@@ -507,6 +598,12 @@ double SUP::ddot(SUP &SZ_i){
 
 #endif
 
+#ifdef __T2P_CON
+
+   ward += SZ_t2p->ddot(*SZ_i.SZ_t2p);
+
+#endif
+
    return ward;
 
 }
@@ -538,6 +635,12 @@ void SUP::invert(){
 
 #endif
 
+#ifdef __T2P_CON
+   
+   SZ_t2p->invert();
+
+#endif
+
 }
 
 /**
@@ -564,6 +667,12 @@ void SUP::dscal(double alpha){
 #ifdef __T2_CON
    
    SZ_pph->dscal(alpha);
+
+#endif
+
+#ifdef __T2P_CON
+   
+   SZ_t2p->dscal(alpha);
 
 #endif
 
@@ -678,6 +787,12 @@ void SUP::sqrt(int option){
 
 #endif
 
+#ifdef __T2P_CON
+
+   SZ_t2p->sqrt(option);
+
+#endif
+
 }
 
 /**
@@ -706,6 +821,12 @@ void SUP::L_map(SUP &map,SUP &object){
 #ifdef __T2_CON
 
    SZ_pph->L_map(map.pphm(),object.pphm());
+
+#endif
+
+#ifdef __T2P_CON
+
+   SZ_t2p->L_map(map.t2pm(),object.t2pm());
 
 #endif
 
@@ -739,6 +860,12 @@ void SUP::daxpy(double alpha,SUP &SZ_p){
 
 #endif
 
+#ifdef __T2P_CON
+
+   SZ_t2p->daxpy(alpha,SZ_p.t2pm());
+
+#endif
+
 }
 
 /**
@@ -766,6 +893,12 @@ double SUP::trace(){
 #ifdef __T2_CON
    
    ward += SZ_pph->trace();
+
+#endif
+
+#ifdef __T2P_CON
+
+   ward += SZ_t2p->trace();
 
 #endif
 
@@ -819,6 +952,12 @@ SUP &SUP::mprod(SUP &A,SUP &B){
 
 #endif
 
+#ifdef __T2P_CON
+
+   SZ_t2p->mprod(A.t2pm(),B.t2pm());
+
+#endif
+
    return *this;
 
 }
@@ -850,6 +989,12 @@ void SUP::fill(TPM &tpm){
 
 #endif
 
+#ifdef __T2P_CON
+
+   SZ_t2p->T(tpm);
+
+#endif
+
 }
 
 /**
@@ -875,6 +1020,12 @@ void SUP::fill(){
 #ifdef __T2_CON
 
    SZ_pph->T(0,*SZ_tp[0]);
+
+#endif 
+
+#ifdef __T2P_CON
+
+   SZ_t2p->T(*SZ_tp[0]);
 
 #endif 
 
@@ -981,6 +1132,15 @@ double SUP::U_norm(){
 
 #endif
 
+#ifdef __T2P_CON
+
+   double t2p = (M - N)/(N - 1.0);
+
+   norm += t2p* t2p * (M - 1.0)* M*M /2.0 + 2.0 * t2p * (M - 1.0)*M + M*(M - 1.0)*(M - 1.0);
+   norm += 2*(M*M-M) + M*(M-1.0)/(N-1.0)*(M-1.0)/(N-1.0);
+
+#endif
+
    return norm;
 
 }
@@ -1014,6 +1174,13 @@ void SUP::proj_U_Tr(){
 
    //dan deze factor aftrekken met u^0
    SZ_pph->min_tunit(ward);
+
+#endif
+
+#ifdef __T2P_CON
+
+   //dan deze factor aftrekken met u^0
+   SZ_t2p->min_tunit(ward);
 
 #endif
 
@@ -1056,6 +1223,14 @@ double SUP::U_trace(){
    double t2 = (M - N)/(N - 1.0);
 
    ward += t2*SZ_pph->trace() + SZ_pph->skew_trace();
+
+#endif
+
+#ifdef __T2P_CON
+
+   double t2p = (M - N)/(N - 1.0);
+
+   ward += t2p*SZ_t2p->T2_trace() + SZ_t2p->skew_trace() + (M-1.0)/(N-1.0) * SZ_t2p->rho_trace() + 2 * SZ_t2p->omega_trace();
 
 #endif
 

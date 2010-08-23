@@ -3,9 +3,9 @@
  * This is an implementation of a primal dual interior point method
  * for optimizing the second order density matrix using the P Q G T1 and T2 N-representability conditions.
  * The method used is a path following algorithm with predictor corrector steps.
- * At compile time you can decide which condtions will be active compile with make PQ, PQG, PQGT1, PQGT2 or PQGT=(for all conditions).
- * @author Brecht Verstichel
- * @date 16-04-2010
+ * At compile time you can decide which condtions will be active compile with make PQ, PQG, PQGT1, PQGT2, PQGT (T1 and T2), PQGT2P and PQGTP (T1 and T2P).
+ * @author Brecht Verstichel, Ward Poelmans
+ * @date 16-08-2010
  */
 
 #include <iostream>

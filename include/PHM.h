@@ -68,6 +68,8 @@ class PHM : public Matrix {
 
       void in_sp(const char *filename);
 
+      void bar(T2PM &);
+
    private:
 
       //!static counter that counts the number of PHM objects running in the program

@@ -64,4 +64,19 @@ ostream &operator<<(ostream &output,SPM &spm_p){
 
 }
 
+template<> void SPM::bar(T2PM &MT)
+{
+   for(int a = 0;a < M;a++)
+      for(int b = a;b < M;b++)
+      {
+         (*this)(a,b) = 0.0;
+
+         for(int l=0;l<M;l++)
+            for(int k=0;k<M;k++)
+               (*this)(a,b) += MT(l,k,a,l,k,b);
+
+         (*this)(b,a) = (*this)(a,b);
+      }
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/
