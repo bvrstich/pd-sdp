@@ -16,7 +16,8 @@ CPPSRC	= pd_sdp.cpp\
             DPM.cpp\
             PPHM.cpp\
             SUP.cpp\
-            EIG.cpp
+            EIG.cpp\
+	    T2PM.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
@@ -105,6 +106,30 @@ PQGT:
 	   echo; echo '*************** FAILED! ***************' ; echo; \
 	 else \
 	   echo; echo '  +++ $(BINNAME) has been built with P, Q, G, T_1 and T_2 conditions successfully!'; \
+	   echo; \
+	 fi
+
+PQGT2P:
+	@echo
+	@echo '  +++ Building $(BINNAME) with P, Q, G and T_2'\'' conditions'
+	@echo	
+	$(MAKE) $(BRIGHT_ROOT)/$(BINNAME) DEFS="-DPQGT2P"
+	@if test $?; then \
+	   echo; echo '*************** FAILED! ***************' ; echo; \
+	 else \
+	   echo; echo '  +++ $(BINNAME) has been built with P, Q, G and T_2'\'' conditions successfully!'; \
+	   echo; \
+	 fi
+
+PQGTP:
+	@echo
+	@echo '  +++ Building $(BINNAME) with P, Q, G, T_1 and T_2'\'' conditions'
+	@echo	
+	$(MAKE) $(BRIGHT_ROOT)/$(BINNAME) DEFS="-DPQGTP"
+	@if test $?; then \
+	   echo; echo '*************** FAILED! ***************' ; echo; \
+	 else \
+	   echo; echo '  +++ $(BINNAME) has been built with P, Q, G, T_1 and T_2'\'' conditions successfully!'; \
 	   echo; \
 	 fi
 
