@@ -34,7 +34,7 @@ class Matrix{
       Matrix(int n);
 
       //copy constructor
-      Matrix(Matrix &);
+      Matrix(const Matrix &);
 
       //construct with filename
       Matrix(const char *filename);
@@ -43,21 +43,21 @@ class Matrix{
       virtual ~Matrix();
 
       //overload equality operator
-      Matrix &operator=(Matrix &);
+      Matrix &operator=(const Matrix &);
 
-      Matrix &operator=(double );
+      Matrix &operator=(double);
 
       //overload += operator
-      Matrix &operator+=(Matrix &);
+      Matrix &operator+=(const Matrix &);
 
       //overload -= operator
-      Matrix &operator-=(Matrix &);
+      Matrix &operator-=(const Matrix &);
 
-      Matrix &daxpy(double alpha,Matrix &);
+      Matrix &daxpy(double alpha,const Matrix &);
 
       Matrix &operator/=(double );
 
-      Matrix &mprod(Matrix &,Matrix &);
+      Matrix &mprod(const Matrix &,const Matrix &);
 
       //easy to change the numbers
       double &operator()(int i,int j);
@@ -66,13 +66,13 @@ class Matrix{
       double operator()(int i,int j) const;
 
       //get the pointer to the matrix
-      double **gMatrix();
+      double **gMatrix() const;
 
-      int gn();
+      int gn() const;
 
-      double trace();
+      double trace() const;
 
-      double ddot(Matrix &);
+      double ddot(const Matrix &) const;
 
       void invert();
 
@@ -87,11 +87,11 @@ class Matrix{
 
       void mdiag(Vector<Matrix> &diag);
 
-      void L_map(Matrix &,Matrix &);
+      void L_map(const Matrix &,const Matrix &);
 
       void symmetrize();
 
-      void out(const char*);
+      void out(const char*) const;
 
    private:
 

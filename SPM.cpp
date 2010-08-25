@@ -22,7 +22,7 @@ SPM::SPM(int M,int N) : Matrix(M) {
  * copy constructor
  * @param spm_copy content of this matrix will be copied into the constructed matrix
  */
-SPM::SPM(SPM &spm_copy) : Matrix(spm_copy) {
+SPM::SPM(const SPM &spm_copy) : Matrix(spm_copy) {
 
    this->M = spm_copy.gM();
    this->N = spm_copy.gN();
@@ -39,19 +39,17 @@ SPM::~SPM(){
 /**
  * @return nr of particles
  */
-int SPM::gN(){
-
+int SPM::gN() const
+{
    return N;
-
 }
 
 /**
  * @return dimension of sp space and of matrix
  */
-int SPM::gM(){
-
+int SPM::gM() const
+{
    return M;
-
 }
 
 ostream &operator<<(ostream &output,SPM &spm_p){
@@ -64,7 +62,7 @@ ostream &operator<<(ostream &output,SPM &spm_p){
 
 }
 
-template<> void SPM::bar(T2PM &MT)
+template<> void SPM::bar(const T2PM &MT)
 {
    for(int a = 0;a < M;a++)
       for(int b = a;b < M;b++)

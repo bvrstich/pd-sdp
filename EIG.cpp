@@ -21,8 +21,8 @@ EIG::EIG(){
  * @param SZ input SUP object that will be destroyed after this function is called. The eigenvectors
  * of the matrix will be stored in the columns of the original SUP matrix.
  */
-EIG::EIG(SUP &SZ){
-
+EIG::EIG(const SUP &SZ)
+{
    //first allocate the memory
    this->N = SZ.gN();
    this->M = SZ.gM();
@@ -85,8 +85,8 @@ EIG::EIG(SUP &SZ){
  * allocates the memory for the eigenvalues of a SUP object and copies the content of eig_c into it.
  * @param eig_c The input EIG that will be copied into this.
  */
-EIG::EIG(EIG &eig_c){
-
+EIG::EIG(const EIG &eig_c)
+{
    flag = 1;
 
    this->N = eig_c.N;
@@ -146,8 +146,8 @@ EIG::EIG(EIG &eig_c){
  * overload equality operator
  * @param eig_c object that will be copied into this.
  */
-EIG &EIG::operator=(EIG &eig_c){
-
+EIG &EIG::operator=(const EIG &eig_c)
+{
    for(int i = 0;i < 2;++i)
       *v_tp[i] = *eig_c.v_tp[i];
 
@@ -249,28 +249,25 @@ ostream &operator<<(ostream &output,EIG &eig_p){
 /**
  * @return nr of particles
  */
-int EIG::gN(){
-
+int EIG::gN() const
+{
    return N;
-
 }
 
 /**
  * @return dimension of sp space
  */
-int EIG::gM(){
-
+int EIG::gM() const
+{
    return M;
-
 }
 
 /**
  * @return dimension of tp space
  */
-int EIG::gn_tp(){
-
+int EIG::gn_tp() const
+{
    return n_tp;
-
 }
 
 /** 
@@ -278,8 +275,8 @@ int EIG::gn_tp(){
  * allocated before
  * @param sup the SUP matrix that has to be diagonalized
  */
-void EIG::diagonalize(SUP &sup){
-
+void EIG::diagonalize(const SUP &sup)
+{
    for(int i = 0;i < 2;++i)
       v_tp[i]->diagonalize(sup.tpm(i));
 
@@ -314,10 +311,9 @@ void EIG::diagonalize(SUP &sup){
  * @param i == 0, the eigenvalues of the P block will be returned, i == 1, the eigenvalues of the Q block will be returned
  * @return a Vector<TPM> object containing the desired eigenvalues
  */
-Vector<TPM> &EIG::tpv(int i){
-
+Vector<TPM> &EIG::tpv(int i) const
+{
    return *v_tp[i];
-
 }
 
 
@@ -326,20 +322,18 @@ Vector<TPM> &EIG::tpv(int i){
 /**
  * @return dimension of ph space
  */
-int EIG::gn_ph(){
-
+int EIG::gn_ph() const
+{
    return n_ph;
-
 }
 
 /** 
  * get the Vector<PHM> object containing the eigenvalues of the PHM block G
  * @return a Vector<PHM> object containing the desired eigenvalues
  */
-Vector<PHM> &EIG::phv(){
-
+Vector<PHM> &EIG::phv() const
+{
    return *v_ph;
-
 }
 
 #endif
@@ -349,20 +343,18 @@ Vector<PHM> &EIG::phv(){
 /**
  * @return dimension of dp space
  */
-int EIG::gn_dp(){
-
+int EIG::gn_dp() const
+{
    return n_dp;
-
 }
 
 /** 
  * get the Vector<DPM> object containing the eigenvalues of the DPM block T1
  * @return a Vector<DPM> object containing the desired eigenvalues
  */
-Vector<DPM> &EIG::dpv(){
-
+Vector<DPM> &EIG::dpv() const
+{
    return *v_dp;
-
 }
 
 #endif
@@ -372,20 +364,18 @@ Vector<DPM> &EIG::dpv(){
 /**
  * @return dimension of pph space
  */
-int EIG::gn_pph(){
-
+int EIG::gn_pph() const
+{
    return n_pph;
-
 }
 
 /** 
  * get the Vector<PPHM> object containing the eigenvalues of the PPHM block T2
  * @return a Vector<PPHM> object containing the desired eigenvalues
  */
-Vector<PPHM> &EIG::pphv(){
-
+Vector<PPHM> &EIG::pphv() const
+{
    return *v_pph;
-
 }
 
 #endif
@@ -395,20 +385,18 @@ Vector<PPHM> &EIG::pphv(){
 /**
  * @return dimension of t2p space
  */
-int EIG::gn_t2p(){
-
+int EIG::gn_t2p() const
+{
    return n_t2p;
-
 }
 
 /** 
  * get the Vector<T2PM> object containing the eigenvalues of the T2PM block T2P
  * @return a Vector<T2PM> object containing the desired eigenvalues
  */
-Vector<T2PM> &EIG::t2pv(){
-
+Vector<T2PM> &EIG::t2pv() const
+{
    return *v_t2p;
-
 }
 
 #endif
@@ -416,10 +404,9 @@ Vector<T2PM> &EIG::t2pv(){
 /**
  * @return total dimension of the EIG object
  */
-int EIG::gdim(){
-
+int EIG::gdim() const
+{
    return dim;
-
 }
 
 
@@ -427,8 +414,8 @@ int EIG::gdim(){
  * @return the minimal element present in this EIG object.
  * watch out, only works when EIG is filled with the eigenvalues of a diagonalized SUP matrix
  */
-double EIG::min(){
-
+double EIG::min() const
+{
    //lowest eigenvalue of P block
    double ward = v_tp[0]->min();
 
@@ -476,8 +463,8 @@ double EIG::min(){
  * @return the maximum element present in this EIG object.
  * watch out, only works when EIG is filled with the eigenvalues of a diagonalized SUP matrix
  */
-double EIG::max(){
-
+double EIG::max() const
+{
    //highest eigenvalue of P block
    double ward = v_tp[0]->max();
 
@@ -525,8 +512,8 @@ double EIG::max(){
  * @return The deviation of the central path as calculated with the logarithmic barrierfunction, the EIG object is calculated
  * in SUP::center_dev.
  */
-double EIG::center_dev(){
-
+double EIG::center_dev() const
+{
    double sum = v_tp[0]->sum() + v_tp[1]->sum();
 
    double log_product = v_tp[0]->log_product() + v_tp[1]->log_product();
@@ -576,8 +563,8 @@ double EIG::center_dev(){
  * @param c_S = Tr (DS Z)/Tr (SZ): parameter calculated in SUP::line_search
  * @param c_Z = Tr (S DZ)/Tr (SZ): parameter calculated in SUP::line_search
  */
-double EIG::centerpot(double alpha,EIG &eigen_Z,double c_S,double c_Z){
-
+double EIG::centerpot(double alpha,const EIG &eigen_Z,double c_S,double c_Z) const
+{
    double ward = dim*log(1.0 + alpha*(c_S + c_Z));
 
    for(int i = 0;i < 2;++i)

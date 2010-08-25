@@ -35,68 +35,68 @@ class EIG{
       EIG();
    
       //constructor met initialisatie op 
-      EIG(SUP &);
+      EIG(const SUP &);
       
       //copy constructor
-      EIG(EIG &);
+      EIG(const EIG &);
 
       //destructor
       ~EIG();
 
-      void diagonalize(SUP &);
+      void diagonalize(const SUP &);
 
-      int gN();
+      int gN() const;
 
-      int gM();
+      int gM() const;
 
-      int gn_tp();
+      int gn_tp() const;
 
-      int gdim();
+      int gdim() const;
 
-      double centerpot(double,EIG &,double,double);
+      double centerpot(double,const EIG &,double,double) const;
 
       //overload equality operator
-      EIG &operator=(EIG &);
+      EIG &operator=(const EIG &);
 
-      Vector<TPM> &tpv(int);
+      Vector<TPM> &tpv(int) const;
 
 #ifdef __G_CON
 
-      int gn_ph();
+      int gn_ph() const;
 
-      Vector<PHM> &phv();
+      Vector<PHM> &phv() const;
 
 #endif
 
 #ifdef __T1_CON
 
-      int gn_dp();
+      int gn_dp() const;
 
-      Vector<DPM> &dpv();
+      Vector<DPM> &dpv() const;
 
 #endif
 
 #ifdef __T2_CON
 
-      int gn_pph();
+      int gn_pph() const;
 
-      Vector<PPHM> &pphv();
+      Vector<PPHM> &pphv() const;
 
 #endif
 
 #ifdef __T2P_CON
 
-      int gn_t2p();
+      int gn_t2p() const;
 
-      Vector<T2PM> &t2pv();
+      Vector<T2PM> &t2pv() const;
 
 #endif
 
-      double min();
+      double min() const;
 
-      double max();
+      double max() const;
 
-      double center_dev();
+      double center_dev() const;
 
    private:
 

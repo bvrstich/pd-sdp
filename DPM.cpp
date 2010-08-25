@@ -74,8 +74,8 @@ DPM::DPM(int M,int N) : Matrix(M*(M - 1)*(M - 2)/6) {
  * if counter == 0, allocates and constructs the lists containing the relationship between sp and dp basis.
  * @param dpm_c input DPM to be copied
  */
-DPM::DPM(DPM &dpm_c) : Matrix(dpm_c){
-
+DPM::DPM(const DPM &dpm_c) : Matrix(dpm_c)
+{
    this->N = dpm_c.N;
    this->M = dpm_c.M;
    this->n = M*(M - 1)*(M - 2)/6;
@@ -270,28 +270,25 @@ ostream &operator<<(ostream &output,DPM &dpm_p){
 /**
  * @return nr of particles
  */
-int DPM::gN(){
-
+int DPM::gN() const
+{
    return N;
-
 }
 
 /**
  * @return dimension of sp space
  */
-int DPM::gM(){
-
+int DPM::gM() const
+{
    return M;
-
 }
 
 /**
  * @return dimension of dp space and of Matrix
  */
-int DPM::gn(){
-
+int DPM::gn() const
+{
    return n;
-
 }
 
 /**
@@ -301,8 +298,8 @@ int DPM::gn(){
  * @param C term before the sp part of the map
  * @param tpm input TPM
  */
-void DPM::T(double A,double B,double C,TPM &tpm){
-
+void DPM::T(double A,double B,double C,const TPM &tpm)
+{
    SPM spm(C,tpm);
 
    double ward = 2*B*tpm.trace();
@@ -398,8 +395,8 @@ void DPM::T(double A,double B,double C,TPM &tpm){
  * @param option == +1 T1_up map, == -1, inverse T1_down map
  * @param tpm input TPM
  */
-void DPM::T(int option, TPM &tpm){
-
+void DPM::T(int option,const TPM &tpm)
+{
    if(option == 1){
 
       double a = 1.0;
@@ -433,8 +430,8 @@ void DPM::T(int option, TPM &tpm){
  * The inverse of the TPM::bar function. It is a T1-like map.
  * @param tpm input TPM
  */
-void DPM::hat(TPM &tpm){
-
+void DPM::hat(const TPM &tpm)
+{
    double a = 1.0/(M - 4.0);
    double b = 1.0/((M - 4.0)*(M - 3.0)*(M - 2.0));
    double c = 1.0/((M - 4.0)*(M - 3.0));

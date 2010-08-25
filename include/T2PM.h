@@ -31,7 +31,7 @@ class T2PM : public Matrix {
       T2PM(int M,int N);
 
       //copy constructor
-      T2PM(T2PM &);
+      T2PM(const T2PM &);
 
       //destructor
       virtual ~T2PM();
@@ -46,26 +46,26 @@ class T2PM : public Matrix {
       double operator()(int a,int b,int c,int d) const;
 
       //geef N terug
-      int gN();
+      int gN() const;
 
       //geef M terug
-      int gM();
+      int gM() const;
 
       //geef dim terug
-      int gn();
+      int gn() const;
 
       void min_tunit(double);
 
-      double skew_trace();
+      double skew_trace() const;
 
-      double T2_trace();
+      double T2_trace() const;
 
-      double rho_trace();
+      double rho_trace() const;
 
-      double omega_trace();
+      double omega_trace() const;
 
       //maak een T2PM van een TPM
-      void T(TPM &);
+      void T(const TPM &);
 
    private:
 

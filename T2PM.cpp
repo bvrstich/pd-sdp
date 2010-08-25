@@ -67,7 +67,7 @@ T2PM::T2PM(int M,int N) : Matrix(M+M*M*(M-1)/2)
  * if counter == 0, allocates and constructs the lists containing the relationship between sp and dp basis.
  * @param T2PM_c input T2PM to be copied
  */
-T2PM::T2PM(T2PM &T2PM_c) : Matrix(T2PM_c)
+T2PM::T2PM(const T2PM &T2PM_c) : Matrix(T2PM_c)
 {
    this->N = T2PM_c.N;
    this->M = T2PM_c.M;
@@ -244,7 +244,7 @@ ostream &operator<<(ostream &output,const T2PM &T2PM_p)
 /**
  * @return nr of particles
  */
-int T2PM::gN()
+int T2PM::gN() const
 {
    return N;
 }
@@ -252,7 +252,7 @@ int T2PM::gN()
 /**
  * @return dimension of sp space
  */
-int T2PM::gM()
+int T2PM::gM() const
 {
    return M;
 }
@@ -260,7 +260,7 @@ int T2PM::gM()
 /**
  * @return dimension of T2' space and of Matrix
  */
-int T2PM::gn()
+int T2PM::gn() const
 {
    return n;
 }
@@ -345,7 +345,7 @@ void T2PM::min_tunit(double scale)
 /** 
  * @return the skew trace, for T2PM matrices defined as sum_abc T2PM(a,b,a,c,b,c)
  */
-double T2PM::skew_trace()
+double T2PM::skew_trace() const
 {
    double ward = 0.0;
 
@@ -360,7 +360,7 @@ double T2PM::skew_trace()
 /**
  * @return the trace over the T2 part
  */
-double T2PM::T2_trace()
+double T2PM::T2_trace() const
 {
    double brecht = 0;
 
@@ -373,7 +373,7 @@ double T2PM::T2_trace()
 /**
  * @return the trace over the rho part
  */
-double T2PM::rho_trace()
+double T2PM::rho_trace() const
 {
    double brecht = 0;
 
@@ -386,7 +386,7 @@ double T2PM::rho_trace()
 /**
  * @return the skew trace over the omega part, defined as sum_abc T2PM(a,b,b,a)-T2PM(a,b,a,b)
  */
-double T2PM::omega_trace()
+double T2PM::omega_trace() const
 {
    double brecht = 0;
 
@@ -401,7 +401,7 @@ double T2PM::omega_trace()
  * The T2-map: maps a TPM object (tpm) on a T2PM object (*this)
  * @param tpm input TPM
  */
-void T2PM::T(TPM &tpm)
+void T2PM::T(const TPM &tpm)
 {
    int a,b,c,d,e,z;
 
