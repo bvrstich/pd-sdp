@@ -67,6 +67,10 @@ class T2PM : public Matrix {
       //maak een T2PM van een TPM
       void T(const TPM &);
 
+      operator PPHM() const;
+
+      operator SPM() const;
+
    private:
 
       //!static counter that counts the number of T2PM objects running in the program

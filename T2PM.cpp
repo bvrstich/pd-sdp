@@ -475,4 +475,32 @@ void T2PM::T(const TPM &tpm)
    }
 }
 
+/**
+ * Cast operator: this implements a cast from a T2PM object to a PPHM object by copying the A_1 matrix of T2PM to PPHM
+ */
+T2PM::operator PPHM() const
+{
+   PPHM A(M,N);
+
+   for(int i = 0;i < n_pph;i++)
+      for(int j = i;j < n_pph;j++)
+         A(i,j) = A(j,i) = (*this)(i,j);
+
+   return A;
+}
+
+/**
+ * Cast operator: this implements a cast from a T2PM object to a SPM object by copying the A_2 matrix of T2PM to SPM
+ */
+T2PM::operator SPM() const
+{
+   SPM A(M,N);
+
+   for(int i = 0;i < M;i++)
+      for(int j = i;j < M;j++)
+         A(i,j) = A(j,i) = (*this)(n_pph+i,n_pph+j);
+
+   return A;
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/
