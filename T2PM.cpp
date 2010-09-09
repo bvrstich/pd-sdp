@@ -202,18 +202,7 @@ double T2PM::operator()(int a,int b,int c,int d) const
 
 ostream &operator<<(ostream &output,const T2PM &T2PM_p)
 {
-/*    output << std::setprecision(2) << std::fixed;
- * 
- *    for(int i = 0;i < T2PM_p.n;i++)
- *    {
- *       for(int j = 0;j < T2PM_p.n;j++)
- *          output << std::setfill('0') << std::setw(6) << T2PM_p(i,j) << " ";
- * 
- *       output << endl;
- *    }
- * 
- *    output << endl;
- */
+
    output << std::setprecision(10) << std::scientific;
 
    // T2 part
