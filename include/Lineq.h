@@ -21,9 +21,9 @@ class Lineq {
    /**
     * Output stream operator overloaded: prints all the constraint matrices with a whitespace between them.
     * @param output The stream to which you are writing (e.g. cout)
-    * @param E_p The Lineq you want to print
+    * @param lineq_p The Lineq you want to print
     */
-   friend ostream &operator<<(ostream &output,Lineq &E_p);
+   friend ostream &operator<<(ostream &output,Lineq &lineq_p);
 
    public:
 
@@ -46,13 +46,13 @@ class Lineq {
 
       double &ge(int) const;
 
-   private:
-
-      void orthogonalize();
-
       TPM &gE_ortho(int) const;
 
       double &ge_ortho(int) const;
+
+   private:
+
+      void orthogonalize();
 
       //!double pointer to TPM object, will contain the linear equality constraints
       TPM **E;

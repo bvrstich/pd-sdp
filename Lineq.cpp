@@ -11,9 +11,9 @@ using std::ifstream;
 
 /**
  * constructor:
+ * @param M nr of sp orbitals
+ * @param N nr of particles
  * @param nr the nr of contraints
- * @param E double pointer to TPM's, containing the constraints
- * @param e pointer of doubles, containing the values
  */
 Lineq::Lineq(int M,int N,int nr){
 
@@ -44,12 +44,7 @@ Lineq::Lineq(int M,int N,int nr){
    for(int i = 0;i < nr;++i)
       E_ortho[i] = new TPM(M,N);
 
-   orthogonalize();
-
-   //testies again
-   for(int i = 0;i < nr;++i)
-      for(int j = 0;j < nr;++j)
-         std::cout << i << "\t" << j << "\t" << E_ortho[i]->ddot(*E_ortho[j]) << std::endl;
+   orthogonalize();//speaks for itself, doesn't it?
 
 }
 
@@ -175,18 +170,18 @@ double &Lineq::ge_ortho(int i) const{
    
 }
 
-ostream &operator<<(ostream &output,Lineq &lineq){
+ostream &operator<<(ostream &output,Lineq &lineq_p){
 
    output << "first print the constraint matrices:";
    output << endl;
    output << endl;
 
-   for(int i = 0;i < lineq.gnr();++i){
+   for(int i = 0;i < lineq_p.gnr();++i){
 
       output << "constraint nr :" << i << endl;
       output << endl;
 
-      output << lineq.gE(i);
+      output << lineq_p.gE(i);
 
    }
 
@@ -195,8 +190,8 @@ ostream &operator<<(ostream &output,Lineq &lineq){
    output << "the desired values are:" << endl;
    output << endl;
 
-   for(int i = 0;i < lineq.gnr();++i)
-      output << i << "\t" << lineq.ge(i) << endl;
+   for(int i = 0;i < lineq_p.gnr();++i)
+      output << i << "\t" << lineq_p.ge(i) << endl;
 
    return output;
 

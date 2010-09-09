@@ -14,6 +14,7 @@ class PHM;
 class DPM;
 class PPHM;
 class T2PM;
+class Lineq;
 
 /**
  * @author Brecht Verstichel
@@ -117,6 +118,8 @@ class TPM : public Matrix {
       void bar(const T2PM &);
 
       void T(const T2PM &);
+
+      void proj_E(int,Lineq &);
 
    private:
 

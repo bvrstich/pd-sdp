@@ -39,9 +39,6 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   Lineq lineq(M,N,2);
-
-/*
    //hamiltoniaan
    TPM ham(M,N);
    ham.hubbard(0,1.0);
@@ -207,7 +204,7 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("workspace/input/rdm.in");
-*/
+
    return 0;
 
 }

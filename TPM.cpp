@@ -1124,4 +1124,26 @@ void TPM::T(const T2PM &t2pm)
    }
 }
 
+/**
+ * project the TPM object onto a space where (option == 0) Tr (Gamma' E) = 0, or (option == 1) Tr (Gamma' E) = e
+ * @param option project onto (option = 0) 0 or (option = 1) e
+ * @param lineq The object containing the linear constraints
+ */
+void TPM::proj_E(int option,Lineq &lineq){
+
+   double ward;
+
+   for(int i = 0;i < lineq.gnr();++i){
+
+      if(option == 1)
+         ward = this->ddot(lineq.gE_ortho(i)) - lineq.ge_ortho(i);//Tr(Gamma E~) - e~
+      else
+         ward = this->ddot(lineq.gE_ortho(i));
+
+      this->daxpy(-ward,lineq.gE_ortho(i));
+
+   }
+
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/
