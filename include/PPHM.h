@@ -57,10 +57,6 @@ class PPHM : public Matrix {
       //maak een PPHM van een TPM via de T2 conditie
       void T(int option,const TPM &);
 
-      void min_tunit(double );
-
-      double skew_trace() const;
-
    private:
 
       //!static counter that counts the number of PPHM objects running in the program

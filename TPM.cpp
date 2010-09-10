@@ -534,6 +534,7 @@ void TPM::H(const TPM &b,const SUP &D,const Lineq &lineq){
  * in which H represents the hessian map.
  * @param b righthandside of the equation
  * @param D SUP matrix that defines the structure of the hessian
+ * @param lineq The object containing the linear constraints
  * @return return number of iterations needed to converge to the desired accuracy
  */
 int TPM::solve(TPM &b,const SUP &D,const Lineq &lineq){
@@ -684,34 +685,6 @@ void TPM::S(int option,const TPM &tpm_d){
 #endif
 
    this->Q(option,a,b,c,tpm_d);
-
-}
-
-/**
- * Deduct the unitmatrix times a constant (scale) from this.\n\n
- * this -= scale* 1
- * @param scale the constant
- */
-void TPM::min_unit(double scale){
-
-   for(int i = 0;i < n;++i)
-      (*this)(i,i) -= scale;
-
-}
-
-/**
- * Deduct from this - de Q-map of the unit-matrix  times a constante (scale):\n\n
- * this -= scale* Q(1)
- * @param scale the constant
- */
-void TPM::min_qunit(double scale){
-
-   double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
-
-   scale *= q;
-
-   for(int i = 0;i < n;++i)
-      (*this)(i,i) -= scale;
 
 }
 
@@ -1145,6 +1118,60 @@ void TPM::proj_E(int option,const Lineq &lineq){
       this->daxpy(-ward,lineq.gE_ortho(i));
 
    }
+
+}
+
+/**
+ * @return the expectation value of the spinproject along the z-direction.
+ */
+double TPM::S_z(){
+
+   int a,b;
+
+   double ward = 0.0;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      ward += ( (1.0 - 2 * (a % 2) ) + (1 - 2 * (b % 2) ) )/2.0 * (*this)(i,i);
+
+   }
+
+   return ward/(N - 1.0);
+
+}
+
+/**
+ * @return the expectation value of the size of the spin: S^2
+ */
+double TPM::S_2(){
+
+   //first diagonal elements:
+   int a,b;
+   double s_a,s_b;
+
+   double ward = 0.0;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      s_a = ( 1.0 - 2 * (a % 2) )/2;
+      s_b = ( 1.0 - 2 * (b % 2) )/2;
+
+      ward += ( (1 + s_a*s_a + s_b*s_b)/(N - 1.0) + 2*s_a*s_b ) * (*this)(i,i);
+
+   }
+
+   //then the off diagonal elements: a and b are sp indices
+   for(int a = 0;a < M/2;++a)
+      for(int b = 0;b < M/2;++b)
+         ward += (*this)(2*a,2*b + 1,2*a + 1,2*b);
+
+   return ward;
 
 }
 

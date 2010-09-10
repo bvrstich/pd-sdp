@@ -203,6 +203,8 @@ int main(void){
    cout << endl;
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
+   cout << endl;
+   cout << "<S_z> = " << (S.tpm(0)).S_z() << "\t" << "<S^2> = " << (S.tpm(0)).S_2() << endl;
 
    //print density matrix to file
 //   (S.tpm(0)).out("workspace/input/rdm.in");

@@ -14,6 +14,7 @@ using std::ifstream;
  * @param M nr of sp orbitals
  * @param N nr of particles
  * @param nr the nr of contraints
+ * @param option There are predefined constraint, for now there is only option == 0, which means the traceconstraint Tr(Gamma) = N(N-1)/2.
  */
 Lineq::Lineq(int M,int N,int nr,int option){
 

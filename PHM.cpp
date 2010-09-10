@@ -245,44 +245,6 @@ void PHM::G(int option,const TPM &tpm)
 }
 
 /**
- * Calculate the skew trace, defined as:\n\n
- * sum_{ab} PHM(a,a,b,b)
- * @return the skew trace
- */
-double PHM::skew_trace() const
-{
-   double ward = 0.0;
-
-   for(int a = 0;a < M;++a)
-      for(int b = 0;b < M;++b)
-         ward += (*this)(a,a,b,b);
-
-   return ward;
-
-}
-
-/**
- * Deduct from this the G-map of the unit matrix times a constant (scale)\n\n
- * this -= scale* G(1) \n\n
- * see notes primal_dual.pdf for more information.
- * @param scale the constant
- */
-void PHM::min_gunit(double scale){
-
-   for(int a = 0;a < M;++a)
-      for(int b = 0;b < M;++b)
-         (*this)(a,a,b,b) -= scale;
-
-   double g = (M - N)/(N - 1.0);
-
-   scale *= g;
-
-   for(int i = 0;i < n;++i)
-      (*this)(i,i) -= scale;
-
-}
-
-/**
  * Map a PPHM (pphm) object onto a PHM (*this) object by tracing one pair of indices (see primal_dual.pdf for more info)
  * @param pphm Input PPHM
  */

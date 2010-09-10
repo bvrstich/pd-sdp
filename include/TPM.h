@@ -103,10 +103,6 @@ class TPM : public Matrix {
       //T2 down
       void T(const PPHM &);
 
-      void min_unit(double scale);
-
-      void min_qunit(double scale);
-
       void collaps(int option,const SUP &,const Lineq &);
 
       void out(const char *filename);
@@ -120,6 +116,10 @@ class TPM : public Matrix {
       void T(const T2PM &);
 
       void proj_E(int,const Lineq &);
+
+      double S_z();
+
+      double S_2();
 
    private:
 

@@ -63,9 +63,6 @@ class DPM : public Matrix {
       //maak een DPM van een TPM via de hat functie
       void hat(const TPM &);
 
-      //deduct scale times T1(1) matrix
-      void min_tunit(double scale);
-
       //input from file with sp indices
       void in_sp(const char *);
 

@@ -693,6 +693,7 @@ void SUP::proj_U(const Lineq &lineq){
  * Tr(Z u^i) = h^i      with h^i = Tr(tpm f^i)\n\n
  * is valid.
  * @param tpm input TPM (mostly the hamiltonian of the problem)
+ * @param lineq The object containing the linear constraints
  */
 void SUP::proj_C(const TPM &tpm,const Lineq &lineq)
 {
@@ -1023,6 +1024,7 @@ void SUP::fill(){
  * H(*this) = B in which H is the dual hessian map
  * @param B right hand side of the equation
  * @param D SUP matrix that defines the structure of the hessian map (the metric) (inverse of the primal Newton equation hessian)
+ * @param lineq The object containing the linear constraints
  * @return return the number of iteration required to converge
  */
 int SUP::solve(SUP &B,const SUP &D,const Lineq &lineq)
@@ -1075,6 +1077,7 @@ int SUP::solve(SUP &B,const SUP &D,const Lineq &lineq)
  * HB = DBD (dus SUP::L_map), projected onto C-space (SUP::proj_C)
  * @param B SUP matrix onto which the hessian works.
  * @param D SUP matrix that defines the structure of the map (metric)
+ * @param lineq The object containing the linear constraints
  */
 void SUP::H(const SUP &B,const SUP &D,const Lineq &lineq)
 {
