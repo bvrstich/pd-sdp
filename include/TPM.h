@@ -83,10 +83,10 @@ class TPM : public Matrix {
       void proj_Tr();
 
       //de hessiaan afbeelding:
-      void H(const TPM &b,const SUP &D);
+      void H(const TPM &b,const SUP &D,const Lineq &);
 
       //los het stelsel op
-      int solve(TPM &b,const SUP &D);
+      int solve(TPM &b,const SUP &D,const Lineq &lineq);
 
       //de G down en inverse G up
       void G(int option,const PHM &);
@@ -107,7 +107,7 @@ class TPM : public Matrix {
 
       void min_qunit(double scale);
 
-      void collaps(int option,const SUP &);
+      void collaps(int option,const SUP &,const Lineq &);
 
       void out(const char *filename);
 
@@ -119,7 +119,7 @@ class TPM : public Matrix {
 
       void T(const T2PM &);
 
-      void proj_E(int,Lineq &);
+      void proj_E(int,const Lineq &);
 
    private:
 

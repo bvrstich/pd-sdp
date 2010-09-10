@@ -441,8 +441,9 @@ void TPM::proj_Tr(){
  * with D_1, D_2, D_3 and D_3 the P, Q, G, T1 and T2 blocks of the SUP D. 
  * @param b TPM domain matrix, hessian will act on it and the image will be put in this
  * @param D SUP matrix that defines the structure of the hessian map. (see primal-dual.pdf for more info)
+ * @param lineq object that stores which linear constraints are to be used.
  */
-void TPM::H(const TPM &b,const SUP &D){
+void TPM::H(const TPM &b,const SUP &D,const Lineq &lineq){
 
    this->L_map(D.tpm(0),b);
 
@@ -523,7 +524,7 @@ void TPM::H(const TPM &b,const SUP &D){
 
 #endif
 
-   this->proj_Tr();
+   this->proj_E(0,lineq);
 
 }
 
@@ -535,7 +536,7 @@ void TPM::H(const TPM &b,const SUP &D){
  * @param D SUP matrix that defines the structure of the hessian
  * @return return number of iterations needed to converge to the desired accuracy
  */
-int TPM::solve(TPM &b,const SUP &D){
+int TPM::solve(TPM &b,const SUP &D,const Lineq &lineq){
 
    *this = 0;
 
@@ -554,7 +555,7 @@ int TPM::solve(TPM &b,const SUP &D){
 
       ++cg_iter;
 
-      Hb.H(b,D);
+      Hb.H(b,D,lineq);
 
       ward = rr/b.ddot(Hb);
 
@@ -873,10 +874,11 @@ void TPM::T(const PPHM &pphm){
 /**
  * Collaps a SUP matrix S onto a TPM matrix like this:\n\n
  * sum_i Tr (S u^i)f^i = this
- * @param option = 0, project onto full symmetric matrix space, = 1 project onto traceless symmetric matrix space
+ * @param option = 0, project onto full symmetric matrix space, = 1 project onto symmetric matrix space with linear constraints space cut out.
  * @param S input SUP
+ * @param lineq The object that stores the linear equality constraints.
  */
-void TPM::collaps(int option,const SUP &S){
+void TPM::collaps(int option,const SUP &S,const Lineq &lineq){
 
    *this = S.tpm(0);
 
@@ -919,7 +921,7 @@ void TPM::collaps(int option,const SUP &S){
 #endif
 
    if(option == 1)
-      this->proj_Tr();
+      this->proj_E(0,lineq);
 
 }
 
@@ -1129,7 +1131,7 @@ void TPM::T(const T2PM &t2pm)
  * @param option project onto (option = 0) 0 or (option = 1) e
  * @param lineq The object containing the linear constraints
  */
-void TPM::proj_E(int option,Lineq &lineq){
+void TPM::proj_E(int option,const Lineq &lineq){
 
    double ward;
 

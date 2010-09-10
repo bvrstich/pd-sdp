@@ -7,6 +7,7 @@
 using std::ostream;
 
 #include "TPM.h"
+#include "SUP.h"
 
 /**
  * @author Brecht Verstichel
@@ -28,7 +29,7 @@ class Lineq {
    public:
 
       //constructor
-      Lineq(int M,int N,int nr);
+      Lineq(int M,int N,int nr,int option);
 
       //copy constructor
       Lineq(const Lineq &);
@@ -50,9 +51,15 @@ class Lineq {
 
       double &ge_ortho(int) const;
 
+      SUP &gu_0() const;
+
+      double gu_0_norm() const;
+
    private:
 
       void orthogonalize();
+
+      void norm_only();
 
       //!double pointer to TPM object, will contain the linear equality constraints
       TPM **E;
@@ -66,6 +73,9 @@ class Lineq {
       //!the values accompanying the orthogonalized constraints
       double *e_ortho;
 
+      //!will contain the u^0 matrix
+      SUP *u_0;
+
       //!nr of contstraints
       int nr;
 
@@ -74,6 +84,9 @@ class Lineq {
 
       //!nr of sp orbs
       int M;
+
+      //!the norm of u_0
+      double u_0_norm;
 
 };
 

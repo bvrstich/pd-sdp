@@ -465,14 +465,14 @@ void SUP::fill_Random(){
 /**
  * Initialisation for dual SUP matrix Z, see primal_dual.pdf for info.
  */
-void SUP::init_Z(double alpha,const TPM &ham,const SUP &u_0)
+void SUP::init_Z(double alpha,const TPM &ham,const Lineq &lineq)
 {
    this->fill_Random();
 
-   this->proj_C(ham);
+   this->proj_C(ham,lineq);
 
    //nog een eenheidsmatrix maal constante bijtellen zodat Z positief definiet is:
-   this->daxpy(alpha,u_0); 
+   this->daxpy(alpha,lineq.gu_0()); 
 
 }
 
@@ -669,12 +669,12 @@ void SUP::dscal(double alpha){
  * Orthogonal projection of a general SUP matrix diag[ M M_Q ( M_G M_T1 M_T2 ) ] onto U space: diag[ M_u Q(M_u) ( G(M_u) T1(M_u) T2(M_u) ) ]
  * for more information see primal_dual.pdf
  */
-void SUP::proj_U(){
+void SUP::proj_U(const Lineq &lineq){
   
    //eerst M_Gamma + Q(M_Q) + ( G(M_G) + T1(M_T1) + T2(M_T2) ) in O stoppen
    TPM O(M,N);
 
-   O.collaps(0,*this);
+   O.collaps(0,*this,lineq);
 
    //dan de inverse overlapmatrix hierop laten inwerken en in this[0] stoppen
    SZ_tp[0]->S(-1,O);
@@ -684,7 +684,7 @@ void SUP::proj_U(){
 
    //Nu is de projectie op de u^\alpha's gebeurd.
    //Nu nog de projectie op de u^i's: dus component langs u^0 eruit halen
-   this->proj_U_Tr();
+   this->proj_u_0(lineq);
 
 }
 
@@ -694,11 +694,11 @@ void SUP::proj_U(){
  * is valid.
  * @param tpm input TPM (mostly the hamiltonian of the problem)
  */
-void SUP::proj_C(const TPM &tpm)
+void SUP::proj_C(const TPM &tpm,const Lineq &lineq)
 {
    TPM hulp(M,N);
 
-   hulp.collaps(0,*this);
+   hulp.collaps(0,*this,lineq);
 
    hulp -= tpm;
 
@@ -712,7 +712,7 @@ void SUP::proj_C(const TPM &tpm)
    //and fill it up Johnny
    Z_res.fill();
 
-   Z_res.proj_U_Tr();
+   Z_res.proj_u_0(lineq);
 
    *this -= Z_res;
 
@@ -897,12 +897,12 @@ double SUP::trace() const
  * Orthogonal projection of a general SUP matrix [ M M_Q ( M_G M_T1 M_T2 ) ] onto the orthogonal complement of the U space (C space)
  * See primal_dual.pdf for more information
  */
-void SUP::proj_C(){
+void SUP::proj_C(const Lineq &lineq){
 
    SUP Z_copy(*this);
 
    //projecteer op de U ruimte
-   Z_copy.proj_U();
+   Z_copy.proj_U(lineq);
 
    //en het orthogonaal complement nemen:
    *this -= Z_copy;
@@ -1025,10 +1025,10 @@ void SUP::fill(){
  * @param D SUP matrix that defines the structure of the hessian map (the metric) (inverse of the primal Newton equation hessian)
  * @return return the number of iteration required to converge
  */
-int SUP::solve(SUP &B,const SUP &D)
+int SUP::solve(SUP &B,const SUP &D,const Lineq &lineq)
 {
    SUP HB(M,N);
-   HB.H(*this,D);
+   HB.H(*this,D,lineq);
 
    B -= HB;
 
@@ -1044,7 +1044,7 @@ int SUP::solve(SUP &B,const SUP &D)
 
       ++cg_iter;
 
-      HB.H(B,D);
+      HB.H(B,D,lineq);
 
       ward = rr/B.ddot(HB);
 
@@ -1076,152 +1076,25 @@ int SUP::solve(SUP &B,const SUP &D)
  * @param B SUP matrix onto which the hessian works.
  * @param D SUP matrix that defines the structure of the map (metric)
  */
-void SUP::H(const SUP &B,const SUP &D)
+void SUP::H(const SUP &B,const SUP &D,const Lineq &lineq)
 {
    this->L_map(D,B);
 
-   this->proj_C();
+   this->proj_C(lineq);
 
 }
 
 /**
- * @return the value Tr (1_u 1_u) for the conditions active
+ * orthogonally project (*this) onto the space where Tr (*this) u^0 = 0.0
+ * @param lineq The linear equalities that have to be fulfilled, this object contains u^0
  */
-double SUP::U_norm() const
-{
-   double norm;
+void SUP::proj_u_0(const Lineq &lineq){
 
-   double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
+   //calculate the overlap
+   double ward = -this->ddot(lineq.gu_0())/lineq.gu_0_norm();
 
-   norm = M*(M - 1)/2 * (1 + q*q);
-
-#ifdef __G_CON
-
-   double g = (M - N)/(N - 1.0);
-
-   norm += M*M * (1.0 + g*g) + 2*g*M;
-
-#endif
-
-#ifdef __T1_CON
-   
-   double t1 = (M*(M - 1.0) - 3.0*(M - N)*N)/(N*(N - 1.0));
-
-   norm += M*(M - 1.0)*(M - 2.0)/6.0 * t1 * t1;
-
-#endif
-
-#ifdef __T2_CON
-
-   double t2 = (M - N)/(N - 1.0);
-
-   norm += t2* t2 * (M - 1.0)* M*M /2.0 + 2.0 * t2 * (M - 1.0)*M + M*(M - 1.0)*(M - 1.0);
-
-#endif
-
-#ifdef __T2P_CON
-
-   double t2p = (M - N)/(N - 1.0);
-
-   norm += t2p* t2p * (M - 1.0)* M*M /2.0 + 2.0 * t2p * (M - 1.0)*M + M*(M - 1.0)*(M - 1.0);
-   norm += 2*(M*M-M) + M*(M-1.0)/(N-1.0)*(M-1.0)/(N-1.0);
-
-#endif
-
-   return norm;
-
-}
-
-/**
- * orthogonally project (*this) onto the space where the U-trace is zero
- */
-void SUP::proj_U_Tr(){
-
-   double ward = (this->U_trace() )/ (this->U_norm() );
-
-   //dan deze factor aftrekken met u^0
-   SZ_tp[0]->min_unit(ward);
-   SZ_tp[1]->min_qunit(ward);
-
-#ifdef __G_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_ph->min_gunit(ward);
-
-#endif
-
-#ifdef __T1_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_dp->min_tunit(ward);
-
-#endif
-
-#ifdef __T2_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_pph->min_tunit(ward);
-
-#endif
-
-#ifdef __T2P_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_t2p->min_tunit(ward);
-
-#endif
-
-}
-
-/**
- * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) ( G(1) T1(1) T2(1) ) ]
- */
-double SUP::U_trace() const
-{
-   //q is the factor by which the unit matrix is multiplied when the Q(1) is taken:
-   double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
-
-   //trace of the Gamma piece of the SUP
-   double ward = SZ_tp[0]->trace();
-
-   //plus q times trace of the Q piece of the SUP
-   ward += q*SZ_tp[1]->trace();
-
-#ifdef __G_CON
-
-   //g is the factor before the identity matrix in the image of G(1)
-   double g = (M - N)/(N - 1.0);
-
-   //skew trace is sum_{ab} G_{aa;bb}
-   ward += g*SZ_ph->trace() + SZ_ph->skew_trace();
-
-#endif
-
-#ifdef __T1_CON
-
-   double t1 = (M*(M - 1.0) - 3.0*N*(M - N))/(N*(N - 1.0));
-
-   ward += t1*SZ_dp->trace();
-
-#endif
-
-#ifdef __T2_CON
-
-   double t2 = (M - N)/(N - 1.0);
-
-   ward += t2*SZ_pph->trace() + SZ_pph->skew_trace();
-
-#endif
-
-#ifdef __T2P_CON
-
-   double t2p = (M - N)/(N - 1.0);
-
-   ward += t2p*SZ_t2p->T2_trace() + SZ_t2p->skew_trace() + (M-1.0)/(N-1.0) * SZ_t2p->rho_trace() + 2 * SZ_t2p->omega_trace();
-
-#endif
-
-   return ward;
+   //and deduct it:
+   this->daxpy(ward,lineq.gu_0());
 
 }
 

@@ -9,6 +9,7 @@ using std::ostream;
 #include "include.h"
 
 class EIG;
+class Lineq;
 
 /**
  * @author Brecht Verstichel
@@ -60,7 +61,7 @@ class SUP{
       void init_S();
 
       //initialiseer Z
-      void init_Z(double alpha,const TPM &ham,const SUP &u_0);
+      void init_Z(double alpha,const TPM &ham,const Lineq &);
 
       int gN() const;
 
@@ -76,9 +77,9 @@ class SUP{
 
       void dscal(double alpha);
 
-      void proj_U();
+      void proj_U(const Lineq &);
 
-      void proj_C(const TPM &);
+      void proj_C(const TPM &,const Lineq &);
 
       //maak de matrix D, nodig voor de hessiaan van het stelsel
       void D(const SUP &S,const SUP &Z);
@@ -92,9 +93,7 @@ class SUP{
 
       double trace() const;
 
-      double U_trace() const;
-
-      void proj_C();
+      void proj_C(const Lineq &);
 
       SUP &mprod(const SUP &,const SUP &);
 
@@ -102,13 +101,11 @@ class SUP{
 
       void fill();
 
-      int solve(SUP &B,const SUP &D);
+      int solve(SUP &B,const SUP &D,const Lineq &);
 
-      void H(const SUP &B,const SUP &D);
+      void H(const SUP &B,const SUP &D,const Lineq &);
 
-      void proj_U_Tr();
-
-      double U_norm() const;
+      void proj_u_0(const Lineq &);
 
       double center_dev(const SUP &Z) const;
 

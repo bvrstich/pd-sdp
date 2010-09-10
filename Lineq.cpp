@@ -15,7 +15,7 @@ using std::ifstream;
  * @param N nr of particles
  * @param nr the nr of contraints
  */
-Lineq::Lineq(int M,int N,int nr){
+Lineq::Lineq(int M,int N,int nr,int option){
 
    this->nr = nr;
 
@@ -28,12 +28,16 @@ Lineq::Lineq(int M,int N,int nr){
    for(int i = 0;i < nr;++i)
       E[i] = new TPM(M,N);
 
-   //for now, for testies, fill randomly
-   
-   for(int i = 0;i < nr;++i){
+   if(option == 0)
+      norm_only();
+   else{//fill randomly
 
-      E[i]->fill_Random();
-      e[i] = (double) rand()/RAND_MAX;
+      for(int i = 0;i < nr;++i){
+
+         E[i]->fill_Random();
+         e[i] = (double) rand()/RAND_MAX;
+
+      }
 
    }
 
@@ -46,6 +50,18 @@ Lineq::Lineq(int M,int N,int nr){
 
    orthogonalize();//speaks for itself, doesn't it?
 
+   //now construct the u_0
+   u_0 = new SUP(M,N);
+
+   u_0->tpm(0) = 0;
+
+   for(int i = 0;i < nr;++i)
+      (u_0->tpm(0)).daxpy(e_ortho[i],*E_ortho[i]);
+
+   u_0->fill();
+
+   u_0_norm = u_0->ddot(*u_0);
+
 }
 
 /**
@@ -54,7 +70,7 @@ Lineq::Lineq(int M,int N,int nr){
  */
 Lineq::Lineq(const Lineq &lineq){
 
-  this->nr = lineq.gnr();
+   this->nr = lineq.gnr();
 
    this->M = lineq.gM();
    this->N = lineq.gN();
@@ -77,6 +93,12 @@ Lineq::Lineq(const Lineq &lineq){
 
    }
 
+   //now construct the u_0
+   u_0 = new SUP(lineq.gu_0());
+
+   //and its norm.
+   u_0_norm = lineq.gu_0_norm();
+
 }
 
 /**
@@ -96,6 +118,8 @@ Lineq::~Lineq(){
 
    delete [] e;
    delete [] e_ortho;
+
+   delete u_0;
 
 }
 
@@ -228,5 +252,38 @@ void Lineq::orthogonalize(){
       }
 
    }
+
+}
+
+/**
+ * access to the u_0
+ * @return u_0
+ */
+SUP &Lineq::gu_0() const{
+
+   return *u_0;
+
+}
+
+/**
+ * @return the norm of u_0
+ */
+double Lineq::gu_0_norm() const{
+
+   return u_0_norm;
+
+}
+
+/**
+ * fills the constraint matrices with the norm constraint only
+ */
+void Lineq::norm_only(){
+
+   *E[0] = 0;
+
+   for(int i = 0;i < E[0]->gn();++i)
+      (*E[0])(i,i) = 1.0;
+
+   e[0] = N*(N - 1.0)/2.0;
 
 }
