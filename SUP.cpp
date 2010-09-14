@@ -385,7 +385,12 @@ T2PM &SUP::t2pm() const
  */
 void SUP::init_S(Lineq &lineq){
 
-   *this = lineq.gu_0();
+   *this = lineq.gu_0(0);
+
+   this->dscal(lineq.ge_ortho(0));
+
+   for(int i = 1;i < lineq.gnr();++i)
+      this->daxpy(lineq.ge_ortho(i),lineq.gu_0(i));
 
 }
 
@@ -470,7 +475,7 @@ void SUP::init_Z(double alpha,const TPM &ham,const Lineq &lineq)
    this->proj_C(ham,lineq);
 
    //nog een eenheidsmatrix maal constante bijtellen zodat Z positief definiet is:
-   this->daxpy(alpha,lineq.gu_0()); 
+   this->daxpy(alpha,lineq.gu_0(0)); 
 
    this->proj_C(ham,lineq);
 
@@ -1088,23 +1093,27 @@ void SUP::H(const SUP &B,const SUP &D,const Lineq &lineq)
 }
 
 /**
- * orthogonally project (*this) onto the space where Tr (*this) u^0 = 0.0
- * @param lineq The linear equalities that have to be fulfilled, this object contains u^0
+ * orthogonally project (*this) onto the subspace witouth the u_0's!
+ * @param lineq The linear equalities that have to be fulfilled, this object contains the u^0 matrices
  */
 void SUP::proj_u_0(const Lineq &lineq){
 
-   //calculate the overlap
-   double ward = -this->ddot(lineq.gu_0())/lineq.gu_0_norm();
+   double ward;
 
-   //and deduct it:
-   this->daxpy(ward,lineq.gu_0());
+   for(int i = 0;i < lineq.gnr();++i){
+
+      ward = -this->ddot(lineq.gu_0_ortho(i));
+
+      this->daxpy(ward,lineq.gu_0_ortho(i));
+
+   }
 
 }
 
 /**
  * @return Deviation from the central path measured through the logarithmic potential, it's a measure for
  * the deviation of the product of the primal with the dual matrix (SZ) from the unit matrix.\n
- * Usage of the function: S.center_dev(Z) gives returns the deviation.\n\n
+ * Usage of the function: S.center_dev(Z) returns the deviation.\n\n
  * (*this) = S = primal matrix of the problem
  * @param Z = dual matrix of the problem
  */

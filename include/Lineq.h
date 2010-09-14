@@ -54,9 +54,9 @@ class Lineq {
 
       double &ge_ortho(int) const;
 
-      SUP &gu_0() const;
+      SUP &gu_0(int) const;
 
-      double gu_0_norm() const;
+      SUP &gu_0_ortho(int) const;
 
    private:
 
@@ -65,6 +65,8 @@ class Lineq {
       void orthogonalize();
 
       void constr_u_0();
+
+      void orthogonalize_u_0();
 
       //!double pointer to TPM object, will contain the linear equality constraints
       TPM **E;
@@ -78,8 +80,11 @@ class Lineq {
       //!the values accompanying the orthogonalized constraints
       double *e_ortho;
 
-      //!will contain the u^0 matrix
-      SUP *u_0;
+      //!will contain the matrices that span u^0 space
+      SUP **u_0;
+
+      //!will contain the orthogonalized matrices that span u^0 space
+      SUP **u_0_ortho;
 
       //!nr of contstraints
       int nr;
@@ -89,9 +94,6 @@ class Lineq {
 
       //!nr of sp orbs
       int M;
-
-      //!the norm of u_0
-      double u_0_norm;
 
 };
 

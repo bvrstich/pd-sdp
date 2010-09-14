@@ -31,8 +31,10 @@ Lineq::Lineq(int M,int N){
 
    orthogonalize();//speaks for itself, doesn't it?
 
-   //construct the u^0 SUP matrix
+   //construct the u^0 SUP matrices
    constr_u_0();
+
+   orthogonalize_u_0();
 
 }
 
@@ -64,8 +66,11 @@ Lineq::Lineq(int M,int N,double spin){
 
    orthogonalize();//speaks for itself, doesn't it?
 
-   //construct the u^0 SUP matrix
+   //construct the u^0 SUP matrices
    constr_u_0();
+
+   //orthogonalize them:
+   orthogonalize_u_0();
 
 }
 
@@ -98,11 +103,16 @@ Lineq::Lineq(const Lineq &lineq){
 
    }
 
-   //now construct the u_0
-   u_0 = new SUP(lineq.gu_0());
+   //now construct the u_0 and u_0 ortho's
+   u_0 = new SUP * [nr];
+   u_0_ortho = new SUP * [nr];
 
-   //and its norm.
-   u_0_norm = lineq.gu_0_norm();
+   for(int i = 0;i < nr;++i){
+
+      u_0[i] = new SUP(lineq.gu_0(i));
+      u_0_ortho[i] = new SUP(lineq.gu_0_ortho(i));
+
+   }
 
 }
 
@@ -116,6 +126,9 @@ Lineq::~Lineq(){
       delete E[i];
       delete E_ortho[i];
 
+      delete u_0[i];
+      delete u_0_ortho[i];
+
    }
 
    delete [] E;
@@ -124,7 +137,8 @@ Lineq::~Lineq(){
    delete [] e;
    delete [] e_ortho;
 
-   delete u_0;
+   delete [] u_0;
+   delete [] u_0_ortho;
 
 }
 
@@ -261,21 +275,24 @@ void Lineq::orthogonalize(){
 }
 
 /**
- * access to the u_0
- * @return u_0
+ * access to the u_0 matrices
+ * @param i the index of the specific u_0 matrix you are interested in.
+ * @return u_0[i]
  */
-SUP &Lineq::gu_0() const{
+SUP &Lineq::gu_0(int i) const{
 
-   return *u_0;
+   return *u_0[i];
 
 }
 
 /**
- * @return the norm of u_0
+ * access to the orthogonalized u_0 matrices
+ * @param i the index of the specific u_0_ortho matrix you are interested in.
+ * @return u_0_ortho[i]
  */
-double Lineq::gu_0_norm() const{
+SUP &Lineq::gu_0_ortho(int i) const{
 
-   return u_0_norm;
+   return *u_0_ortho[i];
 
 }
 
@@ -307,16 +324,53 @@ void Lineq::allocate(){
  */
 void Lineq::constr_u_0(){
 
-   u_0 = new SUP(M,N);
+   u_0 = new SUP * [nr];
 
-   u_0->tpm(0) = 0;
+   for(int i = 0;i < nr;++i){
+
+      //construct
+      u_0[i] = new SUP(M,N);
+
+      //and fill with the different constraints
+      (*u_0[i]).tpm(0) = *E_ortho[i];
+
+      u_0[i]->fill();
+
+   }
+
+}
+
+/**
+ * orthogonalize the u_0 matrices, will take the u_0's and construct the u_0_ortho's.
+ */
+void Lineq::orthogonalize_u_0(){
+
+   //first allocate the u_0_ortho matrices:
+   u_0_ortho = new SUP * [nr];
 
    for(int i = 0;i < nr;++i)
-      (u_0->tpm(0)).daxpy(e_ortho[i],*E_ortho[i]);
+      u_0_ortho[i] = new SUP(M,N);
 
-   u_0->fill();
+   //construct the overlapmatrix of the u_0's
+   Matrix S(nr);
 
-   //calculate the norm for further use
-   u_0_norm = u_0->ddot(*u_0);
+   for(int i = 0;i < nr;++i)
+      for(int j = i;j < nr;++j)
+         S(i,j) = u_0[i]->ddot(*u_0[j]);
+
+   S.symmetrize();
+
+   //take the inverse square root
+   S.sqrt(-1);
+
+   //make the orthogonal ones:
+   for(int i = 0;i < nr;++i){
+
+      *u_0_ortho[i] = 0;//init
+
+      for(int j = 0;j < nr;++j)
+         u_0_ortho[i]->daxpy(S(i,j),*u_0[j]);
+
+   }
 
 }
