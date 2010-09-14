@@ -381,13 +381,11 @@ T2PM &SUP::t2pm() const
 #endif
 
 /**
- * Initialization of the SUP matrix S, is just u^0: see primal_dual.pdf for more information
+ * Initialization of the SUP matrix S, is just u^0 for now: see primal_dual.pdf for more information
  */
-void SUP::init_S(){
+void SUP::init_S(Lineq &lineq){
 
-   (*SZ_tp[0]).unit();
-
-   this->fill();
+   *this = lineq.gu_0();
 
 }
 
@@ -473,6 +471,8 @@ void SUP::init_Z(double alpha,const TPM &ham,const Lineq &lineq)
 
    //nog een eenheidsmatrix maal constante bijtellen zodat Z positief definiet is:
    this->daxpy(alpha,lineq.gu_0()); 
+
+   this->proj_C(ham,lineq);
 
 }
 

@@ -58,7 +58,7 @@ class SUP{
       TPM &tpm(int i) const;
 
       //initialiseer S
-      void init_S();
+      void init_S(Lineq &);
 
       //initialiseer Z
       void init_Z(double alpha,const TPM &ham,const Lineq &);

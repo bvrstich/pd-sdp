@@ -10,58 +10,62 @@ using std::ifstream;
 #include "include.h"
 
 /**
- * constructor:
+ * standard constructor, only norm constraint:
  * @param M nr of sp orbitals
  * @param N nr of particles
- * @param nr the nr of contraints
- * @param option There are predefined constraint, for now there is only option == 0, which means the traceconstraint Tr(Gamma) = N(N-1)/2.
  */
-Lineq::Lineq(int M,int N,int nr,int option){
+Lineq::Lineq(int M,int N){
 
-   this->nr = nr;
+   this->nr = 1;
 
    this->M = M;
    this->N = N;
 
-   E = new TPM * [nr];
-   e = new double [nr];
+   //allocate the bitch.
+   allocate();
 
-   for(int i = 0;i < nr;++i)
-      E[i] = new TPM(M,N);
+   //initialize the constraint
+   E[0]->set_unit();
 
-   if(option == 0)
-      norm_only();
-   else{//fill randomly
-
-      for(int i = 0;i < nr;++i){
-
-         E[i]->fill_Random();
-         e[i] = (double) rand()/RAND_MAX;
-
-      }
-
-   }
-
-   //orthogonalize the constraints:
-   E_ortho = new TPM * [nr];
-   e_ortho = new double [nr];
-
-   for(int i = 0;i < nr;++i)
-      E_ortho[i] = new TPM(M,N);
+   e[0] = N*(N - 1.0)/2.0;
 
    orthogonalize();//speaks for itself, doesn't it?
 
-   //now construct the u_0
-   u_0 = new SUP(M,N);
+   //construct the u^0 SUP matrix
+   constr_u_0();
 
-   u_0->tpm(0) = 0;
+}
 
-   for(int i = 0;i < nr;++i)
-      (u_0->tpm(0)).daxpy(e_ortho[i],*E_ortho[i]);
+/**
+ * constructor, norm and S^2 constraint:
+ * @param M nr of sp orbitals
+ * @param N nr of particles
+ * @param spin the size of the spin you want to project on: e[1]
+ */
+Lineq::Lineq(int M,int N,double spin){
 
-   u_0->fill();
+   this->nr = 2;
 
-   u_0_norm = u_0->ddot(*u_0);
+   this->M = M;
+   this->N = N;
+
+   //allocate the bitch.
+   allocate();
+
+   //initialize the constraints:first the norm
+   E[0]->set_unit();
+
+   e[0] = N*(N - 1.0)/2.0;
+
+   //then the spin in the "1" block
+   E[1]->set_S_2();
+
+   e[1] = spin * ( spin + 1.0 );
+
+   orthogonalize();//speaks for itself, doesn't it?
+
+   //construct the u^0 SUP matrix
+   constr_u_0();
 
 }
 
@@ -170,7 +174,7 @@ TPM &Lineq::gE(int i) const {
 double &Lineq::ge(int i) const{
 
    return e[i];
-   
+
 }
 
 /**
@@ -192,7 +196,7 @@ TPM &Lineq::gE_ortho(int i) const {
 double &Lineq::ge_ortho(int i) const{
 
    return e_ortho[i];
-   
+
 }
 
 ostream &operator<<(ostream &output,Lineq &lineq_p){
@@ -276,15 +280,43 @@ double Lineq::gu_0_norm() const{
 }
 
 /**
- * fills the constraint matrices with the norm constraint only
+ * allocate the array's and memory needed for the program, reusable code for the different constructors
+ * private because I say it's private.
  */
-void Lineq::norm_only(){
+void Lineq::allocate(){
 
-   *E[0] = 0;
+   //the regular ones
+   E = new TPM * [nr];
+   e = new double [nr];
 
-   for(int i = 0;i < E[0]->gn();++i)
-      (*E[0])(i,i) = 1.0;
+   for(int i = 0;i < nr;++i)
+      E[i] = new TPM(M,N);
 
-   e[0] = N*(N - 1.0)/2.0;
+   //the orthogonal ones
+   E_ortho = new TPM * [nr];
+   e_ortho = new double [nr];
+
+   for(int i = 0;i < nr;++i)
+      E_ortho[i] = new TPM(M,N);
+
+}
+
+/**
+ * construct's the u_0 matrices with the input provided in the constructor. Again reusable code for the different constructers.
+ * and again private because I say so.
+ */
+void Lineq::constr_u_0(){
+
+   u_0 = new SUP(M,N);
+
+   u_0->tpm(0) = 0;
+
+   for(int i = 0;i < nr;++i)
+      (u_0->tpm(0)).daxpy(e_ortho[i],*E_ortho[i]);
+
+   u_0->fill();
+
+   //calculate the norm for further use
+   u_0_norm = u_0->ddot(*u_0);
 
 }

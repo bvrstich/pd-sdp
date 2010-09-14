@@ -78,7 +78,11 @@ class TPM : public Matrix {
       //overlapmatrix afbeelding en zijn inverse
       void S(int option,const TPM &);
 
-      void unit();
+      void init();
+
+      void set_unit();
+
+      void set_S_2();
 
       void proj_Tr();
 

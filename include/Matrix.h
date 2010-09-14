@@ -80,7 +80,11 @@ class Matrix{
 
       void fill_Random();
 
+      void fill_Random_Pos();
+
       void fill_Random(int);
+
+      void fill_Random_Pos(int);
 
       //positieve of negatieve vierkantswortel uit de matrix
       void sqrt(int option);

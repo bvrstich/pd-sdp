@@ -299,6 +299,26 @@ void Matrix::fill_Random(){
 }
 
 /**
+ * Fill the matrix with random numbers: make sure it's positive definite
+ * you can do this by making the diagonal elements positive and the off-diagonal elements 0;
+ */
+void Matrix::fill_Random_Pos(){
+
+   for(int i = 0;i < n;++i){
+
+      matrix[i][i] = (double) rand()/RAND_MAX;
+
+      for(int j = i + 1;j < n;++j)
+         matrix[j][i] = 0.0;
+
+   }
+
+   this->symmetrize();
+
+}
+
+
+/**
  * Fill the matrix with random numbers.
  * @param seed the seed for the random number generator
  */
@@ -316,6 +336,28 @@ void Matrix::fill_Random(int seed)
          matrix[i][j] = matrix[j][i];
       }
    }
+}
+
+/**
+ * Fill the matrix with random numbers: make sure it's positive definite
+ * you can do this by making the diagonal elements positive and the off-diagonal elements negative.
+ * @param seed the seed for the random number generator
+ */
+void Matrix::fill_Random_Pos(int seed){
+
+   srand(seed);
+
+   for(int i = 0;i < n;++i){
+
+      matrix[i][i] = (double) rand()/RAND_MAX;
+
+      for(int j = i + 1;j < n;++j)
+         matrix[j][i] = - (double) rand()/RAND_MAX;
+
+   }
+
+   this->symmetrize();
+
 }
 
 /**

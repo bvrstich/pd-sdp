@@ -39,14 +39,14 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   Lineq lineq(M,N,1,0);
+   Lineq lineq(M,N,1.0);
 
    //hamiltoniaan
    TPM ham(M,N);
    ham.hubbard(0,1.0);
 
    SUP S(M,N);
-   S.init_S();
+   S.init_S(lineq);
 
    SUP Z(M,N);
    Z.init_Z(100.0,ham,lineq);
@@ -74,7 +74,7 @@ int main(void){
 
    while(flag != 3){
 
-      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
+      cout << (S.tpm(0)).trace() << "\t" << S.tpm(0).S_2() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
 
       //matrix D aanmaken voor de hessiaan van het duale stelsel
       SUP D(M,N);

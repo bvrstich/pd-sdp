@@ -28,8 +28,11 @@ class Lineq {
 
    public:
 
-      //constructor
-      Lineq(int M,int N,int nr,int option);
+      //norm constructor
+      Lineq(int M,int N);
+
+      //norm + spinsize constructor
+      Lineq(int M,int N,double spin);
 
       //copy constructor
       Lineq(const Lineq &);
@@ -57,9 +60,11 @@ class Lineq {
 
    private:
 
+      void allocate();
+
       void orthogonalize();
 
-      void norm_only();
+      void constr_u_0();
 
       //!double pointer to TPM object, will contain the linear equality constraints
       TPM **E;
