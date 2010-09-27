@@ -1239,4 +1239,38 @@ double TPM::S_2(){
 
 }
 
+/**
+ * What is the value of the commutator constraint? : Tr ( [a^dagger_a a_b , O] Gamma ) 
+ * For an operator that commutes with the hamiltonian this should be zero for all a < b. if not, there is a violation!
+ * @param k index
+ * @param l index
+ * @param O TPM object containing the operator
+ * @return the expectation value
+ */
+double TPM::commutator(int k,int l,TPM &O){
+
+   double ward = 0.0;
+
+   for(int a = 0;a < M;++a)
+      for(int b = 0;b < M;++b)
+         for(int c = 0;c < M;++c){
+
+            //1
+            ward += O(a,b,k,c) * (*this)(a,b,l,c) - O(a,b,l,c) * (*this)(a,b,k,c);
+
+            //2
+            ward += O(a,b,c,k) * (*this)(a,b,c,l) - O(a,b,c,l) * (*this)(a,b,c,k);
+
+            //3
+            ward -= O(a,l,b,c) * (*this)(a,k,b,c) - O(a,k,b,c) * (*this)(a,l,b,c);
+
+            //4
+            ward -= O(l,a,b,c) * (*this)(k,a,b,c) - O(k,a,b,c) * (*this)(l,a,b,c);
+
+         }
+
+   return ward;
+
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/

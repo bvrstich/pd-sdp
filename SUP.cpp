@@ -290,7 +290,7 @@ SUP &SUP::operator=(const SUP &SZ_c)
  * e.g. SZ = 0 makes all the Matrix elements zero.
  * @param a the number
  */
-SUP &SUP::operator=(const double &a)
+SUP &SUP::operator=(const double a)
 {
    (*SZ_tp[0]) = a;
    (*SZ_tp[1]) = a;
@@ -382,6 +382,7 @@ T2PM &SUP::t2pm() const
 
 /**
  * Initialization of the SUP matrix S, is just u^0 for now: see primal_dual.pdf for more information
+ *  @param lineq the object containing the linear equality constraints
  */
 void SUP::init_S(Lineq &lineq){
 
@@ -472,11 +473,10 @@ void SUP::init_Z(double alpha,const TPM &ham,const Lineq &lineq)
 {
    this->fill_Random();
 
-   this->proj_C(ham,lineq);
-
    //nog een eenheidsmatrix maal constante bijtellen zodat Z positief definiet is:
    this->daxpy(alpha,lineq.gu_0(0)); 
 
+   //projecteer op de juiste ruimte
    this->proj_C(ham,lineq);
 
 }

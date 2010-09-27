@@ -53,7 +53,7 @@ class SUP{
       SUP &operator=(const SUP &);
 
       //overload equality operator
-      SUP &operator=(const double &);
+      SUP &operator=(const double );
 
       TPM &tpm(int i) const;
 
