@@ -112,6 +112,8 @@ class TPM : public Matrix {
 
       void sp_pairing(double );
 
+      void pairing(double x[]);
+
       void in_sp(const char *);
 
       void bar(const T2PM &);

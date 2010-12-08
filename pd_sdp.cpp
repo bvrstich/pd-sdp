@@ -37,15 +37,14 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   //hamiltoniaan
    TPM ham(M,N);
-   ham.hubbard(0,1.0);
+   ham.sp_pairing(1);
 
    SUP S(M,N);
    S.init_S();
 
    SUP Z(M,N);
-   Z.init_Z(100.0,ham,S);
+   Z.init_Z(1000.0,ham,S);
 
    int dim = Z.gdim();
 
@@ -143,7 +142,7 @@ int main(void){
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,5.0);
+         a = DS.line_search(DZ,S,Z,2.0);
 
          S.daxpy(a,DS);
          Z.daxpy(a,DZ);
@@ -201,8 +200,8 @@ int main(void){
    cout << endl;
 
    //print density matrix to file
-//   (S.tpm(0)).out("workspace/input/rdm.in");
-
+//   (S.tpm(0)).out("rdm.out");
+   
    return 0;
 
 }

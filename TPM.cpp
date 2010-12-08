@@ -957,7 +957,7 @@ void TPM::sp_pairing(double pair_coupling){
 
    //pairing interaction term
    for(int a = 0;a < M/2;++a)
-      x[a] = a;//1.0;
+      x[a] = 1.0;
 
    //normeren op 1/2
    double ward = 0.0;
@@ -998,7 +998,53 @@ void TPM::sp_pairing(double pair_coupling){
 
    this->symmetrize();
 
+   delete [] x;
    delete [] E;
+
+}
+
+/** 
+ * Construct the pairing hamiltonian with a single particle spectrum
+ * @param x[] Structure of the pairing interaction
+ */
+void TPM::pairing(double x[]){
+
+   //normeren op 1/2
+   double ward = 0.0;
+
+   for(int i = 0;i < M/2;++i)
+      ward += x[i]*x[i];
+
+   ward *= 2.0;
+
+   for(int a = 0;a < M/2;++a)
+      x[a] /= std::sqrt(ward);
+
+   int a,b,c,d;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      if(a/2 == b/2)
+         (*this)(i,i) -= 2.0*x[a/2]*x[a/2];
+
+      for(int j = i + 1;j < n;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         if(a/2 == b/2 && c/2 == d/2)
+            (*this)(i,j) = -2.0*x[a/2]*x[c/2];
+         else
+            (*this)(i,j) = 0.0;
+
+      }
+
+   }
+
+   this->symmetrize();
 
 }
 
