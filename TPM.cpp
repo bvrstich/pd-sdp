@@ -1170,4 +1170,83 @@ void TPM::T(const T2PM &t2pm)
    }
 }
 
+/**
+ * fill the TPM object with the S^2 matrix
+ */
+void TPM::set_S_2(){
+
+   int a,b,c,d;
+
+   double s_a,s_b;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         //init
+         (*this)(i,j) = 0.0;
+
+         if(i == j){//diagonal stuff
+
+            s_a = ( 1.0 - 2 * (a % 2) )/2;
+            s_b = ( 1.0 - 2 * (b % 2) )/2;
+
+            (*this)(i,i) = (1 + s_a*s_a + s_b*s_b)/(N - 1.0) + 2*s_a*s_b;
+
+            if(a/2 == b/2 && a % 2 == 0 && b % 2 == 1)
+               (*this)(i,i) -= 1.0;
+
+         }
+
+         //then the off-diagonal elements
+         if(a % 2 == 0 && b % 2 == 1 && a/2 != b/2)//a up and b down
+            if(a + 1 == c && b == d + 1)
+               (*this)(i,j) += 1.0;
+
+      }
+
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * @return the expectation value of the size of the spin: S^2
+ */
+double TPM::S_2(){
+
+   //first diagonal elements:
+   int a,b;
+   double s_a,s_b;
+
+   double ward = 0.0;
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      s_a = ( 1.0 - 2 * (a % 2) )/2;
+      s_b = ( 1.0 - 2 * (b % 2) )/2;
+
+      ward += ( (1 + s_a*s_a + s_b*s_b)/(N - 1.0) + 2*s_a*s_b ) * (*this)(i,i);
+
+   }
+
+   //then the off diagonal elements: a and b are sp indices
+   for(int a = 0;a < M/2;++a)
+      for(int b = 0;b < M/2;++b)
+         ward += (*this)(2*a,2*b + 1,2*a + 1,2*b);
+
+   return ward;
+
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/
