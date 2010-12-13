@@ -50,6 +50,8 @@ class LinCon{
 
       void spincon();
 
+      void fill_Random();
+
    private:
 
       //!Constraint matrix

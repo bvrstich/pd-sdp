@@ -14,6 +14,7 @@ class PHM;
 class DPM;
 class PPHM;
 class T2PM;
+class LinIneq;
 
 /**
  * @author Brecht Verstichel
@@ -73,6 +74,9 @@ class TPM : public Matrix {
 
       //Q like afbeelding Q(A,B,C,tpm_d)
       void Q(int option,double A,double B,double C,const TPM &);
+
+      //Q like map with linear constraints added
+      void Q_L(int option,double A,double B,double C,const LinIneq &,const TPM &);
 
       //overlapmatrix afbeelding en zijn inverse
       void S(int option,const TPM &);

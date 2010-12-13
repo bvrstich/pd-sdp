@@ -405,6 +405,70 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
    this->symmetrize();
 
 }
+
+/**
+ * The Q-like map with linear constraints: see primal-dual.pdf for more info (form: Q(A,B,C,li)(TPM) )
+ * @param option = 1, regular Q-like map , = -1 inverse Q-like map
+ * @param A factor in front of the two particle piece of the map
+ * @param B factor in front of the no particle piece of the map
+ * @param C factor in front of the single particle piece of the map
+ * @param li The object containing the information about the linear constraints
+ * @param tpm_d the TPM of which the Q-like map is taken and saved in this.
+ */
+void TPM::Q_L(int option,double A,double B,double C,const LinIneq &li,const TPM &tpm_d){
+
+   if(option == -1){
+
+      std::cout << "NOT YET PROGRAMMED" << endl;
+
+   }
+
+   SPM spm(M,N);
+
+   //de trace*2 omdat mijn definitie van trace in berekeningen over alle (alpha,beta) loopt
+   double ward = B*tpm_d.trace()*2.0;
+
+   //construct de spm met schaling C
+   spm.constr(C,tpm_d);
+
+   for(int i = 0;i < n;++i){
+
+      int a = t2s[i][0];
+      int b = t2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         int c = t2s[j][0];
+         int d = t2s[j][1];
+
+         //tp
+         (*this)(i,j) = A*tpm_d(i,j);
+
+         //np
+         if(i == j)
+            (*this)(i,i) += ward;
+
+         //3 sp
+         if(a == c)
+            (*this)(i,j) -= spm(b,d);
+
+         if(b == c)
+            (*this)(i,j) += spm(a,d);
+
+         if(b == d)
+            (*this)(i,j) -= spm(a,c);
+
+         //constraint
+         for(int i = 0;i < li.gnr();++i)
+            (*this)(i,j) += li.gproj(i) * li[i].gI()(i,j);
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
 /**
  * initialize this onto the unitmatrix with trace N*(N - 1)/2
  */

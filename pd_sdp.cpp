@@ -11,6 +11,8 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <time.h>
+#include <cstdlib>
 
 using std::cout;
 using std::endl;
@@ -32,13 +34,19 @@ using std::ofstream;
 
 int main(void){
 
+   srand(time(NULL));
+
    cout.precision(10);
 
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
+   LinIneq::init(M,N,10);
+
+   LinIneq li(M,N);
+
    TPM ham(M,N);
-   ham.sp_pairing(1);
+   ham.hubbard(0,1.0);
 
    SUP S(M,N);
    S.init_S();
@@ -201,6 +209,8 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
+
+   LinIneq::clean();
    
    return 0;
 

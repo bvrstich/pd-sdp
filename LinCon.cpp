@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include <cmath>
 
 using std::cout;
@@ -139,5 +140,16 @@ void LinCon::diag_T(int index){
 void LinCon::spincon(){
 
    I_c->set_S_2();
+
+}
+
+/**
+ * fills the constraints object randomly
+ */
+void LinCon::fill_Random(){
+
+   I_c->fill_Random();
+
+   i_c = rand()/RAND_MAX;
 
 }

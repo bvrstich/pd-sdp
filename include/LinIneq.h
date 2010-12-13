@@ -26,7 +26,7 @@ class LinIneq{
    public:
 
       //constructor
-      LinIneq(int,int,int);
+      LinIneq(int,int);
 
       //copy constructor
       LinIneq(const LinIneq &);
@@ -58,6 +58,10 @@ class LinIneq{
 
       double gtr() const;
 
+      static void init(int,int,int);
+
+      static void clean();
+
    private:
 
       //!LinCon array containing the different LinCon objects
@@ -66,14 +70,14 @@ class LinIneq{
       //!counter of the nr of objects in the program
       static int counter;
 
+      //!nr of linear constraints
+      static int nr;
+
       //!array containing the projections on the constraint
       double *proj;
 
       //!variable needed for the constraint function, Tr (tpm)*2/N(N-1)
       double tr;
-
-      //!nr of linear constraints
-      int nr;
 
       //!nr of sp orbitals
       int M;

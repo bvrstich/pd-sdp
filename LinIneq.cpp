@@ -10,35 +10,56 @@ using std::ifstream;
 
 #include "include.h"
 
-int LinIneq::counter = 0;
+int LinIneq::nr;
 
 LinCon **LinIneq::li;
+
+/**
+ * Static function that initialializes the static members: it allocates the LinCon objects and 
+ * initializes them.
+ * @param M nr of sp orbitals
+ * @param N nr of particles
+ * @param nr_in nr of contraint matrices
+ */
+void LinIneq::init(int M,int N,int nr_in){
+
+   nr = nr_in;
+
+   //allocate
+   li = new LinCon * [nr];
+
+   for(int i = 0;i < nr;++i)
+      li[i] = new LinCon(M,N);
+
+   //fill
+   for(int i = 0;i < nr;++i)
+      li[i]->fill_Random();
+
+}
+
+/**
+ * delete the statics
+ */
+void LinIneq::clean(){
+
+   for(int i = 0;i < nr;++i)
+      delete li[i];
+
+   delete [] li;
+
+}
 
 /**
  * constructor of a LinIneq object
  * @param M nr of sp orbitals
  * @param N nr of particles
- * @param nr nr of constraints
  */
-LinIneq::LinIneq(int M,int N,int nr){
+LinIneq::LinIneq(int M,int N){
 
    this->M = M;
    this->N = N;
 
-   this->nr = nr;
-
-   if(counter == 0){
-
-      li = new LinCon * [nr];
-
-      for(int i = 0;i < nr;++i)
-         li[i] = new LinCon(M,N);
-
-   }
-
    proj = new double [nr];
-
-   ++counter;
 
 }
 
@@ -51,25 +72,12 @@ LinIneq::LinIneq(const LinIneq &li_copy){
    this->M = li_copy.gM();
    this->N = li_copy.gN();
 
-   this->nr = li_copy.gnr();
-
    this->tr = li_copy.gtr();
-
-   if(counter == 0){
-
-      li = new LinCon * [nr];
-
-      for(int i = 0;i < nr;++i)
-         li[i] = new LinCon(li_copy[i]);
-
-   }
 
    proj = new double [nr];
 
    for(int i = 0;i < nr;++i)
       proj[i] = li_copy.gproj(i);
-
-   ++counter;
 
 }
 
@@ -79,17 +87,6 @@ LinIneq::LinIneq(const LinIneq &li_copy){
 LinIneq::~LinIneq(){
 
    delete [] proj;
-
-   if(counter == 1){
-
-      for(int i = 0;i < nr;++i)
-         delete li[i];
-
-      delete [] li;
-
-   }
-
-   counter--;
 
 }
 
@@ -139,33 +136,6 @@ int LinIneq::gN() const{
 int LinIneq::gM() const{
 
    return M;
-
-}
-
-/**
- * @param li_epsi the LinIneq object filled with the Newton direction found by the cg loop.
- * @return the first singularity in the potential along the "epsilon" direction.
- */
-double LinIneq::min_end(const LinIneq &li_epsi) const{
-
-   double min_end = -constraint(0)/li_epsi.constraint(0);
-
-   if(min_end < 0.0)
-      min_end = 1.0e+15;
-
-   for(int i = 1;i < nr;++i){
-
-      double tmp = -constraint(i)/li_epsi.constraint(i);
-
-      if(tmp < 0.0)
-         tmp = 1.0e+15;
-
-      if(tmp < min_end)
-         min_end = tmp;
-
-   }
-
-   return min_end;
 
 }
 
