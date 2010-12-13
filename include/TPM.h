@@ -81,6 +81,9 @@ class TPM : public Matrix {
       //overlapmatrix afbeelding en zijn inverse
       void S(int option,const TPM &);
 
+      //overlapmatrix afbeelding en zijn inverse
+      void S_L(int option,const LinIneq &,const TPM &);
+
       void unit();
 
       void proj_Tr();
@@ -128,6 +131,8 @@ class TPM : public Matrix {
 
       double S_2();
 
+      static void constr_overlap(int,int);
+
    private:
 
       //!static list of dimension [n_tp][2] that takes in a tp index i and returns two sp indices: a = t2s[i][0] and b = t2s[i][1]
@@ -138,6 +143,9 @@ class TPM : public Matrix {
 
       //!static counter that counts the number of TPM objects running in the program
       static int counter;
+
+      //!variables needed for the Q-like overlapmatrix - map.
+      static double S_a,S_b,S_c;
 
       //!nr of particles
       int N;

@@ -7,6 +7,7 @@
 using std::ostream;
 
 class TPM;
+class SPM;
 
 /**
  * @author Brecht Verstichel
@@ -36,6 +37,8 @@ class LinCon{
 
       TPM &gI() const;
 
+      SPM &gI_bar() const;
+
       double gi() const;
 
       void sI(const TPM &);
@@ -48,14 +51,17 @@ class LinCon{
 
       void diag_T(int);
 
-      void spincon();
+      void spincon(double);
 
       void fill_Random();
 
    private:
 
-      //!Constraint matrix
+      //!Constraint matrix: Watch out, shifted with i_c unity, so that Tr Gamma I_c > 0
       TPM *I_c;
+
+      //!Partially traced constrained matrix, it just helps to keep it here.
+      SPM *I_c_bar;
 
       //!minimal projection on the constraint matrix, such that Tr(Gamma I_C) geq i_c
       double i_c;

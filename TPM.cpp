@@ -15,6 +15,62 @@ int TPM::counter = 0;
 int **TPM::t2s;
 int **TPM::s2t;
 
+double TPM::S_a;
+double TPM::S_b;
+double TPM::S_c;
+
+/**
+ * Will calculate the parameters needed for the overlapmatrix-map: S_a,S_b and S_c.
+ * @param M nr of sp orbitals
+ * @param N nr of particles
+ */
+void TPM::constr_overlap(int M,int N){
+
+   S_a = 1.0;
+   S_b = 0.0;
+   S_c = 0.0;
+
+#ifdef __Q_CON
+
+   S_a += 1.0;
+   S_b += (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
+   S_c += (2.0*N - M)/((N - 1.0)*(N - 1.0));
+
+#endif
+
+#ifdef __G_CON
+
+   S_a += 4.0;
+   S_c += (2.0*N - M - 2.0)/((N - 1.0)*(N - 1.0));
+
+#endif
+
+#ifdef __T1_CON
+
+   S_a += M - 4.0;
+   S_b += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
+   S_c -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
+
+#endif
+
+#ifdef __T2_CON
+   
+   S_a += 5.0*M - 8.0;
+   S_b += 2.0/(N - 1.0);
+   S_c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
+
+#endif
+
+#ifdef __T2P_CON
+
+   S_a += 5.0*M - 4.0;
+   S_b += 2.0/(N - 1.0);
+   S_c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M - 2.0)/(2.0*(N - 1.0)*(N - 1.0));
+
+#endif
+
+}
+
 /**
  * standard constructor: constructs Matrix object of dimension M*(M - 1)/2 and
  * if counter == 0, allocates and constructs the lists containing the relationship between sp and tp basis.
@@ -28,6 +84,8 @@ TPM::TPM(int M,int N) : Matrix(M*(M - 1)/2) {
    this->n = M*(M - 1)/2;
 
    if(counter == 0){
+
+      TPM::constr_overlap(M,N);
 
       //allocatie van sp2tp
       s2t = new int * [M];
@@ -79,6 +137,8 @@ TPM::TPM(const TPM &tpm_c) : Matrix(tpm_c){
    this->n = M*(M - 1)/2;
 
    if(counter == 0){
+
+      TPM::constr_overlap(M,N);
 
       //allocatie van sp2tp
       s2t = new int * [M];
@@ -407,69 +467,6 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
 }
 
 /**
- * The Q-like map with linear constraints: see primal-dual.pdf for more info (form: Q(A,B,C,li)(TPM) )
- * @param option = 1, regular Q-like map , = -1 inverse Q-like map
- * @param A factor in front of the two particle piece of the map
- * @param B factor in front of the no particle piece of the map
- * @param C factor in front of the single particle piece of the map
- * @param li The object containing the information about the linear constraints
- * @param tpm_d the TPM of which the Q-like map is taken and saved in this.
- */
-void TPM::Q_L(int option,double A,double B,double C,const LinIneq &li,const TPM &tpm_d){
-
-   if(option == -1){
-
-      std::cout << "NOT YET PROGRAMMED" << endl;
-
-   }
-
-   SPM spm(M,N);
-
-   //de trace*2 omdat mijn definitie van trace in berekeningen over alle (alpha,beta) loopt
-   double ward = B*tpm_d.trace()*2.0;
-
-   //construct de spm met schaling C
-   spm.constr(C,tpm_d);
-
-   for(int i = 0;i < n;++i){
-
-      int a = t2s[i][0];
-      int b = t2s[i][1];
-
-      for(int j = i;j < n;++j){
-
-         int c = t2s[j][0];
-         int d = t2s[j][1];
-
-         //tp
-         (*this)(i,j) = A*tpm_d(i,j);
-
-         //np
-         if(i == j)
-            (*this)(i,i) += ward;
-
-         //3 sp
-         if(a == c)
-            (*this)(i,j) -= spm(b,d);
-
-         if(b == c)
-            (*this)(i,j) += spm(a,d);
-
-         if(b == d)
-            (*this)(i,j) -= spm(a,c);
-
-         //constraint
-         for(int i = 0;i < li.gnr();++i)
-            (*this)(i,j) += li.gproj(i) * li[i].gI()(i,j);
-
-      }
-   }
-
-   this->symmetrize();
-
-}
-
-/**
  * initialize this onto the unitmatrix with trace N*(N - 1)/2
  */
 void TPM::unit(){
@@ -703,50 +700,76 @@ void TPM::G(int option,const PHM &phm){
  */
 void TPM::S(int option,const TPM &tpm_d){
 
-   double a = 1.0;
-   double b = 0.0;
-   double c = 0.0;
+   this->Q(option,S_a,S_b,S_c,tpm_d);
 
-#ifdef __Q_CON
+}
 
-   a += 1.0;
-   b += (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
-   c += (2.0*N - M)/((N - 1.0)*(N - 1.0));
+/**
+ * ( Overlapmatrix of the U-basis ) - map, maps a TPM onto a different TPM, this map is actually a Q-like map
+ * for which the paramaters a,b and c are calculated in primal_dual.pdf. Since it is a Q-like map the inverse
+ * can be taken as well.
+ * @param option = 1 direct overlapmatrix-map is used , = -1 inverse overlapmatrix map is used
+ * @param li The LinIneq object containing all the info about all the constraints.
+ * @param tpm_d the input TPM
+ */
+void TPM::S_L(int option,const LinIneq &li,const TPM &tpm_d){
 
-#endif
+   if(option == -1){
 
-#ifdef __G_CON
+      std::cout << "NOT YET PROGRAMMED" << endl;
 
-   a += 4.0;
-   c += (2.0*N - M - 2.0)/((N - 1.0)*(N - 1.0));
+   }
+   else{
 
-#endif
+      double A = li.ga();
+      double B = li.gb();
+      double C = li.gc();
 
-#ifdef __T1_CON
+      SPM spm(M,N);
 
-   a += M - 4.0;
-   b += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
-   c -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
+      //de trace*2 omdat mijn definitie van trace in berekeningen over alle (alpha,beta) loopt
+      double ward = B*tpm_d.trace()*2.0;
 
-#endif
+      //construct de spm met schaling C
+      spm.constr(C,tpm_d);
 
-#ifdef __T2_CON
-   
-   a += 5.0*M - 8.0;
-   b += 2.0/(N - 1.0);
-   c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
+      for(int i = 0;i < n;++i){
 
-#endif
+         int a = t2s[i][0];
+         int b = t2s[i][1];
 
-#ifdef __T2P_CON
+         for(int j = i;j < n;++j){
 
-   a += 5.0*M - 4.0;
-   b += 2.0/(N - 1.0);
-   c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M - 2.0)/(2.0*(N - 1.0)*(N - 1.0));
+            int c = t2s[j][0];
+            int d = t2s[j][1];
 
-#endif
+            //tp
+            (*this)(i,j) = A*tpm_d(i,j);
 
-   this->Q(option,a,b,c,tpm_d);
+            //np
+            if(i == j)
+               (*this)(i,i) += ward;
+
+            //3 sp
+            if(a == c)
+               (*this)(i,j) -= spm(b,d);
+
+            if(b == c)
+               (*this)(i,j) += spm(a,d);
+
+            if(b == d)
+               (*this)(i,j) -= spm(a,c);
+
+            //constraint
+            for(int i = 0;i < li.gnr();++i)
+               (*this)(i,j) += li.gproj(i) * li[i].gI()(i,j);
+
+         }
+      }
+
+   }
+
+   this->symmetrize();
 
 }
 
@@ -967,7 +990,7 @@ void TPM::collaps(int option,const SUP &S){
 #endif
 
 #ifdef __T2_CON
-   
+
    hulp.T(S.pphm());
 
    *this += hulp;

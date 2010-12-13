@@ -46,21 +46,33 @@ class LinIneq{
 
       int gN() const;
 
-      double min_end(const LinIneq &) const;
-
       void fill(const TPM &);
 
       double gproj(int) const;
 
       double *gproj();
 
-      double constraint(int) const;
+      double gproj_bar(int) const;
+
+      double *gproj_bar();
 
       double gtr() const;
 
       static void init(int,int,int);
 
       static void clean();
+
+      static void constr_overlap(int,int);
+
+      double ga() const;
+
+      double gb() const;
+
+      double gc() const;
+
+      double alpha() const;
+
+      double beta(int) const;
 
    private:
 
@@ -73,10 +85,19 @@ class LinIneq{
       //!nr of linear constraints
       static int nr;
 
+      //!variables of the overlapmatrix-map
+      static double a,b,c;
+
+      //!coefficient matrix of the overlap matrix map system of linear equations
+      static double *coef;
+
       //!array containing the projections on the constraint
       double *proj;
 
-      //!variable needed for the constraint function, Tr (tpm)*2/N(N-1)
+      //!array containing the barred projections onto the barred constraints
+      double *proj_bar;
+
+      //!the unrestriced trace of the input TPM object.
       double tr;
 
       //!nr of sp orbitals
