@@ -43,8 +43,6 @@ int main(void){
 
    LinIneq::init(M,N,10);
 
-   LinIneq li(M,N);
-
    TPM ham(M,N);
    ham.hubbard(0,1.0);
 
@@ -77,7 +75,7 @@ int main(void){
 
    while(flag != 3){
 
-      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
+      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t" << S.tpm(0).spin();
 
       //matrix D aanmaken voor de hessiaan van het duale stelsel
       SUP D(M,N);
@@ -211,7 +209,7 @@ int main(void){
 //   (S.tpm(0)).out("rdm.out");
 
    LinIneq::clean();
-   
+  
    return 0;
 
 }

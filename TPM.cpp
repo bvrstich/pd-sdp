@@ -709,14 +709,84 @@ void TPM::S(int option,const TPM &tpm_d){
  * for which the paramaters a,b and c are calculated in primal_dual.pdf. Since it is a Q-like map the inverse
  * can be taken as well.
  * @param option = 1 direct overlapmatrix-map is used , = -1 inverse overlapmatrix map is used
- * @param li The LinIneq object containing all the info about all the constraints.
  * @param tpm_d the input TPM
  */
-void TPM::S_L(int option,const LinIneq &li,const TPM &tpm_d){
+void TPM::S_L(int option,const TPM &tpm_d){
+
+   LinIneq li(M,N);
+   li.fill(tpm_d);
 
    if(option == -1){
 
-      std::cout << "NOT YET PROGRAMMED" << endl;
+      //first make some parameters needed for the inverse:
+      double A = li.ga();
+      double B = li.gb();
+      double C = li.gc();
+
+      double lambda = B*(M - 1.0) - C;
+      double kappa = A - C*(M - 2.0);
+
+      double alpha = li.alpha();
+
+      double beta[li.gnr()];
+
+      for(int k = 0;k < li.gnr();++k)
+         beta[k] = li.beta(k);
+
+      //make the scaled bar of tpm_d
+      SPM spm(M,N);
+      spm.constr(C/(A*kappa),tpm_d);
+
+      //now start the map
+      for(int i = 0;i < n;++i){
+
+         int a = t2s[i][0];
+         int b = t2s[i][1];
+
+         for(int j = i;j < n;++j){
+
+            int c = t2s[j][0];
+            int d = t2s[j][1];
+
+            //regular Q-like part:
+
+            //tp
+            (*this)(i,j) = tpm_d(i,j)/A;
+
+            //np
+            if(i == j)
+               (*this)(i,i) -= 1.0/A * ( B + 2.0*C*lambda/kappa ) * alpha;
+
+            //3 sp
+            if(a == c)
+               (*this)(i,j) += spm(b,d);
+
+            if(b == c)
+               (*this)(i,j) -= spm(a,d);
+
+            if(b == d)
+               (*this)(i,j) += spm(a,c);
+
+            //constraint part:
+            for(int k = 0;k < li.gnr();++k){
+
+               //tp part
+               (*this)(i,j) -= beta[k]/A * li[k].gI()(i,j);
+
+               //3 sp
+               if(a == c)
+                  (*this)(i,j) -= C/(A*kappa) * beta[k] * li[k].gI_bar()(b,d);
+
+               if(b == c)
+                  (*this)(i,j) += C/(A*kappa) * beta[k] * li[k].gI_bar()(a,d);
+
+               if(b == d)
+                  (*this)(i,j) -= C/(A*kappa) * beta[k] * li[k].gI_bar()(a,c);
+
+            }
+
+         }
+      }
 
    }
    else{
@@ -726,9 +796,6 @@ void TPM::S_L(int option,const LinIneq &li,const TPM &tpm_d){
       double C = li.gc();
 
       SPM spm(M,N);
-
-      //de trace*2 omdat mijn definitie van trace in berekeningen over alle (alpha,beta) loopt
-      double ward = B*tpm_d.trace()*2.0;
 
       //construct de spm met schaling C
       spm.constr(C,tpm_d);
@@ -748,7 +815,7 @@ void TPM::S_L(int option,const LinIneq &li,const TPM &tpm_d){
 
             //np
             if(i == j)
-               (*this)(i,i) += ward;
+               (*this)(i,i) += B*li.gtr();
 
             //3 sp
             if(a == c)
@@ -761,8 +828,8 @@ void TPM::S_L(int option,const LinIneq &li,const TPM &tpm_d){
                (*this)(i,j) -= spm(a,c);
 
             //constraint
-            for(int i = 0;i < li.gnr();++i)
-               (*this)(i,j) += li.gproj(i) * li[i].gI()(i,j);
+            for(int k = 0;k < li.gnr();++k)
+               (*this)(i,j) += li.gproj(k) * li[k].gI()(i,j);
 
          }
       }

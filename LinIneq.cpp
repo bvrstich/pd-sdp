@@ -55,14 +55,14 @@ void LinIneq::init(int M,int N,int nr_in){
    double con_tr[nr];
 
    for(int i = 0;i < nr;++i)
-      con_tr[i] = li[i]->gI().trace();
+      con_tr[i] = 2.0*li[i]->gI().trace();
 
    //overlaps
    Matrix I_overlap(nr);
 
    for(int i = 0;i < nr;++i)
       for(int j = i;j < nr;++j)
-         I_overlap(i,j) = li[i]->gI().ddot(li[j]->gI());
+         I_overlap(i,j) = 4.0*li[i]->gI().ddot(li[j]->gI());
 
    I_overlap.symmetrize();
 
@@ -401,8 +401,20 @@ double LinIneq::gc() const {
  */
 double LinIneq::alpha() const {
 
-   //I AM HERE!! WRITE ME!!
-   return 0.0;
+   int n = 2*nr + 1;
+
+   //alpha_1
+   double tmp = tr*coef[0];
+
+   //alpha_2^i
+   for(int k = 1;k <= nr;++k)
+      tmp += coef[k*n]*proj[k - 1];
+
+   //alpha_3^i
+   for(int k = nr + 1;k <= 2*nr;++k)
+      tmp += coef[k*n]*proj_bar[k - nr - 1];
+
+   return tmp;
 
 }
 
@@ -412,7 +424,19 @@ double LinIneq::alpha() const {
  */
 double LinIneq::beta(int index) const {
 
-   //ME TOO!!
-   return 0.0;
+   int n = 2*nr + 1;
+
+   //beta_1
+   double tmp = tr*coef[index + 1];
+
+   //beta_2^i
+   for(int k = 1;k <= nr;++k)
+      tmp += coef[k*n + index + 1] * proj[k - 1];
+
+   //beta_3^i
+   for(int k = nr + 1;k <= 2*nr;++k)
+      tmp += coef[k*n + index + 1] * proj_bar[k - nr - 1];
+
+   return tmp;
 
 }
