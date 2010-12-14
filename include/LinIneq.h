@@ -34,6 +34,14 @@ class LinIneq{
       //destructor
       virtual ~LinIneq();
 
+      LinIneq &operator=(const LinIneq &);
+
+      LinIneq &operator+=(const LinIneq &);
+
+      LinIneq &operator-=(const LinIneq &);
+
+      LinIneq &operator=(double);
+
       int gnr() const;
 
       //easy to access the LinCon objects
@@ -73,6 +81,24 @@ class LinIneq{
       double alpha() const;
 
       double beta(int) const;
+
+      void fill_Random();
+
+      double ddot(const LinIneq &) const;
+
+      void invert();
+
+      void dcal(double);
+
+      void sqrt(int);
+
+      void L_map(const LinIneq &,const LinIneq &);
+
+      LinIneq &daxpy(double,const LinIneq &);
+
+      void dscal(double);
+
+      void min_lunit(double);
 
    private:
 

@@ -42,6 +42,8 @@ LinCon::LinCon(const LinCon &lc_copy){
    this->M = lc_copy.gM();
    this->N = lc_copy.gN();
 
+   this->I_c_tr = lc_copy.gI_tr();
+
 }
 
 /**
@@ -74,6 +76,15 @@ SPM &LinCon::gI_bar() const{
 }
 
 /**
+ * @return the unrestricted trace of the constraint.
+ */
+double LinCon::gI_tr() const{
+
+   return I_c_tr;
+
+}
+
+/**
  * @return The minimal projection
  */
 double LinCon::gi() const{
@@ -101,21 +112,23 @@ void LinCon::sI(const TPM &I){
    *I_c = I;
 
    for(int i = 0;i < I.gn();++i)//shift it for convenience
-      (*I_c)(i,i) -= i_c/(N*(N - 1.0));
+      (*I_c)(i,i) -= 2.0*i_c/(N*(N - 1.0));
 
    I_c_bar->bar(I);
+
+   I_c_tr = I_c->trace()*2.0;
 
 }
 
 ostream &operator<<(ostream &output,const LinCon &lc_p){
 
-   cout << "The minimal projection:\t" << lc_p.gi() << endl;
-   cout << endl;
+   output << "The minimal projection:\t" << lc_p.gi() << endl;
+   output << endl;
 
-   cout << "The shifted Constraint matrix:" << endl;
-   cout << endl;
+   output << "The shifted Constraint matrix:" << endl;
+   output << endl;
 
-   cout << lc_p.gI() << endl;
+   output << lc_p.gI() << endl;
 
    return output;
 
@@ -154,6 +167,8 @@ void LinCon::diag_T(int index){
 
    I_c_bar->bar(*I_c);
 
+   I_c_tr = I_c->trace()*2.0;
+
    i_c = 0.0;
 
 }
@@ -167,9 +182,11 @@ void LinCon::spincon(double spin){
    I_c->set_S_2();
 
    for(int i = 0;i < I_c->gn();++i)
-      (*I_c)(i,i) -= spin/(N*(N - 1.0));
+      (*I_c)(i,i) -= 2.0*spin/(N*(N - 1.0));
 
    I_c_bar->bar(*I_c);
+
+   I_c_tr = I_c->trace()*2.0;
 
    i_c = spin;
 
@@ -185,7 +202,9 @@ void LinCon::fill_Random(){
    I_c->fill_Random();
 
    for(int i = 0;i < I_c->gn();++i)
-      (*I_c)(i,i) -= i_c/(N*(N - 1.0));
+      (*I_c)(i,i) -= 2.0*i_c/(N*(N - 1.0));
+
+   I_c_tr = I_c->trace()*2.0;
 
    I_c_bar->bar(*I_c);
 

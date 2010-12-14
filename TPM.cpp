@@ -1071,6 +1071,11 @@ void TPM::collaps(int option,const SUP &S){
    *this += hulp;
 
 #endif
+   
+   //and last but not least, the linear constraints
+
+   for(int i = 0;i < S.gli().gnr();++i)
+      this->daxpy(S.gli().gproj(i),S.gli()[i].gI());
 
    if(option == 1)
       this->proj_Tr();

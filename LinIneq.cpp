@@ -36,10 +36,12 @@ void LinIneq::init(int M,int N,int nr_in){
 
    for(int i = 0;i < nr;++i)
       li[i] = new LinCon(M,N);
-
+   /*
    //fill
    for(int i = 0;i < nr;++i)
-      li[i]->fill_Random();
+   li[i]->fill_Random();
+    */
+   li[0]->spincon(1.0);
 
    //what are the coef's of the overlap matrix without the linear constraints:
    constr_overlap(M,N);
@@ -50,12 +52,6 @@ void LinIneq::init(int M,int N,int nr_in){
    coef = new double [n*n];
 
    //now make some variables needed for the making of the system
-
-   //traces:
-   double con_tr[nr];
-
-   for(int i = 0;i < nr;++i)
-      con_tr[i] = 2.0*li[i]->gI().trace();
 
    //overlaps
    Matrix I_overlap(nr);
@@ -84,11 +80,11 @@ void LinIneq::init(int M,int N,int nr_in){
       coef[i] = 0.0;
 
    for(int i = nr + 1;i <= 2*nr;++i)
-      coef[i] = (b*(M - 1.0) - c)*con_tr[i - nr - 1];
+      coef[i] = (b*(M - 1.0) - c) * li[i - nr - 1]->gI_tr();
 
    for(int k = 1;k <= nr;++k){//columns
 
-      coef[k*n] = con_tr[k - 1];
+      coef[k*n] = li[k - 1]->gI_tr();
 
       for(int i = 1;i <= nr;++i){//rows
 
@@ -187,7 +183,7 @@ void LinIneq::constr_overlap(int M,int N){
 #endif
 
 #ifdef __T2_CON
-   
+
    a += 5.0*M - 8.0;
    b += 2.0/(N - 1.0);
    c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
@@ -250,6 +246,78 @@ LinIneq::~LinIneq(){
 
    delete [] proj;
    delete [] proj_bar;
+
+}
+
+/**
+ * overload the equality operator
+ * @param li_copy The LinIneq you want to be copied into this
+ */
+LinIneq &LinIneq::operator=(const LinIneq &li_copy){
+
+   int inc = 1;
+
+   dcopy_(&nr,li_copy.proj,&inc,proj,&inc);
+
+   return *this;
+
+}
+
+/**
+ * Make all the numbers in your LinIneq projection object array equal to the number a.
+ * @param a the number
+ */
+LinIneq &LinIneq::operator=(double a){
+
+   for(int i = 0;i < nr;++i)
+      proj[i] = a;
+
+   return *this;
+
+}
+
+/**
+ * overload the += operator
+ * @param li_pl The LinIneq object you want to add to this
+ */
+LinIneq &LinIneq::operator+=(const LinIneq &li_pl){
+
+   int inc = 1;
+   double alpha = 1.0;
+
+   daxpy_(&nr,&alpha,li_pl.proj,&inc,proj,&inc);
+
+   return *this;
+
+}
+
+/**
+ * overload the -= operator
+ * @param li_pl The LinIneq object you want to deduct from this
+ */
+LinIneq &LinIneq::operator-=(const LinIneq &li_pl){
+
+   int inc = 1;
+   double alpha = -1.0;
+
+   daxpy_(&nr,&alpha,li_pl.proj,&inc,proj,&inc);
+
+   return *this;
+
+}
+
+/**
+ * the daxpy function, add another object scaled with alpha.
+ * @param alpha the scaling factor
+ * @param li_pl The LinIneq object you want to add to this
+ */
+LinIneq &LinIneq::daxpy(double alpha,const LinIneq &li_pl){
+
+   int inc = 1;
+
+   daxpy_(&nr,&alpha,li_pl.proj,&inc,proj,&inc);
+
+   return *this;
 
 }
 
@@ -438,5 +506,102 @@ double LinIneq::beta(int index) const {
       tmp += coef[k*n + index + 1] * proj_bar[k - nr - 1];
 
    return tmp;
+
+}
+
+/**
+ * @return inproduct of (*this) LinIneq with li_i, defined as (A^T B)
+ * @param li_i input matrix
+ */
+double LinIneq::ddot(const LinIneq &li_i) const {
+
+   int inc = 1;
+
+   return ddot_(&nr,proj,&inc,li_i.proj,&inc);
+
+}
+
+ostream &operator<<(ostream &output,const LinIneq &li_p){
+
+   for(int i = 0;i < li_p.gnr();++i)
+      output << i << "\t" << li_p.gproj(i) << endl;
+
+   return output;
+
+}
+
+/**
+ * Multiply LinIneq object left and right with another LinIneq object
+ * @param map LinIneq object that will be multiplied to the left en to the right of the matrix object
+ * @param object central LinIneq object
+ */
+void LinIneq::L_map(const LinIneq &map,const LinIneq &object){
+
+   for(int i = 0;i < nr;++i)
+      proj[i] = map.gproj(i)*object.gproj(i)*map.gproj(i);
+
+}
+
+/**
+ * Take the square root out of the projections onto the Linear Constraints
+ * @param option = 1, positive square root, = -1, inverse square root.
+ */
+void LinIneq::sqrt(int option){
+
+   if(option == 1){
+
+      for(int i = 0;i < nr;++i)
+         proj[i] = std::sqrt(proj[i]);
+
+   }
+   else{
+
+      for(int i = 0;i < nr;++i)
+         proj[i] = 1.0/std::sqrt(proj[i]);
+
+   }
+
+}
+
+/**
+ * Multiply the projections with a constant factor  alpha
+ * @param alpha the scaling factor
+ */
+void LinIneq::dscal(double alpha){
+
+   int inc = 1;
+
+   dscal_(&nr,&alpha,proj,&inc);
+
+}
+
+/**
+ * Invert the projections
+ */
+void LinIneq::invert(){
+
+   for(int i = 0;i < nr;++i)
+      proj[i] = 1.0/proj[i];
+
+}
+
+/**
+ * Fill the projection randomly
+ */
+void LinIneq::fill_Random(){
+
+   for(int i = 0;i < nr;++i)
+      proj[i] = rand()/RAND_MAX;
+
+}
+
+/**
+ * Deduct from the current LinIneq a constant times the unity matrix projected on the constraints.
+ * @param alpha the scaling factor
+ */
+void LinIneq::min_lunit(double alpha){
+
+   for(int i = 0;i < nr;++i)
+      proj[i] -= alpha * li[i]->gI_tr();
 
 }

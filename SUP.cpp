@@ -8,7 +8,7 @@ using std::ostream;
 
 /**
  * standard constructor\n
- * Allocates two TPM matrices and optionally a PHM, DPM or PPHM matrix.
+ * Allocates two TPM matrices and optionally a PHM, DPM or PPHM matrix. And of course also the LinIneq object.
  * @param M number of sp orbitals
  * @param N number of particles
  */
@@ -64,12 +64,14 @@ SUP::SUP(int M,int N){
    dim += n_t2p;
 
 #endif
+   
+   li = new LinIneq(M,N);
 
 }
 
 /**
  * standard constructor\n
- * Allocates two TPM matrices and optionally a PHM, DPM or PPHM matrix, then copies the content of
+ * Allocates two TPM matrices and optionally a PHM, DPM or PPHM matrix, and a LinIneq object, then copies the content of
  * input SUP SZ_c into it.
  * @param SZ_c input SUP
  */
@@ -135,6 +137,10 @@ SUP::SUP(const SUP &SZ_c)
    *SZ_t2p = *SZ_c.SZ_t2p;
 
 #endif
+   
+   li = new LinIneq(SZ_c.gli());
+
+   dim += li->gnr();
 
 }
 
@@ -171,6 +177,8 @@ SUP::~SUP(){
    delete SZ_t2p;
 
 #endif
+   
+   delete li;
 
 }
 
@@ -206,6 +214,8 @@ SUP &SUP::operator+=(const SUP &SZ_pl)
    (*SZ_t2p) += (*SZ_pl.SZ_t2p);
 
 #endif
+   
+   (*li) += SZ_pl.gli();
 
    return *this;
 
@@ -244,6 +254,8 @@ SUP &SUP::operator-=(const SUP &SZ_pl)
 
 #endif
 
+   (*li) -= SZ_pl.gli();
+
    return *this;
 
 }
@@ -280,6 +292,8 @@ SUP &SUP::operator=(const SUP &SZ_c)
    (*SZ_t2p) = (*SZ_c.SZ_t2p);
 
 #endif
+
+   (*li) = SZ_c.gli();
 
    return *this;
 
@@ -319,15 +333,27 @@ SUP &SUP::operator=(const double &a)
 
 #endif
 
+   (*li) = a;
+
    return *this;
 
+}
+
+/**
+ * The const version
+ * @param i which block you want to have the pointer to.
+ * @return pointer to the individual TPM blocks: SZ_tp[i]
+ */
+const TPM &SUP::tpm(int i) const
+{
+   return *SZ_tp[i];
 }
 
 /**
  * @param i which block you want to have the pointer to.
  * @return pointer to the individual TPM blocks: SZ_tp[i]
  */
-TPM &SUP::tpm(int i) const
+TPM &SUP::tpm(int i)
 {
    return *SZ_tp[i];
 }
@@ -335,9 +361,18 @@ TPM &SUP::tpm(int i) const
 #ifdef __G_CON
 
 /**
+ * The const version
  * @return pointer to the PHM block: SZ_ph
  */
-PHM &SUP::phm() const
+const PHM &SUP::phm() const
+{
+   return *SZ_ph;
+}
+
+/**
+ * @return pointer to the PHM block: SZ_ph
+ */
+PHM &SUP::phm()
 {
    return *SZ_ph;
 }
@@ -347,9 +382,18 @@ PHM &SUP::phm() const
 #ifdef __T1_CON
 
 /**
+ * The const version
  * @return pointer to the DPM block: SZ_dp
  */
-DPM &SUP::dpm() const
+const DPM &SUP::dpm() const
+{
+   return *SZ_dp;
+}
+
+/**
+ * @return pointer to the DPM block: SZ_dp
+ */
+DPM &SUP::dpm()
 {
    return *SZ_dp;
 }
@@ -359,9 +403,18 @@ DPM &SUP::dpm() const
 #ifdef __T2_CON
 
 /**
+ * The const version
  * @return pointer to the PPHM block: SZ_pph
  */
-PPHM &SUP::pphm() const
+const PPHM &SUP::pphm() const
+{
+   return *SZ_pph;
+}
+
+/**
+ * @return pointer to the PPHM block: SZ_pph
+ */
+PPHM &SUP::pphm()
 {
    return *SZ_pph;
 }
@@ -371,14 +424,42 @@ PPHM &SUP::pphm() const
 #ifdef __T2P_CON
 
 /**
+ * The const version
  * @return pointer to the T2PM block: SZ_t2p
  */
-T2PM &SUP::t2pm() const
+const T2PM &SUP::t2pm() const
+{
+   return *SZ_t2p;
+}
+
+/**
+ * @return pointer to the T2PM block: SZ_t2p
+ */
+T2PM &SUP::t2pm()
 {
    return *SZ_t2p;
 }
 
 #endif
+
+/**
+ * The const version
+ * @return pointer to the LinIneq object li.
+ */
+const LinIneq &SUP::gli() const{
+
+   return *li;
+
+}
+
+/**
+ * @return pointer to the LinIneq object li.
+ */
+LinIneq &SUP::gli(){
+
+   return *li;
+
+}
 
 /**
  * Initialization of the SUP matrix S, is just u^0: see primal_dual.pdf for more information
@@ -423,6 +504,9 @@ ostream &operator<<(ostream &output,SUP &SZ_p){
    output << (*SZ_p.SZ_t2p);
 
 #endif
+   
+   output << std::endl;
+   output << SZ_p.gli();
 
    return output;
 
@@ -459,6 +543,8 @@ void SUP::fill_Random(){
    SZ_t2p->fill_Random();
 
 #endif
+   
+   li->fill_Random();
 
 }
 
@@ -590,6 +676,8 @@ double SUP::ddot(const SUP &SZ_i) const
    ward += SZ_t2p->ddot(*SZ_i.SZ_t2p);
 
 #endif
+   
+   ward += li->ddot(SZ_i.gli());
 
    return ward;
 
@@ -627,6 +715,8 @@ void SUP::invert(){
    SZ_t2p->invert();
 
 #endif
+   
+   li->invert();
 
 }
 
@@ -662,6 +752,8 @@ void SUP::dscal(double alpha){
    SZ_t2p->dscal(alpha);
 
 #endif
+   
+   li->dscal(alpha);
 
 }
 
@@ -677,7 +769,7 @@ void SUP::proj_U(){
    O.collaps(0,*this);
 
    //dan de inverse overlapmatrix hierop laten inwerken en in this[0] stoppen
-   SZ_tp[0]->S(-1,O);
+   SZ_tp[0]->S_L(-1,O);
 
    //fill up the rest with the right maps
    this->fill();
@@ -707,7 +799,7 @@ void SUP::proj_C(const TPM &tpm)
    SUP Z_res(M,N);
 
    //apply iverse S to it and put it in Z_res.tpm(0)
-   (Z_res.tpm(0)).S(-1,hulp);
+   (Z_res.tpm(0)).S_L(-1,hulp);
 
    //and fill it up Johnny
    Z_res.fill();
@@ -780,6 +872,8 @@ void SUP::sqrt(int option){
 
 #endif
 
+   li->sqrt(option);
+
 }
 
 /**
@@ -817,6 +911,8 @@ void SUP::L_map(const SUP &map,const SUP &object)
 
 #endif
 
+   li->L_map(map.gli(),object.gli());
+
 }
 
 /**
@@ -853,43 +949,7 @@ void SUP::daxpy(double alpha,const SUP &SZ_p)
 
 #endif
 
-}
-
-/**
- * @return trace of the SUP matrix, defined as sum of the traces of the separate carrierspace matrices
- */
-double SUP::trace() const
-{
-   double ward = 0.0;
-
-   for(int i = 0;i < 2;++i)
-      ward += SZ_tp[i]->trace();
-
-#ifdef __G_CON
-   
-   ward += SZ_ph->trace();
-
-#endif
-
-#ifdef __T1_CON
-   
-   ward += SZ_dp->trace();
-
-#endif
-
-#ifdef __T2_CON
-   
-   ward += SZ_pph->trace();
-
-#endif
-
-#ifdef __T2P_CON
-
-   ward += SZ_t2p->trace();
-
-#endif
-
-   return ward;
+   li->daxpy(alpha,SZ_p.gli());
 
 }
 
@@ -906,46 +966,6 @@ void SUP::proj_C(){
 
    //en het orthogonaal complement nemen:
    *this -= Z_copy;
-
-}
-
-/**
- * General matrixproduct between two SUP matrices, act with Matrix::mprod on every block
- * 
- * @param A left hand matrix
- * @param B right hand matrix
- * @return The product AB
- */
-SUP &SUP::mprod(const SUP &A,const SUP &B)
-{
-   for(int i= 0;i < 2;++i)
-      SZ_tp[i]->mprod(A.tpm(i),B.tpm(i));
-
-#ifdef __G_CON
-
-   SZ_ph->mprod(A.phm(),B.phm());
-
-#endif
-
-#ifdef __T1_CON
-
-   SZ_dp->mprod(A.dpm(),B.dpm());
-
-#endif
-
-#ifdef __T2_CON
-
-   SZ_pph->mprod(A.pphm(),B.pphm());
-
-#endif
-
-#ifdef __T2P_CON
-
-   SZ_t2p->mprod(A.t2pm(),B.t2pm());
-
-#endif
-
-   return *this;
 
 }
 
@@ -981,6 +1001,8 @@ void SUP::fill(const TPM &tpm)
    SZ_t2p->T(tpm);
 
 #endif
+   
+   li->fill(tpm);
 
 }
 
@@ -1015,6 +1037,8 @@ void SUP::fill(){
    SZ_t2p->T(*SZ_tp[0]);
 
 #endif 
+   
+   li->fill(*SZ_tp[0]);
 
 }
 
@@ -1128,6 +1152,9 @@ double SUP::U_norm() const
 
 #endif
 
+   for(int i = 0;i < li->gnr();++i)
+      norm += (*li)[i].gI_tr() * (*li)[i].gI_tr();
+
    return norm;
 
 }
@@ -1170,11 +1197,14 @@ void SUP::proj_U_Tr(){
    SZ_t2p->min_tunit(ward);
 
 #endif
+   
+   //and the lincon
+   li->min_lunit(ward);
 
 }
 
 /**
- * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) ( G(1) T1(1) T2(1) ) ]
+ * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) ( G(1) T1(1) T2(1) ) ... L_k(1)... ]
  */
 double SUP::U_trace() const
 {
@@ -1220,6 +1250,10 @@ double SUP::U_trace() const
    ward += t2p*SZ_t2p->T2_trace() + SZ_t2p->skew_trace() + (M-1.0)/(N-1.0) * SZ_t2p->rho_trace() + 2 * SZ_t2p->omega_trace();
 
 #endif
+   
+   //and the linear constraints
+   for(int i = 0;i < li->gnr();++i)
+      ward += li->gproj(i) * (*li)[i].gI_tr();
 
    return ward;
 

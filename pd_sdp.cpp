@@ -41,7 +41,7 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   LinIneq::init(M,N,10);
+   LinIneq::init(M,N,1);
 
    TPM ham(M,N);
    ham.hubbard(0,1.0);
@@ -52,6 +52,7 @@ int main(void){
    SUP Z(M,N);
    Z.init_Z(1000.0,ham,S);
 
+/*
    int dim = Z.gdim();
 
    //eerste primal dual gap:
@@ -75,7 +76,7 @@ int main(void){
 
    while(flag != 3){
 
-      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t" << S.tpm(0).spin();
+      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t" << S.tpm(0).S_2();
 
       //matrix D aanmaken voor de hessiaan van het duale stelsel
       SUP D(M,N);
@@ -204,7 +205,7 @@ int main(void){
    cout << endl;
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
-
+*/
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
 

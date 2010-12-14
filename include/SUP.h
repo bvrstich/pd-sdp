@@ -54,7 +54,9 @@ class SUP{
       //overload equality operator
       SUP &operator=(const double &);
 
-      TPM &tpm(int i) const;
+      TPM &tpm(int i);
+
+      const TPM &tpm(int i) const;
 
       //initialiseer S
       void init_S();
@@ -118,7 +120,9 @@ class SUP{
 
 #ifdef __G_CON
 
-      PHM &phm() const;
+      PHM &phm();
+
+      const PHM &phm() const;
 
       int gn_ph() const;
 
@@ -126,7 +130,9 @@ class SUP{
 
 #ifdef __T1_CON
       
-      DPM &dpm() const;
+      DPM &dpm();
+
+      const DPM &dpm() const;
 
       int gn_dp() const;
 
@@ -134,7 +140,9 @@ class SUP{
 
 #ifdef __T2_CON
 
-      PPHM &pphm() const;
+      PPHM &pphm();
+
+      const PPHM &pphm() const;
 
       int gn_pph() const;
 
@@ -142,11 +150,17 @@ class SUP{
 
 #ifdef __T2P_CON
 
-      T2PM &t2pm() const;
+      T2PM &t2pm();
+
+      const T2PM &t2pm() const;
 
       int gn_t2p() const;
 
 #endif
+      
+      LinIneq &gli();
+
+      const LinIneq &gli() const;
 
    private:
 
@@ -204,7 +218,9 @@ class SUP{
       int n_t2p;
 
 #endif
-
+      
+      //!the object containing the linear constraint info.
+      LinIneq *li;
 
 };
 
