@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 #include <cmath>
 
 using std::cout;
@@ -591,8 +592,8 @@ void LinIneq::invert(){
 void LinIneq::fill_Random(){
 
    for(int i = 0;i < nr;++i)
-      proj[i] = rand()/RAND_MAX;
-
+      proj[i] = (double) rand()/RAND_MAX;
+   
 }
 
 /**
