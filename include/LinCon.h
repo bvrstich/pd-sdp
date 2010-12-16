@@ -65,7 +65,7 @@ class LinCon{
       //!Partially traced constrained matrix, it just helps to keep it here.
       SPM *I_c_bar;
 
-      //!unrestricted trace of the contraint
+      //!trace of the contraint
       double I_c_tr;
 
       //!minimal projection on the constraint matrix, such that Tr(Gamma I_C) geq i_c

@@ -116,7 +116,7 @@ void LinCon::sI(const TPM &I){
 
    I_c_bar->bar(I);
 
-   I_c_tr = I_c->trace()*2.0;
+   I_c_tr = I_c->trace();
 
 }
 
@@ -167,7 +167,7 @@ void LinCon::diag_T(int index){
 
    I_c_bar->bar(*I_c);
 
-   I_c_tr = I_c->trace()*2.0;
+   I_c_tr = I_c->trace();
 
    i_c = 0.0;
 
@@ -186,7 +186,7 @@ void LinCon::spincon(double spin){
 
    I_c_bar->bar(*I_c);
 
-   I_c_tr = I_c->trace()*2.0;
+   I_c_tr = I_c->trace();
 
    i_c = spin;
 
@@ -197,14 +197,14 @@ void LinCon::spincon(double spin){
  */
 void LinCon::fill_Random(){
 
-   i_c = rand()/RAND_MAX;
+   i_c = (double) rand()/RAND_MAX;
 
    I_c->fill_Random();
 
    for(int i = 0;i < I_c->gn();++i)
       (*I_c)(i,i) -= 2.0*i_c/(N*(N - 1.0));
 
-   I_c_tr = I_c->trace()*2.0;
+   I_c_tr = I_c->trace();
 
    I_c_bar->bar(*I_c);
 

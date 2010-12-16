@@ -43,6 +43,22 @@ int main(void){
 
    LinIneq::init(M,N,10);
 
+   TPM tpm(M,N);
+   tpm.fill_Random();
+
+   ofstream out("tpm.out");
+   out.precision(10);
+
+   //out << tpm;
+
+   TPM Stpm(M,N);
+   Stpm.S_L(1,tpm);
+
+   tpm.S_L(-1,Stpm);
+
+   //cout << tpm;
+
+/*
    SUP sup(M,N);
    sup.fill_Random();
 
@@ -60,7 +76,7 @@ int main(void){
    sup_copy -= proj_sup;
 
    cout << sup_copy.ddot(proj_sup) << endl;
-
+*/
 /*
    TPM ham(M,N);
    ham.hubbard(0,1.0);

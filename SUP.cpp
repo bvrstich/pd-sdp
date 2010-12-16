@@ -643,6 +643,15 @@ int SUP::gdim() const
 }
 
 /**
+ * @return nr of constraints
+ */
+int SUP::gnr() const {
+
+   return li->gnr();
+
+}
+
+/**
  * @param SZ_i input SUP_PQ SZ_i
  * @return inproduct between this and input matrix SZ_i, defined as Tr(this SZ_i)
  */

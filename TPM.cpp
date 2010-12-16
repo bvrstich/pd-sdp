@@ -771,17 +771,17 @@ void TPM::S_L(int option,const TPM &tpm_d){
             for(int k = 0;k < li.gnr();++k){
 
                //tp part
-               (*this)(i,j) -= beta[k]/A * li[k].gI()(i,j);
+               (*this)(i,j) -= beta[k]/(4.0*A) * li[k].gI()(i,j);
 
                //3 sp
                if(a == c)
-                  (*this)(i,j) -= C/(A*kappa) * beta[k] * li[k].gI_bar()(b,d);
+                  (*this)(i,j) -= C/(4.0*A*kappa) * beta[k] * li[k].gI_bar()(b,d);
 
                if(b == c)
-                  (*this)(i,j) += C/(A*kappa) * beta[k] * li[k].gI_bar()(a,d);
+                  (*this)(i,j) += C/(4.0*A*kappa) * beta[k] * li[k].gI_bar()(a,d);
 
                if(b == d)
-                  (*this)(i,j) -= C/(A*kappa) * beta[k] * li[k].gI_bar()(a,c);
+                  (*this)(i,j) -= C/(4.0*A*kappa) * beta[k] * li[k].gI_bar()(a,c);
 
             }
 
@@ -815,7 +815,7 @@ void TPM::S_L(int option,const TPM &tpm_d){
 
             //np
             if(i == j)
-               (*this)(i,i) += B*li.gtr();
+               (*this)(i,i) += B*li.gtr()*2.0;
 
             //3 sp
             if(a == c)

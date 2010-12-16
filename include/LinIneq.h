@@ -123,7 +123,7 @@ class LinIneq{
       //!array containing the barred projections onto the barred constraints
       double *proj_bar;
 
-      //!the unrestriced trace of the input TPM object.
+      //!the trace of the input TPM object.
       double tr;
 
       //!nr of sp orbitals

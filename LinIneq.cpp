@@ -37,12 +37,10 @@ void LinIneq::init(int M,int N,int nr_in){
 
    for(int i = 0;i < nr;++i)
       li[i] = new LinCon(M,N);
-   /*
+
    //fill
    for(int i = 0;i < nr;++i)
-   li[i]->fill_Random();
-    */
-   li[0]->spincon(1.0);
+      li[i]->fill_Random();
 
    //what are the coef's of the overlap matrix without the linear constraints:
    constr_overlap(M,N);
@@ -59,7 +57,7 @@ void LinIneq::init(int M,int N,int nr_in){
 
    for(int i = 0;i < nr;++i)
       for(int j = i;j < nr;++j)
-         I_overlap(i,j) = 4.0*li[i]->gI().ddot(li[j]->gI());
+         I_overlap(i,j) = li[i]->gI().ddot(li[j]->gI());
 
    I_overlap.symmetrize();
 
@@ -78,26 +76,26 @@ void LinIneq::init(int M,int N,int nr_in){
    coef[0] = a - 2.0*c*(M - 1.0) + b*M*(M - 1.0);
 
    for(int i = 1;i <= nr;++i)
-      coef[i] = 0.0;
+      coef[i] = b*li[i - 1]->gI_tr()*2.0;
 
    for(int i = nr + 1;i <= 2*nr;++i)
-      coef[i] = (b*(M - 1.0) - c) * li[i - nr - 1]->gI_tr();
+      coef[i] = (b*(M - 1.0) - c) * li[i - nr - 1]->gI_tr() * 2.0;
 
    for(int k = 1;k <= nr;++k){//columns
 
-      coef[k*n] = li[k - 1]->gI_tr();
+      coef[k*n] = 0.5 * li[k - 1]->gI_tr();
 
       for(int i = 1;i <= nr;++i){//rows
 
          coef[k*n + i] = I_overlap(i - 1,k - 1);
 
          if(i == k)
-            coef[k*n + i] += a + b;
+            coef[k*n + i] += a;
 
       }
 
       for(int i = nr + 1;i <= 2*nr;++i)//rows
-         coef[k*n + i] = I_bar_overlap(i - nr - 1,k - 1);
+         coef[k*n + i] = 0.25*I_bar_overlap(i - nr - 1,k - 1);
 
    }
 
@@ -378,7 +376,7 @@ int LinIneq::gM() const{
 void LinIneq::fill(const TPM &tpm){
 
    for(int i = 0;i < nr;++i)
-      proj[i] = 4.0*(li[i]->gI()).ddot(tpm);
+      proj[i] = (li[i]->gI()).ddot(tpm);
 
    SPM spm(M,N);
    spm.bar(tpm);
@@ -386,7 +384,7 @@ void LinIneq::fill(const TPM &tpm){
    for(int i = 0;i < nr;++i)
       proj_bar[i] = (li[i]->gI_bar()).ddot(spm);
 
-   tr = 2.0*tpm.trace();
+   tr = tpm.trace();
 
 }
 
@@ -473,11 +471,11 @@ double LinIneq::alpha() const {
    int n = 2*nr + 1;
 
    //alpha_1
-   double tmp = tr*coef[0];
+   double tmp = 2.0*tr*coef[0];
 
    //alpha_2^i
    for(int k = 1;k <= nr;++k)
-      tmp += coef[k*n]*proj[k - 1];
+      tmp += coef[k*n]*4.0*proj[k - 1];
 
    //alpha_3^i
    for(int k = nr + 1;k <= 2*nr;++k)
@@ -496,11 +494,11 @@ double LinIneq::beta(int index) const {
    int n = 2*nr + 1;
 
    //beta_1
-   double tmp = tr*coef[index + 1];
+   double tmp = 2.0*tr*coef[index + 1];
 
    //beta_2^i
    for(int k = 1;k <= nr;++k)
-      tmp += coef[k*n + index + 1] * proj[k - 1];
+      tmp += 4.0*coef[k*n + index + 1] * proj[k - 1];
 
    //beta_3^i
    for(int k = nr + 1;k <= 2*nr;++k)

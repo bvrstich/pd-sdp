@@ -162,6 +162,8 @@ class SUP{
 
       const LinIneq &gli() const;
 
+      int gnr() const;
+
    private:
 
       //!double pointer of TPM's, will contain the P and Q block of the SUP in the first and second block.
