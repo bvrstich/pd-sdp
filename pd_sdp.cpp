@@ -43,41 +43,6 @@ int main(void){
 
    LinIneq::init(M,N,10);
 
-   TPM tpm(M,N);
-   tpm.fill_Random();
-
-   ofstream out("tpm.out");
-   out.precision(10);
-
-   //out << tpm;
-
-   TPM Stpm(M,N);
-   Stpm.S_L(1,tpm);
-
-   tpm.S_L(-1,Stpm);
-
-   //cout << tpm;
-
-/*
-   SUP sup(M,N);
-   sup.fill_Random();
-
-   SUP sup_copy(sup);
-
-   TPM tpm(M,N);
-   tpm.collaps(0,sup);
-
-   SUP proj_sup(M,N);
-
-   proj_sup.tpm(0).S_L(-1,tpm);
-
-   proj_sup.fill();
-
-   sup_copy -= proj_sup;
-
-   cout << sup_copy.ddot(proj_sup) << endl;
-*/
-/*
    TPM ham(M,N);
    ham.hubbard(0,1.0);
 
@@ -239,7 +204,7 @@ int main(void){
    cout << endl;
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
-*/
+
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
 

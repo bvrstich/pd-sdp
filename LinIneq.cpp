@@ -76,7 +76,7 @@ void LinIneq::init(int M,int N,int nr_in){
    coef[0] = a - 2.0*c*(M - 1.0) + b*M*(M - 1.0);
 
    for(int i = 1;i <= nr;++i)
-      coef[i] = b*li[i - 1]->gI_tr()*2.0;
+      coef[i] = b*li[i - 1]->gI_tr()*4.0;
 
    for(int i = nr + 1;i <= 2*nr;++i)
       coef[i] = (b*(M - 1.0) - c) * li[i - nr - 1]->gI_tr() * 2.0;
