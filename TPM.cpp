@@ -704,34 +704,6 @@ void TPM::S(int option,const TPM &tpm_d){
 }
 
 /**
- * Deduct the unitmatrix times a constant (scale) from this.\n\n
- * this -= scale* 1
- * @param scale the constant
- */
-void TPM::min_unit(double scale){
-
-   for(int i = 0;i < n;++i)
-      (*this)(i,i) -= scale;
-
-}
-
-/**
- * Deduct from this - de Q-map of the unit-matrix  times a constante (scale):\n\n
- * this -= scale* Q(1)
- * @param scale the constant
- */
-void TPM::min_qunit(double scale){
-
-   double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
-
-   scale *= q;
-
-   for(int i = 0;i < n;++i)
-      (*this)(i,i) -= scale;
-
-}
-
-/**
  * calculate the trace of one pair of sp indices of a DPM an put in (*this):\n\n
  * TPM(a,b,d,e) = sum_{c} DPM(a,b,c,d,e,c)
  * @param dpm input DPM

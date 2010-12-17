@@ -54,16 +54,6 @@ class T2PM : public Matrix {
       //geef dim terug
       int gn() const;
 
-      void min_tunit(double);
-
-      double skew_trace() const;
-
-      double T2_trace() const;
-
-      double rho_trace() const;
-
-      double omega_trace() const;
-
       //maak een T2PM van een TPM
       void T(const TPM &);
 

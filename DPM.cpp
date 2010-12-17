@@ -441,23 +441,6 @@ void DPM::hat(const TPM &tpm)
 }
 
 /**
- * Deduct from (*this) the T1-map of the unit matrix times a constant (scale)\n\n
- * this -= scale* T1(1) \n\n
- * see notes primal_dual.pdf for more information.
- * @param scale the constant
- */
-void DPM::min_tunit(double scale){
-
-   double t = (M*(M - 1.0) - 3.0*N*(M - N))/(N*(N - 1.0));
-
-   scale *= t;
-
-   for(int i = 0;i < n;++i)
-      (*this)(i,i) -= scale;
-
-}
-
-/**
  * fill the DPM from a file with name filename, where the elements are indicated by their sp-indices
  * @param filename Name of the inputfile
  */

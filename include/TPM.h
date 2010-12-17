@@ -102,10 +102,6 @@ class TPM : public Matrix {
       //T2 down
       void T(const PPHM &);
 
-      void min_unit(double scale);
-
-      void min_qunit(double scale);
-
       void collaps(int option,const SUP &);
 
       void out(const char *filename);

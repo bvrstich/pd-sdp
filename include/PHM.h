@@ -60,10 +60,6 @@ class PHM : public Matrix {
 
       void G(int option,const TPM &);
 
-      double skew_trace() const;
-
-      void min_gunit(double scale);
-
       void bar(const PPHM &);
 
       void in_sp(const char *filename);
