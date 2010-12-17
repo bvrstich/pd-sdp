@@ -120,6 +120,8 @@ class TPM : public Matrix {
 
       void T(const T2PM &);
 
+      static void init_overlap(int,int);
+
    private:
 
       //!static list of dimension [n_tp][2] that takes in a tp index i and returns two sp indices: a = t2s[i][0] and b = t2s[i][1]
@@ -130,6 +132,9 @@ class TPM : public Matrix {
 
       //!static counter that counts the number of TPM objects running in the program
       static int counter;
+
+      //!static variables of the inverse overlapmatrix.
+      static double Sa,Sb,Sc;
 
       //!nr of particles
       int N;

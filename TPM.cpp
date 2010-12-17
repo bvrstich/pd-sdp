@@ -15,6 +15,10 @@ int TPM::counter = 0;
 int **TPM::t2s;
 int **TPM::s2t;
 
+double TPM::Sa;
+double TPM::Sb;
+double TPM::Sc;
+
 /**
  * standard constructor: constructs Matrix object of dimension M*(M - 1)/2 and
  * if counter == 0, allocates and constructs the lists containing the relationship between sp and tp basis.
@@ -60,6 +64,8 @@ TPM::TPM(int M,int N) : Matrix(M*(M - 1)/2) {
       for(int i = 0;i < M;++i)
          for(int j = i + 1;j < M;++j)
             s2t[j][i] = s2t[i][j];
+
+      init_overlap(M,N);
 
    }
 
@@ -111,6 +117,8 @@ TPM::TPM(const TPM &tpm_c) : Matrix(tpm_c){
       for(int i = 0;i < M;++i)
          for(int j = i + 1;j < M;++j)
             s2t[j][i] = s2t[i][j];
+
+      init_overlap(M,N);
 
    }
 
@@ -173,9 +181,61 @@ TPM::TPM(const char *filename) : Matrix(filename){
          for(int j = i + 1;j < M;++j)
             s2t[j][i] = s2t[i][j];
 
+      init_overlap(M,N);
+
    }
 
    ++counter;
+
+}
+
+/**
+ * static function that constructs the parameters of the overlapmatrix
+ */
+void TPM::init_overlap(int M,int N){
+
+   Sa = 1.0;
+   Sb = 0.0;
+   Sc = 0.0;
+
+#ifdef __Q_CON
+
+   Sa += 1.0;
+   Sb += (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
+   Sc += (2.0*N - M)/((N - 1.0)*(N - 1.0));
+
+#endif
+
+#ifdef __G_CON
+
+   Sa += 4.0;
+   Sc += (2.0*N - M - 2.0)/((N - 1.0)*(N - 1.0));
+
+#endif
+
+#ifdef __T1_CON
+
+   Sa += M - 4.0;
+   Sb += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
+   Sc -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
+
+#endif
+
+#ifdef __T2_CON
+   
+   Sa += 5.0*M - 8.0;
+   Sb += 2.0/(N - 1.0);
+   Sc += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
+
+#endif
+
+#ifdef __T2P_CON
+
+   Sa += 5.0*M - 4.0;
+   Sb += 2.0/(N - 1.0);
+   Sc += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M - 2.0)/(2.0*(N - 1.0)*(N - 1.0));
+
+#endif
 
 }
 
@@ -639,50 +699,7 @@ void TPM::G(int option,const PHM &phm){
  */
 void TPM::S(int option,const TPM &tpm_d){
 
-   double a = 1.0;
-   double b = 0.0;
-   double c = 0.0;
-
-#ifdef __Q_CON
-
-   a += 1.0;
-   b += (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
-   c += (2.0*N - M)/((N - 1.0)*(N - 1.0));
-
-#endif
-
-#ifdef __G_CON
-
-   a += 4.0;
-   c += (2.0*N - M - 2.0)/((N - 1.0)*(N - 1.0));
-
-#endif
-
-#ifdef __T1_CON
-
-   a += M - 4.0;
-   b += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
-   c -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
-
-#endif
-
-#ifdef __T2_CON
-   
-   a += 5.0*M - 8.0;
-   b += 2.0/(N - 1.0);
-   c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
-
-#endif
-
-#ifdef __T2P_CON
-
-   a += 5.0*M - 4.0;
-   b += 2.0/(N - 1.0);
-   c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M - 2.0)/(2.0*(N - 1.0)*(N - 1.0));
-
-#endif
-
-   this->Q(option,a,b,c,tpm_d);
+   this->Q(option,Sa,Sb,Sc,tpm_d);
 
 }
 

@@ -37,24 +37,6 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   SUP sup(M,N);
-   sup.fill_Random();
-
-   SUP sup_copy(sup);
-
-   TPM tpm(M,N);
-   tpm.collaps(0,sup);
-
-   SUP proj_sup(M,N);
-   proj_sup.tpm(0).S(-1,tpm);
-
-   proj_sup.fill();
-
-   sup_copy -= proj_sup;
-
-   cout << sup_copy.ddot(proj_sup) << endl;
-
-/*
    TPM ham(M,N);
    ham.sp_pairing(1);
 
@@ -219,7 +201,7 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
-*/   
+   
    return 0;
 
 }
