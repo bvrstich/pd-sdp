@@ -705,7 +705,7 @@ void TPM::S(int option,const TPM &tpm_d){
 }
 
 /**
- * ( Overlapmatrix of the U-basis ) - map, maps a TPM onto a different TPM, this map is actually a Q-like map
+ * ( Overlapmatrix of the U-basis ) - map, maps a traceless TPM onto a different traceless TPM, this map is actually a Q-like map
  * for which the paramaters a,b and c are calculated in primal_dual.pdf. Since it is a Q-like map the inverse
  * can be taken as well.
  * @param option = 1 direct overlapmatrix-map is used , = -1 inverse overlapmatrix map is used
@@ -720,18 +720,14 @@ void TPM::S_L(int option,const TPM &tpm_d){
 
       //first make some parameters needed for the inverse:
       double A = li.ga();
-      double B = li.gb();
       double C = li.gc();
 
-      double lambda = B*(M - 1.0) - C;
       double kappa = A - C*(M - 2.0);
 
-      double alpha = li.alpha();
-
-      double beta[li.gnr()];
+      double alpha[li.gnr()];
 
       for(int k = 0;k < li.gnr();++k)
-         beta[k] = li.beta(k);
+         alpha[k] = li.alpha(k);
 
       //make the scaled bar of tpm_d
       SPM spm(M,N);
@@ -753,10 +749,6 @@ void TPM::S_L(int option,const TPM &tpm_d){
             //tp
             (*this)(i,j) = tpm_d(i,j)/A;
 
-            //np
-            if(i == j)
-               (*this)(i,i) -= 1.0/A * ( B + 2.0*C*lambda/kappa ) * alpha;
-
             //3 sp
             if(a == c)
                (*this)(i,j) += spm(b,d);
@@ -771,17 +763,17 @@ void TPM::S_L(int option,const TPM &tpm_d){
             for(int k = 0;k < li.gnr();++k){
 
                //tp part
-               (*this)(i,j) -= beta[k]/(4.0*A) * li[k].gI()(i,j);
+               (*this)(i,j) -= alpha[k]/(4.0*A) * li[k].gI()(i,j);
 
                //3 sp
                if(a == c)
-                  (*this)(i,j) -= C/(4.0*A*kappa) * beta[k] * li[k].gI_bar()(b,d);
+                  (*this)(i,j) -= C/(4.0*A*kappa) * alpha[k] * li[k].gI_bar()(b,d);
 
                if(b == c)
-                  (*this)(i,j) += C/(4.0*A*kappa) * beta[k] * li[k].gI_bar()(a,d);
+                  (*this)(i,j) += C/(4.0*A*kappa) * alpha[k] * li[k].gI_bar()(a,d);
 
                if(b == d)
-                  (*this)(i,j) -= C/(4.0*A*kappa) * beta[k] * li[k].gI_bar()(a,c);
+                  (*this)(i,j) -= C/(4.0*A*kappa) * alpha[k] * li[k].gI_bar()(a,c);
 
             }
 
@@ -792,7 +784,6 @@ void TPM::S_L(int option,const TPM &tpm_d){
    else{
 
       double A = li.ga();
-      double B = li.gb();
       double C = li.gc();
 
       SPM spm(M,N);
@@ -812,10 +803,6 @@ void TPM::S_L(int option,const TPM &tpm_d){
 
             //tp
             (*this)(i,j) = A*tpm_d(i,j);
-
-            //np
-            if(i == j)
-               (*this)(i,i) += B*li.gtr()*2.0;
 
             //3 sp
             if(a == c)

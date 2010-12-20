@@ -74,13 +74,9 @@ class LinIneq{
 
       double ga() const;
 
-      double gb() const;
-
       double gc() const;
 
-      double alpha() const;
-
-      double beta(int) const;
+      double alpha(int) const;
 
       void fill_Random();
 
@@ -98,8 +94,6 @@ class LinIneq{
 
       void dscal(double);
 
-      void min_lunit(double);
-
    private:
 
       //!LinCon array containing the different LinCon objects
@@ -112,7 +106,7 @@ class LinIneq{
       static int nr;
 
       //!variables of the overlapmatrix-map
-      static double a,b,c;
+      static double a,c;
 
       //!coefficient matrix of the overlap matrix map system of linear equations
       static double *coef;

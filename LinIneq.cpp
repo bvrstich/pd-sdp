@@ -14,7 +14,6 @@ using std::ifstream;
 int LinIneq::nr;
 
 double LinIneq::a;
-double LinIneq::b;
 double LinIneq::c;
 
 LinCon **LinIneq::li;
@@ -39,20 +38,21 @@ void LinIneq::init(int M,int N,int nr_in){
       li[i] = new LinCon(M,N);
 
    //fill
-   for(int i = 0;i < nr;++i)
-      li[i]->fill_Random();
+   //for(int i = 0;i < nr;++i)
+    //  li[i]->fill_Random();
+   li[0]->spincon(1.0);
 
    //what are the coef's of the overlap matrix without the linear constraints:
    constr_overlap(M,N);
 
-   int n = 2*nr + 1;
+   int n = 2*nr;
 
    //make the linear system for the inverse overlapmatrix coefficient calculations
    coef = new double [n*n];
 
    //now make some variables needed for the making of the system
 
-   //overlaps
+   //overlap
    Matrix I_overlap(nr);
 
    for(int i = 0;i < nr;++i)
@@ -70,45 +70,30 @@ void LinIneq::init(int M,int N,int nr_in){
 
    I_bar_overlap.symmetrize();
 
-   //fill the system:
+   for(int k = 0;k < nr;++k){//columns
 
-   //first column
-   coef[0] = a - 2.0*c*(M - 1.0) + b*M*(M - 1.0);
+      for(int i = 0;i < nr;++i){//rows
 
-   for(int i = 1;i <= nr;++i)
-      coef[i] = b*li[i - 1]->gI_tr()*4.0;
-
-   for(int i = nr + 1;i <= 2*nr;++i)
-      coef[i] = (b*(M - 1.0) - c) * li[i - nr - 1]->gI_tr() * 2.0;
-
-   for(int k = 1;k <= nr;++k){//columns
-
-      coef[k*n] = 0.5 * li[k - 1]->gI_tr();
-
-      for(int i = 1;i <= nr;++i){//rows
-
-         coef[k*n + i] = I_overlap(i - 1,k - 1);
+         coef[k*n + i] = I_overlap(i,k);
 
          if(i == k)
             coef[k*n + i] += a;
 
       }
 
-      for(int i = nr + 1;i <= 2*nr;++i)//rows
-         coef[k*n + i] = 0.25*I_bar_overlap(i - nr - 1,k - 1);
+      for(int i = nr;i < 2*nr;++i)//rows
+         coef[k*n + i] = 0.25*I_bar_overlap(i - nr,k);
 
    }
 
-   for(int k = nr + 1;k <= 2*nr;++k){//columns
+   for(int k = nr;k < 2*nr;++k){//columns
 
-      coef[k*n] = 0.0;
-
-      for(int i = 1;i <= nr;++i)//rows
+      for(int i = 0;i < nr;++i)//rows
          coef[k*n + i] = 0.0;
 
       coef[k*n + k - nr] = -4.0*c;
 
-      for(int i = nr + 1;i <= 2*nr;++i)
+      for(int i = nr;i < 2*nr;++i)
          coef[k*n + i] = 0.0;
 
       coef[k*n + k] = a - c*(M - 2.0);
@@ -148,20 +133,18 @@ void LinIneq::clean(){
 }
 
 /**
- * Will calculate the parameters needed for the overlapmatrix-map: S_a,S_b and S_c.
+ * Will calculate the parameters needed for the overlapmatrix-map: a and c.
  * @param M nr of sp orbitals
  * @param N nr of particles
  */
 void LinIneq::constr_overlap(int M,int N){
 
    a = 1.0;
-   b = 0.0;
    c = 0.0;
 
 #ifdef __Q_CON
 
    a += 1.0;
-   b += (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
    c += (2.0*N - M)/((N - 1.0)*(N - 1.0));
 
 #endif
@@ -176,7 +159,6 @@ void LinIneq::constr_overlap(int M,int N){
 #ifdef __T1_CON
 
    a += M - 4.0;
-   b += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
    c -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
 
 #endif
@@ -184,7 +166,6 @@ void LinIneq::constr_overlap(int M,int N){
 #ifdef __T2_CON
 
    a += 5.0*M - 8.0;
-   b += 2.0/(N - 1.0);
    c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
 
 #endif
@@ -192,7 +173,6 @@ void LinIneq::constr_overlap(int M,int N){
 #ifdef __T2P_CON
 
    a += 5.0*M - 4.0;
-   b += 2.0/(N - 1.0);
    c += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M - 2.0)/(2.0*(N - 1.0)*(N - 1.0));
 
 #endif
@@ -375,16 +355,16 @@ int LinIneq::gM() const{
  */
 void LinIneq::fill(const TPM &tpm){
 
+   tr = tpm.trace();
+
    for(int i = 0;i < nr;++i)
-      proj[i] = (li[i]->gI()).ddot(tpm);
+      proj[i] = (li[i]->gI()).ddot(tpm) + li[i]->gI_tr() * tr;
 
    SPM spm(M,N);
    spm.bar(tpm);
 
    for(int i = 0;i < nr;++i)
-      proj_bar[i] = (li[i]->gI_bar()).ddot(spm);
-
-   tr = tpm.trace();
+      proj_bar[i] = (li[i]->gI_bar()).ddot(spm) + li[i]->gI_tr() * (M - 1.0) * 2.0 * tr;
 
 }
 
@@ -427,7 +407,7 @@ double *LinIneq::gproj_bar(){
 }
 
 /**
- * @return the trace of the input TPM scaled with N(N-1)/2
+ * @return the trace of the input TPM
  */
 double LinIneq::gtr() const{
 
@@ -445,15 +425,6 @@ double LinIneq::ga() const {
 }
 
 /**
- * @return the value of the "b" coefficient of the overlapmatrix-map
- */ 
-double LinIneq::gb() const {
-
-   return b;
-
-}
-
-/**
  * @return the value of the "c" coefficient of the overlapmatrix-map
  */ 
 double LinIneq::gc() const {
@@ -464,45 +435,22 @@ double LinIneq::gc() const {
 
 /**
  * The "alpha" function, see notes, projects a LinIneq (actually a TPM) onto a scalar.
+ * @param index the index of the alpha function
  * @return the alpha function value for this LinIneq object
  */
-double LinIneq::alpha() const {
+double LinIneq::alpha(int index) const {
 
-   int n = 2*nr + 1;
+   double tmp = 0.0;
 
-   //alpha_1
-   double tmp = 2.0*tr*coef[0];
+   int n = 2*nr;
+
+   //alpha_1^i
+   for(int k = 0;k < nr;++k)
+      tmp += 4.0*coef[k*n + index] * proj[k];
 
    //alpha_2^i
-   for(int k = 1;k <= nr;++k)
-      tmp += coef[k*n]*4.0*proj[k - 1];
-
-   //alpha_3^i
-   for(int k = nr + 1;k <= 2*nr;++k)
-      tmp += coef[k*n]*proj_bar[k - nr - 1];
-
-   return tmp;
-
-}
-
-/**
- * The "beta" function, see notes, projects a LinIneq (actually a TPM) onto a scalar.
- * @return the beta function value for this LinIneq object
- */
-double LinIneq::beta(int index) const {
-
-   int n = 2*nr + 1;
-
-   //beta_1
-   double tmp = 2.0*tr*coef[index + 1];
-
-   //beta_2^i
-   for(int k = 1;k <= nr;++k)
-      tmp += 4.0*coef[k*n + index + 1] * proj[k - 1];
-
-   //beta_3^i
-   for(int k = nr + 1;k <= 2*nr;++k)
-      tmp += coef[k*n + index + 1] * proj_bar[k - nr - 1];
+   for(int k = nr;k < 2*nr;++k)
+      tmp += coef[k*n + index] * proj_bar[k - nr];
 
    return tmp;
 
@@ -592,15 +540,4 @@ void LinIneq::fill_Random(){
    for(int i = 0;i < nr;++i)
       proj[i] = (double) rand()/RAND_MAX;
    
-}
-
-/**
- * Deduct from the current LinIneq a constant times the unity matrix projected on the constraints.
- * @param alpha the scaling factor
- */
-void LinIneq::min_lunit(double alpha){
-
-   for(int i = 0;i < nr;++i)
-      proj[i] -= alpha * li[i]->gI_tr();
-
 }

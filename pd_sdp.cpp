@@ -41,51 +41,8 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
 
-   LinIneq::init(M,N,10);
+   LinIneq::init(M,N,1);
 
-   SUP sup(M,N);
-   sup.fill_Random();
-
-   SUP sup_copy(sup);
-
-   //regular projection
-   TPM tpm(M,N);
-   tpm.collaps(0,sup);
-
-   SUP sup_proj(M,N);
-
-   sup_proj.tpm(0).S_L(-1,tpm);
-   sup_proj.fill();
-
-   //make it U_traceless:
-   SUP sup_unit(M,N);
-
-   TPM unit(M,N);
-   unit = 0.0;
-
-   for(int i = 0;i < unit.gn();++i)
-      unit(i,i) = 1.0;
-
-   sup_unit.fill(unit);
-
-   double ward = sup_proj.ddot(sup_unit)/sup_unit.ddot(sup_unit);
-
-   sup_proj.daxpy(-ward,sup_unit);
-
-   //deduct from original
-   sup_copy -= sup_proj;
-
-   tpm.collaps(1,sup_copy);
-
-   ofstream out("tpm.out");
-   out.precision(10);
-
-   for(int i = 0;i < tpm.gn();++i)
-      for(int j = i;j < tpm.gn();++j)
-         if(fabs(tpm(i,j)) > 1.0e-12)
-            out << i << "\t" << j << "\t" << tpm(i,j) << endl;
-
-/*
    TPM ham(M,N);
    ham.hubbard(0,1.0);
 
@@ -95,6 +52,9 @@ int main(void){
    SUP Z(M,N);
    Z.init_Z(1000.0,ham,S);
 
+   ham.proj_Tr();
+   cout << ham;
+/*
    int dim = Z.gdim();
 
    //eerste primal dual gap:

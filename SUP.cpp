@@ -558,7 +558,7 @@ void SUP::init_Z(double alpha,const TPM &ham,const SUP &u_0)
    this->proj_C(ham);
 
    //nog een eenheidsmatrix maal constante bijtellen zodat Z positief definiet is:
-   this->daxpy(alpha,u_0); 
+   //this->daxpy(alpha,u_0); 
 
 }
 
@@ -775,17 +775,13 @@ void SUP::proj_U(){
    //eerst M_Gamma + Q(M_Q) + ( G(M_G) + T1(M_T1) + T2(M_T2) ) in O stoppen
    TPM O(M,N);
 
-   O.collaps(0,*this);
+   O.collaps(1,*this);
 
    //dan de inverse overlapmatrix hierop laten inwerken en in this[0] stoppen
    SZ_tp[0]->S_L(-1,O);
 
    //fill up the rest with the right maps
    this->fill();
-
-   //Nu is de projectie op de u^\alpha's gebeurd.
-   //Nu nog de projectie op de u^i's: dus component langs u^0 eruit halen
-   this->proj_U_Tr();
 
 }
 
@@ -803,6 +799,8 @@ void SUP::proj_C(const TPM &tpm)
 
    hulp -= tpm;
 
+   hulp.proj_Tr();
+
    //Z_res is the orthogonal piece of this that will be deducted,
    //so the piece of this in the U-space - ham
    SUP Z_res(M,N);
@@ -812,8 +810,6 @@ void SUP::proj_C(const TPM &tpm)
 
    //and fill it up Johnny
    Z_res.fill();
-
-   Z_res.proj_U_Tr();
 
    *this -= Z_res;
 
@@ -1114,157 +1110,6 @@ void SUP::H(const SUP &B,const SUP &D)
    this->L_map(D,B);
 
    this->proj_C();
-
-}
-
-/**
- * @return the value Tr (1_u 1_u) for the conditions active
- */
-double SUP::U_norm() const
-{
-   double norm;
-
-   double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
-
-   norm = M*(M - 1)/2 * (1 + q*q);
-
-#ifdef __G_CON
-
-   double g = (M - N)/(N - 1.0);
-
-   norm += M*M * (1.0 + g*g) + 2*g*M;
-
-#endif
-
-#ifdef __T1_CON
-   
-   double t1 = (M*(M - 1.0) - 3.0*(M - N)*N)/(N*(N - 1.0));
-
-   norm += M*(M - 1.0)*(M - 2.0)/6.0 * t1 * t1;
-
-#endif
-
-#ifdef __T2_CON
-
-   double t2 = (M - N)/(N - 1.0);
-
-   norm += t2* t2 * (M - 1.0)* M*M /2.0 + 2.0 * t2 * (M - 1.0)*M + M*(M - 1.0)*(M - 1.0);
-
-#endif
-
-#ifdef __T2P_CON
-
-   double t2p = (M - N)/(N - 1.0);
-
-   norm += t2p* t2p * (M - 1.0)* M*M /2.0 + 2.0 * t2p * (M - 1.0)*M + M*(M - 1.0)*(M - 1.0);
-   norm += 2*(M*M-M) + M*(M-1.0)/(N-1.0)*(M-1.0)/(N-1.0);
-
-#endif
-
-   for(int i = 0;i < li->gnr();++i)
-      norm += (*li)[i].gI_tr() * (*li)[i].gI_tr();
-
-   return norm;
-
-}
-
-/**
- * orthogonally project (*this) onto the space where the U-trace is zero
- */
-void SUP::proj_U_Tr(){
-
-   double ward = (this->U_trace() )/ (this->U_norm() );
-
-   //dan deze factor aftrekken met u^0
-   SZ_tp[0]->min_unit(ward);
-   SZ_tp[1]->min_qunit(ward);
-
-#ifdef __G_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_ph->min_gunit(ward);
-
-#endif
-
-#ifdef __T1_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_dp->min_tunit(ward);
-
-#endif
-
-#ifdef __T2_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_pph->min_tunit(ward);
-
-#endif
-
-#ifdef __T2P_CON
-
-   //dan deze factor aftrekken met u^0
-   SZ_t2p->min_tunit(ward);
-
-#endif
-   
-   //and the lincon
-   li->min_lunit(ward);
-
-}
-
-/**
- * @return The U-trace of a SUP matrix (*this), which is defined as Tr ( (*this) 1_u), with 1_u defined as diag [1 Q(1) ( G(1) T1(1) T2(1) ) ... L_k(1)... ]
- */
-double SUP::U_trace() const
-{
-   //q is the factor by which the unit matrix is multiplied when the Q(1) is taken:
-   double q = 1.0 + (M - 2*N)*(M - 1.0)/(N*(N - 1.0));
-
-   //trace of the Gamma piece of the SUP
-   double ward = SZ_tp[0]->trace();
-
-   //plus q times trace of the Q piece of the SUP
-   ward += q*SZ_tp[1]->trace();
-
-#ifdef __G_CON
-
-   //g is the factor before the identity matrix in the image of G(1)
-   double g = (M - N)/(N - 1.0);
-
-   //skew trace is sum_{ab} G_{aa;bb}
-   ward += g*SZ_ph->trace() + SZ_ph->skew_trace();
-
-#endif
-
-#ifdef __T1_CON
-
-   double t1 = (M*(M - 1.0) - 3.0*N*(M - N))/(N*(N - 1.0));
-
-   ward += t1*SZ_dp->trace();
-
-#endif
-
-#ifdef __T2_CON
-
-   double t2 = (M - N)/(N - 1.0);
-
-   ward += t2*SZ_pph->trace() + SZ_pph->skew_trace();
-
-#endif
-
-#ifdef __T2P_CON
-
-   double t2p = (M - N)/(N - 1.0);
-
-   ward += t2p*SZ_t2p->T2_trace() + SZ_t2p->skew_trace() + (M-1.0)/(N-1.0) * SZ_t2p->rho_trace() + 2 * SZ_t2p->omega_trace();
-
-#endif
-   
-   //and the linear constraints
-   for(int i = 0;i < li->gnr();++i)
-      ward += li->gproj(i) * (*li)[i].gI_tr();
-
-   return ward;
 
 }
 

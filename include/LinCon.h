@@ -59,13 +59,13 @@ class LinCon{
 
    private:
 
-      //!Constraint matrix: Watch out, shifted with i_c unity, so that Tr Gamma I_c > 0
+      //!Traceless Constraint matrix: Watch out, shifted with i_c unity, so that Tr Gamma I_c > 0
       TPM *I_c;
 
-      //!Partially traced constrained matrix, it just helps to keep it here.
+      //!Partially traced, traceless constraint matrix
       SPM *I_c_bar;
 
-      //!trace of the contraint
+      //!scaled trace of the contraint
       double I_c_tr;
 
       //!minimal projection on the constraint matrix, such that Tr(Gamma I_C) geq i_c

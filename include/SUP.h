@@ -92,10 +92,6 @@ class SUP{
 
       void daxpy(double alpha,const SUP &);
 
-      double trace() const;
-
-      double U_trace() const;
-
       void proj_C();
 
       SUP &mprod(const SUP &,const SUP &);
@@ -107,10 +103,6 @@ class SUP{
       int solve(SUP &B,const SUP &D);
 
       void H(const SUP &B,const SUP &D);
-
-      void proj_U_Tr();
-
-      double U_norm() const;
 
       double center_dev(const SUP &Z) const;
 
