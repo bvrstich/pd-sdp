@@ -555,10 +555,11 @@ void SUP::init_Z(double alpha,const TPM &ham,const SUP &u_0)
 {
    this->fill_Random();
 
-   this->proj_C(ham);
+   //nog een eenheidsmatrix maal constante bijtellen zodat Z sterk positief definiet is:
+   this->daxpy(alpha,u_0); 
 
-   //nog een eenheidsmatrix maal constante bijtellen zodat Z positief definiet is:
-   //this->daxpy(alpha,u_0); 
+   //en projecteren!
+   this->proj_C(ham);
 
 }
 

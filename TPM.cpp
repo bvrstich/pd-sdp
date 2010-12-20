@@ -498,7 +498,7 @@ void TPM::proj_Tr(){
 
 /**
  * Primal hessian map:\n\n
- * Hb = D_1 b D_1 + D_2 Q(b) D_2 + D_3 G(b) D_3 + D_4 T1(b) D_4 + D_5 T2(b) D5 \n\n
+ * Hb = D_1 b D_1 + D_2 Q(b) D_2 + D_3 G(b) D_3 + D_4 T1(b) D_4 + D_5 T2(b) D5 + sum_k d_k d_k I_k Tr(b I_k)\n\n
  * with D_1, D_2, D_3 and D_3 the P, Q, G, T1 and T2 blocks of the SUP D. 
  * @param b TPM domain matrix, hessian will act on it and the image will be put in this
  * @param D SUP matrix that defines the structure of the hessian map. (see primal-dual.pdf for more info)
@@ -584,6 +584,12 @@ void TPM::H(const TPM &b,const SUP &D){
 
 #endif
 
+   LinIneq li(M,N);
+   li.fill(b);
+
+   for(int k = 0;k < li.gnr();++k)
+      this->daxpy(D.gli().gproj(k)*D.gli().gproj(k) * li.gproj(k) , li[k].gI());
+   
    this->proj_Tr();
 
 }

@@ -77,6 +77,15 @@ EIG::EIG(const SUP &SZ)
    v_t2p = new Vector<T2PM>(SZ.t2pm());
 
 #endif
+   
+   this->nr = SZ.gli().gnr();
+
+   dim += nr;
+
+   li = new double [nr];
+
+   for(int i = 0;i < nr;++i)
+      li[i] = SZ.gli().gproj(i);
 
 }
 
@@ -140,6 +149,16 @@ EIG::EIG(const EIG &eig_c)
    v_t2p = new Vector<T2PM>(eig_c.t2pv());
 
 #endif
+   
+   this->nr = eig_c.gnr();
+
+   dim += nr;
+
+   li = new double [nr];
+
+   for(int i = 0;i < nr;++i)
+      li[i] = eig_c.gli(i);
+
 }
 
 /**
@@ -174,6 +193,9 @@ EIG &EIG::operator=(const EIG &eig_c)
    *v_t2p = *eig_c.v_t2p;
 
 #endif
+   
+   for(int i = 0;i < nr;++i)
+      li[i] = eig_c.gli(i);
 
    return *this;
 
@@ -208,6 +230,8 @@ EIG::~EIG(){
       delete v_pph;
 
 #endif
+   
+      delete [] li;
 
    }
 
@@ -216,31 +240,34 @@ EIG::~EIG(){
 ostream &operator<<(ostream &output,EIG &eig_p){
 
    for(int i = 0;i < 2;++i)
-      std::cout << eig_p.tpv(i) << std::endl;
+      output << eig_p.tpv(i) << std::endl;
 
 #ifdef __G_CON
 
-   std::cout << eig_p.phv() << std::endl;
+   output << eig_p.phv() << std::endl;
 
 #endif
 
 #ifdef __T1_CON
 
-   std::cout << eig_p.dpv() << std::endl;
+   output << eig_p.dpv() << std::endl;
 
 #endif
 
 #ifdef __T2_CON
 
-   std::cout << eig_p.pphv() << std::endl;
+   output << eig_p.pphv() << std::endl;
 
 #endif
 
 #ifdef __T2P_CON
 
-   std::cout << eig_p.t2pv() << std::endl;
+   output << eig_p.t2pv() << std::endl;
 
 #endif
+   
+   for(int i = 0;i < eig_p.gnr();++i)
+      output << i << "\t" << eig_p.gli(i) << endl;
 
    return output;
 
@@ -268,6 +295,43 @@ int EIG::gM() const
 int EIG::gn_tp() const
 {
    return n_tp;
+}
+
+/** 
+ * @return the nr of linear constraints
+ */
+int EIG::gnr() const {
+
+   return nr;
+
+}
+
+/** 
+ * @return the pointer to the projection onto the linear constraints
+ */
+double *EIG::gli() {
+
+   return li;
+
+}
+
+/** 
+ * @return the pointer to the projection onto the linear constraints (the const version)
+ */
+const double *EIG::gli() const {
+
+   return li;
+
+}
+
+/** 
+ * @param i the index
+ * @return the value of the constraint projection on index i
+ */
+double EIG::gli(int i) const {
+
+   return li[i];
+
 }
 
 /** 
@@ -303,6 +367,9 @@ void EIG::diagonalize(const SUP &sup)
       v_t2p->diagonalize(sup.t2pm());
 
 #endif
+   
+      for(int i = 0;i < nr;++i)
+         li[i] = sup.gli().gproj(i);
 
 }
 
@@ -549,6 +616,13 @@ double EIG::center_dev() const
    log_product += v_t2p->log_product();
 
 #endif
+
+   for(int i = 0;i < nr;++i){
+
+      sum += li[i];
+      log_product += log(li[i]);
+
+   }
 
    return dim*log(sum/(double)dim) - log_product;
 

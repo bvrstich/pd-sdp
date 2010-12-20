@@ -98,6 +98,14 @@ class EIG{
 
       double center_dev() const;
 
+      int gnr() const;
+
+      double *gli();
+
+      const double *gli() const;
+
+      double gli(int) const;
+
    private:
 
       //!variable that tells if the memory has been allocated (flag = 1) or not (flag = 0)
@@ -151,6 +159,12 @@ class EIG{
       int n_t2p;
 
 #endif
+      
+      //!double array containing the projections on the constraints
+      double *li;
+
+      //!the number of linear constraints
+      int nr;
 
       //!total dimension of the EIG object
       int dim;

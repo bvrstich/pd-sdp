@@ -52,9 +52,6 @@ int main(void){
    SUP Z(M,N);
    Z.init_Z(1000.0,ham,S);
 
-   ham.proj_Tr();
-   cout << ham;
-/*
    int dim = Z.gdim();
 
    //eerste primal dual gap:
@@ -76,9 +73,9 @@ int main(void){
 
    double a;//stapgrootte
 
-   while(flag != 3){
+   //while(flag != 3){
 
-      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t" << S.tpm(0).S_2();
+      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t" << S.tpm(0).S_2() << "\t";
 
       //matrix D aanmaken voor de hessiaan van het duale stelsel
       SUP D(M,N);
@@ -200,7 +197,7 @@ int main(void){
 
       }
 
-   }
+//   }
 
    cout << endl;
    cout << "FINAL RESULT " << endl;
@@ -210,7 +207,7 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
-*/
+
    LinIneq::clean();
   
    return 0;
