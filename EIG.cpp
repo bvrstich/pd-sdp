@@ -521,6 +521,11 @@ double EIG::min() const
       ward = v_t2p->min();
 
 #endif
+   
+   //are there any lower values in the linear constraints?
+   for(int i = 0;i < nr;++i)
+      if(ward > li[i])
+         ward = li[i];
 
    return ward;
 
@@ -570,6 +575,11 @@ double EIG::max() const
       ward = v_t2p->max();
 
 #endif
+
+   //are there any higher values in the linear constraints?
+   for(int i = 0;i < nr;++i)
+      if(ward < li[i])
+         ward = li[i];
 
    return ward;
 
@@ -667,6 +677,13 @@ double EIG::centerpot(double alpha,const EIG &eigen_Z,double c_S,double c_Z) con
    ward -= v_t2p->centerpot(alpha) + (eigen_Z.t2pv()).centerpot(alpha);
 
 #endif
+   
+   //now the lincon terms:
+   for(int i = 0;i < nr;++i)
+      ward -= log(1.0 + alpha*li[i]);
+
+   for(int i = 0;i < nr;++i)
+      ward -= log(1.0 + alpha*eigen_Z.gli(i));
 
    return ward;
 

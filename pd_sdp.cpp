@@ -73,7 +73,7 @@ int main(void){
 
    double a;//stapgrootte
 
-   //while(flag != 3){
+   while(flag != 3){
 
       cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t" << S.tpm(0).S_2() << "\t";
 
@@ -197,7 +197,7 @@ int main(void){
 
       }
 
-//   }
+   }
 
    cout << endl;
    cout << "FINAL RESULT " << endl;
