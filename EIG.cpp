@@ -523,9 +523,12 @@ double EIG::min() const
 #endif
    
    //are there any lower values in the linear constraints?
-   for(int i = 0;i < nr;++i)
-      if(ward > li[i])
+   for(int i = 0;i < nr;++i){
+
+      if(ward > li[i] && li[i] < 0.0)
          ward = li[i];
+
+   }
 
    return ward;
 
