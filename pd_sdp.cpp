@@ -11,10 +11,12 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <complex>
 
 using std::cout;
 using std::endl;
 using std::ofstream;
+using std::complex;
 
 #include "include.h"
 
@@ -35,16 +37,16 @@ int main(void){
    cout.precision(10);
 
    int M = 8;//dim sp hilbert space
-   int N = 4;//nr of particles
+   int N = 3;//nr of particles
 
    TPM ham(M,N);
-   ham.sp_pairing(1);
+   ham.hubbard(0,0.0);
 
    SUP S(M,N);
    S.init_S();
 
    SUP Z(M,N);
-   Z.init_Z(1000.0,ham,S);
+   Z.init_Z(10000.0,ham,S);
 
    int dim = Z.gdim();
 
@@ -201,7 +203,66 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
-   
+
+   //Another little test
+   PPHM pphm(M,N);
+   pphm.T(0,S.tpm(0));
+
+   PHM phm(M,N);
+   phm.G(1,S.tpm(0));
+
+   SPM spm(1.0/(N - 1.0),S.tpm(0));
+
+   //First the "particle" constraint
+   Matrix matrix(M/2);
+   matrix = 0.0;
+
+   for(int i = 0;i < M/2;++i)
+      for(int j = i;j < M/2;++j){
+
+         matrix(i,j) = spm(2*i,2*j);
+
+         matrix(i,j) -= (S.tpm(0)(2*i,2*j+1,2*j,2*j+1) + S.tpm(0)(2*i,2*i+1,2*j,2*i+1));
+
+         matrix(i,j) += pphm(2*i,2*i+1,2*i+1,2*j,2*j+1,2*j+1);
+
+      }
+
+   matrix.symmetrize();
+
+   Vector<Matrix> vp(matrix);
+   cout << vp << endl;
+
+   //make the hole, mjam mjam
+   for(int i = 0;i < M;++i){
+
+      spm(i,i) = 1.0 - spm(i,i);
+
+      for(int j = i + 1;j < M;++j)
+         spm(i,j) = -spm(i,j);
+
+   }
+
+   spm.symmetrize();
+
+   matrix = 0.0;
+
+   for(int i = 0;i < M/2;++i)
+      for(int j = i;j < M/2;++j){
+
+         matrix(i,j) = spm(2*i,2*j);
+
+         matrix(i,j) -= (phm(2*j + 1,2*i,2*j + 1,2*j) + phm(2*i + 1,2*i,2*i + 1,2*j));
+
+         matrix(i,j) += pphm(2*i,2*i+1,2*i+1,2*j,2*j+1,2*j+1);
+
+      }
+
+   matrix.symmetrize();
+
+   Vector<Matrix> vh(matrix);
+   cout << vh;
+
    return 0;
 
 }

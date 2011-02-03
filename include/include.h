@@ -67,4 +67,6 @@
 #include "SUP.h"
 #include "EIG.h"
 
+#include "GutMat.h"
+
 /* vim: set ts=3 sw=3 expandtab :*/
