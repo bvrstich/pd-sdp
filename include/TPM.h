@@ -14,6 +14,7 @@ class PHM;
 class DPM;
 class PPHM;
 class T2PM;
+class GutMat;
 
 /**
  * @author Brecht Verstichel
@@ -117,6 +118,10 @@ class TPM : public Matrix {
       void T(const T2PM &);
 
       static void init_overlap(int,int);
+
+      void p(const GutMat &);
+
+      void q(const GutMat &);
 
    private:
 

@@ -36,8 +36,8 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 12;//dim sp hilbert space
-   int N = 5;//nr of particles
+   int M = 8;//dim sp hilbert space
+   int N = 3;//nr of particles
 
    TPM ham(M,N);
    ham.hubbard(0,10.0);
@@ -203,6 +203,17 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
+
+   GutMat gm(M,N);
+   gm.p(S.tpm(0));
+
+   Vector<GutMat> vgm1(gm);
+   cout << vgm1 << endl;
+
+   gm.q(S.tpm(0));
+
+   Vector<GutMat> vgm2(gm);
+   cout << vgm2;
 
    return 0;
 

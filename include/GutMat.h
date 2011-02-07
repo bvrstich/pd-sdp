@@ -12,6 +12,8 @@ using std::ostream;
  * @author Brecht Verstichel
  * @date 03-02-2011\n\n
  * This class GutMat was written for the gutzwiller constraint matrices on singly occupied space. (see notes on hubbard).
+ * Attention, when using this class be aware that it is assumed that up spins have even sp-orbital numbers and down spins odd.
+ * The indices of this matrix have no spin, only site numbers.
  */
 
 class GutMat : public Matrix {

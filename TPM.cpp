@@ -1159,4 +1159,139 @@ void TPM::T(const T2PM &t2pm)
    }
 }
 
+/** 
+ * The p-down condition: see primal_dual.pdf for info
+ * @param gm the input GutMat object
+ */
+void TPM::p(const GutMat &gm){
+
+   double ward = 1.0/(N - 1.0);
+
+   for(int i = 0;i < n;++i){
+
+      int a = t2s[i][0];
+      int b = t2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         int c = t2s[j][0];
+         int d = t2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         //first the np part
+         if(i == j)
+            (*this)(i,i) = ward*(gm(Math::adjoint(a),Math::adjoint(a)) + gm(Math::adjoint(b),Math::adjoint(b)));
+
+         if(a == c){
+
+            (*this)(i,j) += ward*gm(b,d);
+
+            if(Math::adjoint(d) == a)
+               (*this)(i,j) -= gm(b,d);
+
+            if(Math::adjoint(b) == c)
+               (*this)(i,j) -= gm(b,d);
+
+         }
+
+         if(b == c){
+
+            (*this)(i,j) -= ward*gm(a,d);
+
+            if(Math::adjoint(d) == b)
+               (*this)(i,j) += gm(a,d);
+
+            if(Math::adjoint(a) == c)
+               (*this)(i,j) += gm(a,d);
+
+         }
+
+         if(b == d){
+
+            (*this)(i,j) += ward*gm(a,c);
+
+            if(Math::adjoint(c) == b)
+               (*this)(i,j) -= gm(a,c);
+
+            if(Math::adjoint(a) == d)
+               (*this)(i,j) -= gm(a,c);
+
+         }
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
+/** 
+ * The q-down condition: see primal_dual.pdf for info
+ * @param gm the input GutMat object
+ */
+void TPM::q(const GutMat &gm){
+
+   double ward = 1.0/(N - 1.0);
+   double hard = 2.0*gm.trace()/(N*(N - 1.0));
+
+   for(int i = 0;i < n;++i){
+
+      int a = t2s[i][0];
+      int b = t2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         int c = t2s[j][0];
+         int d = t2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         //first the np part
+         if(i == j)
+            (*this)(i,i) = hard -ward*(gm(Math::adjoint(a),Math::adjoint(a)) + gm(Math::adjoint(b),Math::adjoint(b)));
+
+         if(a == c){
+
+            (*this)(i,j) -= ward*gm(b,d);
+
+            if(Math::adjoint(d) == a)
+               (*this)(i,j) += gm(b,d);
+
+            if(Math::adjoint(b) == c)
+               (*this)(i,j) += gm(b,d);
+
+         }
+
+         if(b == c){
+
+            (*this)(i,j) += ward*gm(a,d);
+
+            if(Math::adjoint(d) == b)
+               (*this)(i,j) -= gm(a,d);
+
+            if(Math::adjoint(a) == c)
+               (*this)(i,j) -= gm(a,d);
+
+         }
+
+         if(b == d){
+
+            (*this)(i,j) -= ward*gm(a,c);
+
+            if(Math::adjoint(c) == b)
+               (*this)(i,j) += gm(a,c);
+
+            if(Math::adjoint(a) == d)
+               (*this)(i,j) += gm(a,c);
+
+         }
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/

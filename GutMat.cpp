@@ -7,11 +7,11 @@ using std::endl;
 #include "include.h"
 
 /**
- * constructor, makes matrix of dimension M/2
+ * constructor, makes matrix of dimension M
  * @param M dimension of single particle space and dimension of the Matrix
  * @param N Nr of particles
  */
-GutMat::GutMat(int M,int N) : Matrix(M/2) {
+GutMat::GutMat(int M,int N) : Matrix(M) {
 
    this->M = M;
    this->N = N;
@@ -72,12 +72,12 @@ void GutMat::p(const TPM &tpm){
 
    SPM spm(1.0/(N - 1.0),tpm);
 
-   for(int a = 0;a < M/2;++a){
+   for(int a = 0;a < M;++a){
 
-      (*this)(a,a) = spm(2*a + 1,2*a + 1);
+      (*this)(a,a) = spm(Math::adjoint(a),Math::adjoint(a));
 
-      for(int b = a;b < M/2;++b)
-         (*this)(a,b) += spm(2*a,2*b) - tpm(2*a,2*b+1,2*b,2*b+1) - tpm(2*a,2*a+1,2*b,2*a+1);
+      for(int b = a;b < M;++b)
+         (*this)(a,b) += spm(a,b) - tpm(a,Math::adjoint(b),b,Math::adjoint(b)) - tpm(a,Math::adjoint(a),b,Math::adjoint(a));
 
    }
 
@@ -97,12 +97,12 @@ void GutMat::q(const TPM &tpm){
 
    double ward = 2.0*tpm.trace()/(N*(N - 1.0));
 
-   for(int a = 0;a < M/2;++a){
+   for(int a = 0;a < M;++a){
 
-      (*this)(a,a) = ward - spm(2*a + 1,2*a + 1);
+      (*this)(a,a) = ward - spm(Math::adjoint(a),Math::adjoint(a));
 
-      for(int b = a;b < M/2;++b)
-         (*this)(a,b) += tpm(2*b + 1,2*b,2*b+1,2*a) + tpm(2*a+1,2*b,2*a+1,2*a) - spm(2*a,2*b);
+      for(int b = a;b < M;++b)
+         (*this)(a,b) += tpm(Math::adjoint(b),b,Math::adjoint(b),a) + tpm(Math::adjoint(a),b,Math::adjoint(a),a) - spm(a,b);
 
    }
 
