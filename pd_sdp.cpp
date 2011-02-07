@@ -11,12 +11,10 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <complex>
 
 using std::cout;
 using std::endl;
 using std::ofstream;
-using std::complex;
 
 #include "include.h"
 
