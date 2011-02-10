@@ -52,7 +52,7 @@ int SPM::gM() const
    return M;
 }
 
-ostream &operator<<(ostream &output,SPM &spm_p){
+ostream &operator<<(ostream &output,const SPM &spm_p){
 
    for(int i = 0;i < spm_p.M;++i)
       for(int j = 0;j < spm_p.M;++j)

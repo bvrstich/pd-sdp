@@ -3,6 +3,8 @@
 #include <fstream>
 
 using std::ostream;
+using std::cout;
+using std::endl;
 
 #include "include.h"
 
@@ -472,7 +474,7 @@ void SUP::init_S(){
 
 }
 
-ostream &operator<<(ostream &output,SUP &SZ_p){
+ostream &operator<<(ostream &output,const SUP &SZ_p){
 
    output << (*SZ_p.SZ_tp[0]) << std::endl;
    output << (*SZ_p.SZ_tp[1]);
@@ -776,6 +778,7 @@ void SUP::proj_U(){
    //eerst M_Gamma + Q(M_Q) + ( G(M_G) + T1(M_T1) + T2(M_T2) ) in O stoppen
    TPM O(M,N);
 
+   //collaps onto traceless TPM space
    O.collaps(1,*this);
 
    //dan de inverse overlapmatrix hierop laten inwerken en in this[0] stoppen

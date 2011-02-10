@@ -27,7 +27,7 @@ class EIG{
     * @param output The stream to which you are writing (e.g. cout)
     * @param eig_p the EIG you want to print
     */
-   friend ostream &operator<<(ostream &output,EIG &eig_p);
+   friend ostream &operator<<(ostream &output,const EIG &eig_p);
 
    public:
 

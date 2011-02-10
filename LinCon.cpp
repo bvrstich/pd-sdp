@@ -60,7 +60,7 @@ LinCon::~LinCon(){
 /**
  * @return the constraint TPM object
  */
-TPM &LinCon::gI() const{
+const TPM &LinCon::gI() const{
 
    return *I_c;
 
@@ -69,7 +69,7 @@ TPM &LinCon::gI() const{
 /**
  * @return the partially trace constraint, the SPM object I_c_bar.
  */
-SPM &LinCon::gI_bar() const{
+const SPM &LinCon::gI_bar() const{
 
    return *I_c_bar;
 

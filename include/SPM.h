@@ -26,7 +26,7 @@ class SPM : public Matrix {
     * @param output The stream to which you are writing (e.g. cout)
     * @param spm_p de SPM you want to print
     */
-   friend ostream &operator<<(ostream &output,SPM &spm_p);
+   friend ostream &operator<<(ostream &output,const SPM &spm_p);
 
    public:
       

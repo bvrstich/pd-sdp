@@ -292,7 +292,7 @@ double TPM::operator()(int a,int b,int c,int d) const{
 
 }
 
-ostream &operator<<(ostream &output,TPM &tpm_p){
+ostream &operator<<(ostream &output,const TPM &tpm_p){
 
    for(int i = 0;i < tpm_p.n;++i)
       for(int j = 0;j < tpm_p.n;++j){

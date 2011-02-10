@@ -237,7 +237,7 @@ EIG::~EIG(){
 
 }
 
-ostream &operator<<(ostream &output,EIG &eig_p){
+ostream &operator<<(ostream &output,const EIG &eig_p){
 
    for(int i = 0;i < 2;++i)
       output << eig_p.tpv(i) << std::endl;

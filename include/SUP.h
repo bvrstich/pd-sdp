@@ -29,7 +29,7 @@ class SUP{
     * @param output The stream to which you are writing (e.g. cout)
     * @param SZ_p the SUP you want to print
     */
-   friend ostream &operator<<(ostream &output,SUP &SZ_p);
+   friend ostream &operator<<(ostream &output,const SUP &SZ_p);
 
    public:
 

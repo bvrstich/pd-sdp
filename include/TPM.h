@@ -35,7 +35,7 @@ class TPM : public Matrix {
     * @param output The stream to which you are writing (e.g. cout)
     * @param tpm_p the TPM you want to print
     */
-   friend ostream &operator<<(ostream &output,TPM &tpm_p);
+   friend ostream &operator<<(ostream &output,const TPM &tpm_p);
 
    public:
       

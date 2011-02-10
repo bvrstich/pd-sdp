@@ -35,9 +35,9 @@ class LinCon{
       //destructor
       virtual ~LinCon();
 
-      TPM &gI() const;
+      const TPM &gI() const;
 
-      SPM &gI_bar() const;
+      const SPM &gI_bar() const;
 
       double gI_tr() const;
 
