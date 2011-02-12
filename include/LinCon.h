@@ -57,6 +57,8 @@ class LinCon{
 
       void fill_Random();
 
+      void in(const char *filename);
+
    private:
 
       //!Traceless Constraint matrix: Watch out, shifted with i_c unity, so that Tr Gamma I_c > 0

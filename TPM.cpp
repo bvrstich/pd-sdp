@@ -1222,6 +1222,28 @@ void TPM::in_sp(const char *filename){
 
 }
 
+void TPM::in_ifstream(ifstream &input){
+
+   double value;
+
+   int a,b,c,d;
+
+   int i,j;
+
+   while(input >> a >> b >> c >> d >> value){
+
+      i = s2t[a][b];
+      j = s2t[c][d];
+
+      (*this)(i,j) = value;
+
+   }
+
+   this->symmetrize();
+
+}
+
+
 void TPM::bar(const T2PM &t2pm)
 {
    int a,b,c,d;

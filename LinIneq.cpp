@@ -39,7 +39,7 @@ void LinIneq::init(int M,int N,int nr_in){
 
    //fill
    //for(int i = 0;i < nr;++i)
-    //  li[i]->fill_Random();
+      //li[i]->fill_Random();
 
    li[0]->spincon(1.0);
 
@@ -541,4 +541,14 @@ void LinIneq::fill_Random(){
    for(int i = 0;i < nr;++i)
       proj[i] = (double) rand()/RAND_MAX;
    
+}
+
+/**
+ * Test function that prints the coefficients of the inverse linear system of equations for the overlapmatrix.
+ */
+void LinIneq::print_coef() {
+
+   for(int i = 0;i < 4*nr*nr;++i)
+      cout << i << "\t" << coef[i] << endl;
+
 }

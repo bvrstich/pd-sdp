@@ -38,8 +38,8 @@ int main(void){
 
    cout.precision(10);
 
-   int M = 12;//dim sp hilbert space
-   int N = 5;//nr of particles
+   int M = 8;//dim sp hilbert space
+   int N = 3;//nr of particles
 
    LinIneq::init(M,N,1);
 

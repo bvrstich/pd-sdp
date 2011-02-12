@@ -219,3 +219,21 @@ void LinCon::fill_Random(){
    I_c_bar->bar(*I_c);
 
 }
+
+/**
+ * Input constraint from file
+ * @param filename yeah, the filename.
+ */
+void LinCon::in(const char *filename){
+
+   ifstream input(filename);
+
+   input >> i_c;
+
+   I_c->in_ifstream(input);
+
+   input >> I_c_tr;
+
+   I_c_bar->bar(*I_c);
+
+}

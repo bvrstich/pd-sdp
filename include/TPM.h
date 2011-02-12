@@ -5,6 +5,7 @@
 #include <fstream>
 
 using std::ostream;
+using std::ifstream;
 
 #include "Matrix.h"
 
@@ -122,6 +123,8 @@ class TPM : public Matrix {
       void pairing(double x[]);
 
       void in_sp(const char *);
+
+      void in_ifstream(ifstream &);
 
       void bar(const T2PM &);
 
