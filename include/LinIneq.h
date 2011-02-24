@@ -84,8 +84,6 @@ class LinIneq{
 
       void invert();
 
-      void dcal(double);
-
       void sqrt(int);
 
       void L_map(const LinIneq &,const LinIneq &);

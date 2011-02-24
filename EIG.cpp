@@ -21,7 +21,7 @@ EIG::EIG(){
  * @param SZ input SUP object that will be destroyed after this function is called. The eigenvectors
  * of the matrix will be stored in the columns of the original SUP matrix.
  */
-EIG::EIG(const SUP &SZ)
+EIG::EIG(SUP &SZ)
 {
    //first allocate the memory
    this->N = SZ.gN();
@@ -339,7 +339,7 @@ double EIG::gli(int i) const {
  * allocated before
  * @param sup the SUP matrix that has to be diagonalized
  */
-void EIG::diagonalize(const SUP &sup)
+void EIG::diagonalize(SUP &sup)
 {
    for(int i = 0;i < 2;++i)
       v_tp[i]->diagonalize(sup.tpm(i));

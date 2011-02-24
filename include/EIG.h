@@ -35,7 +35,7 @@ class EIG{
       EIG();
    
       //constructor met initialisatie op 
-      EIG(const SUP &);
+      EIG(SUP &);
       
       //copy constructor
       EIG(const EIG &);
@@ -43,7 +43,7 @@ class EIG{
       //destructor
       ~EIG();
 
-      void diagonalize(const SUP &);
+      void diagonalize(SUP &);
 
       int gN() const;
 
