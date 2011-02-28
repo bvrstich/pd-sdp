@@ -395,6 +395,54 @@ void TPM::hubbard_1D(int option,double U){
 }
 
 /**
+ * construct the two-dimensional hubbard hamiltonian with on site repulsion U
+ * @param U onsite repulsion term
+ */
+void TPM::hubbard_2D(double U){
+
+   int a,b,c,d;//sp orbitals
+
+   double ward = 1.0/(N - 1.0);
+
+   Matrix T(M);
+
+   Hamiltonian::construct_T(T);
+
+   for(int i = 0;i < n;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         if(a == c)
+            (*this)(i,j) += ward*T(b,d);
+
+         if(b == c)
+            (*this)(i,j) -= ward*T(a,d);
+
+         if(b == d)
+            (*this)(i,j) += ward*T(a,c);
+
+         //on site interaction
+         if(i == j)
+            if(a % 2 == 0 && b == a + 1)
+               (*this)(i,i) += U;
+
+      }
+
+   }
+
+   this->symmetrize();
+
+}
+
+/**
  * The Q map
  * @param option = 1, regular Q map , = -1 inverse Q map
  * @param tpm_d the TPM of which the Q map is taken and saved in this.

@@ -29,16 +29,21 @@ using std::ofstream;
  * Part 3: When the primal dual gap is smaller that the required accuracy exit the while. (flag == 3)\n
  * For more information on the actual method, see primal_dual.pdf
  */
-
-int main(void){
+int main(int argc,char *argv[]){
 
    cout.precision(10);
 
-   int M = 8;//dim sp hilbert space
-   int N = 4;//nr of particles
+   int L = atoi(argv[1]);//dim sp hilbert space, nr of sites times 2.
+   int N = atoi(argv[2]);//nr of particles
+
+   double U = atof(argv[3]);
+
+   Hamiltonian::init(L);
+
+   int M = L*L*2;//dim sp hilbert space
 
    TPM ham(M,N);
-   ham.hubbard_1D(0,1);
+   ham.hubbard_2D(U);
 
    SUP S(M,N);
    S.init_S();
@@ -202,6 +207,8 @@ int main(void){
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
    
+   Hamiltonian::clear();
+
    return 0;
 
 }
