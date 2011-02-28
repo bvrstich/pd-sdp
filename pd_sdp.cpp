@@ -33,7 +33,7 @@ int main(int argc,char *argv[]){
 
    cout.precision(10);
 
-   int L = atoi(argv[1]);//dim sp hilbert space, nr of sites times 2.
+   int L = atoi(argv[1]);//dimension of the lattice
    int N = atoi(argv[2]);//nr of particles
 
    double U = atof(argv[3]);
