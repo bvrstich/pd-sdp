@@ -336,7 +336,7 @@ int TPM::gn() const
  * @param U onsite repulsion term
  * @param option == 0 use periodic boundary conditions, == 1 use no pbc
  */
-void TPM::hubbard(int option,double U){
+void TPM::hubbard_1D(int option,double U){
 
    int a,b,c,d;//sp orbitals
 

@@ -38,7 +38,7 @@ int main(void){
    int N = 4;//nr of particles
 
    TPM ham(M,N);
-   ham.sp_pairing(1);
+   ham.hubbard_1D(0,1);
 
    SUP S(M,N);
    S.init_S();
