@@ -60,6 +60,8 @@ class PHM : public Matrix {
 
       void G(int option,const TPM &);
 
+      void G2(const TPM &);
+
       void bar(const PPHM &);
 
       void in_sp(const char *filename);

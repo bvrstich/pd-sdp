@@ -245,6 +245,55 @@ void PHM::G(int option,const TPM &tpm)
 }
 
 /**
+ * The G2 map, maps a TPM object on a PHM object.
+ * @param tpm input TPM
+ */
+void PHM::G2(const TPM &tpm)
+{
+   SPM spm(M,N);
+   spm.constr(1.0/(N - 1.0),tpm);
+
+   double ward = tpm.trace()*2.0/(N*(N - 1.0));
+
+   int a,b,c,d;
+
+   for(int i = 0;i < n;++i){
+
+      a = ph2s[i][0];
+      b = ph2s[i][1];
+
+      for(int j = i;j < n;++j){
+
+         c = ph2s[j][0];
+         d = ph2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         if(a == b){
+
+            if(c == d)
+               (*this)(i,j) += ward;
+
+            (*this)(i,j) -= spm(c,d);
+
+         }
+
+         if(c == d)
+            (*this)(i,j) -= spm(a,b);
+
+         if(a == c)
+            (*this)(i,j) += spm(b,d);
+
+         (*this)(i,j) -= tpm(a,d,c,b);
+
+      }
+   }
+   
+   this->symmetrize();
+
+}
+
+/**
  * Map a PPHM (pphm) object onto a PHM (*this) object by tracing one pair of indices (see primal_dual.pdf for more info)
  * @param pphm Input PPHM
  */
