@@ -63,6 +63,7 @@
 #include "DPM.h"
 #include "PPHM.h"
 #include "T2PM.h"
+#include "PHPM.h"
 
 #include "SUP.h"
 #include "EIG.h"
