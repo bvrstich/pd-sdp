@@ -113,6 +113,8 @@ class TPM : public Matrix {
 
       void in_sp(const char *);
 
+      void in(const char *);
+
       void bar(const T2PM &);
 
       void T(const T2PM &);
