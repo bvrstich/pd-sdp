@@ -29,7 +29,7 @@ BRIGHT_ROOT= .
 
 INCLUDE = -Iinclude
 
-LIBS= -llapack -lblas
+LIBS= -lblas -llapack
 
 CC	= gcc
 CXX	= g++
@@ -38,7 +38,7 @@ CXX	= g++
 #   Compiler & Linker flags
 # -----------------------------------------------------------------------------
 CFLAGS	= $(INCLUDE) -g -Wall -O2
-LDFLAGS	= $(LIBS) -g -Wall -O2
+LDFLAGS	=  -g -Wall -O2 
 
 
 # =============================================================================
@@ -153,7 +153,7 @@ PQGTP:
 # -----------------------------------------------------------------------------
 $(BRIGHT_ROOT)/$(BINNAME):	Makefile $(OBJ) 
 	@echo; echo "Linker: creating $(BRIGHT_ROOT)/$(BINNAME) ..."
-	$(CXX) $(LDFLAGS) $(SFLAGS) -o $(BRIGHT_ROOT)/$(BINNAME) $(OBJ)
+	$(CXX) $(LDFLAGS) $(SFLAGS) -o $(BRIGHT_ROOT)/$(BINNAME) $(OBJ) $(LIBS)
 
 # -----------------------------------------------------------------------------
 #   Create everything newly from scratch
