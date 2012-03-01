@@ -15,9 +15,14 @@ CPPSRC	= pd_sdp.cpp\
             PHM.cpp\
             SUP.cpp\
             EIG.cpp\
-	    DPM.cpp\
-	    PPHM.cpp\
-	    T2PM.cpp
+            DPM.cpp\
+            PPHM.cpp\
+            T2PM.cpp\
+            MxElem.cpp\
+            MxElemFiller.cpp\
+            R.cpp\
+            Gauss.cpp\
+            input.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
@@ -29,7 +34,7 @@ BRIGHT_ROOT= .
 
 INCLUDE = -Iinclude
 
-LIBS= -lblas -llapack
+LIBS= -lblas -llapack -lgmp -lgmpxx
 
 CC	= gcc
 CXX	= g++
