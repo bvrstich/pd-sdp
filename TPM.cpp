@@ -939,8 +939,8 @@ void TPM::sp_pairing(double pair_coupling){
    double *E = new double [M/2];
 
    //single particle spectrum
-   for(int a = -M/2;a < 0;++a)
-      E[M/2 + a] = (double) a*2/M;
+   for(int a = 0;a < M/2;++a)
+      E[a] = a + 1.0;
 
    double *x = new double [M/2];
 

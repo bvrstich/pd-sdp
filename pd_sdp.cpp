@@ -38,7 +38,7 @@ int main(void){
    int N = 3;//nr of particles
 
    TPM ham(M,N);
-   ham.sp_pairing(1.0);
+   ham.sp_pairing(8);
 
    SUP S(M,N);
    S.init_S();
@@ -198,12 +198,6 @@ int main(void){
    cout << endl;
    cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
-
-   PHM phm(M,N);
-   phm.G2(S.tpm(0));
-
-   Vector<PHM> v(phm);
-   cout << v;
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
