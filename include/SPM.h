@@ -31,7 +31,7 @@ class SPM : public Matrix {
    public:
       
       //constructor
-      SPM(int M,int N);
+      SPM();
 
       //copy constructor
       SPM(const SPM &);
@@ -52,14 +52,14 @@ class SPM : public Matrix {
        * @param MT PHM or TPM inputmatrix.
        */
       template<class MatrixType>
-         void constr(double scale,const MatrixType &MT)
-         {
-            for(int a = 0;a < M;++a)
-               for(int b = a;b < M;++b){
+         void bar(double scale,const MatrixType &MT){
+
+            for(int a = 0;a < MT.gM();++a)
+               for(int b = a;b < MT.gM();++b){
 
                   (*this)(a,b) = 0.0;
 
-                  for(int l = 0;l < M;++l)
+                  for(int l = 0;l < MT.gM();++l)
                      (*this)(a,b) += MT(a,l,b,l);
 
                   (*this)(a,b) *= scale;
@@ -69,56 +69,19 @@ class SPM : public Matrix {
             this->symmetrize();
 
          }
+      void bar(const T2PM &MT);
 
-      /**
-       * Constructor of an SPM object with initialisation by means of the function SPM::constr
-       * @param scale The factor that multiplies the bar(MT), e.g. 1/(N - 1) for a normal single particle density matrix
-       * @param MT the PHM or TPM inputmatrix.
-       */
-      template<class MatrixType>
-         SPM(double scale,const MatrixType &MT) : Matrix(MT.gM())
-      {
-            this->M = MT.gM();
-            this->N = MT.gN();
-
-            this->constr(scale,MT);
-
-         }
-
-      /**
-       * construeert een SPM uit een TPM of PHM. \n\n
-       * SPM(a,c) = sum_b MT(a,b,c,b)\n\n
-       * @param MT the PHM or TPM inputmatrix.
-       */
-      template<class MatrixType>
-         void bar(const MatrixType &MT)
-         {
-            for(int a = 0;a < M;++a)
-               for(int b = a;b < M;++b){
-
-                  (*this)(a,b) = 0.0;
-
-                  for(int l = 0;l < M;++l)
-                     (*this)(a,b) += MT(a,l,b,l);
-
-               }
-
-            this->symmetrize();
-
-         }
+      static void init(int,int);
 
    private:
 
       //!dimension of single particle space
-      int M;
+      static int M;
 
       //!nr of particles
-      int N;
+      static int N;
 
 };
-
-
-template<> void SPM::bar(const T2PM &MT);
 
 #endif
 

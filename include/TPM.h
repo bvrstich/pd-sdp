@@ -3,8 +3,10 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using std::ostream;
+using std::vector;
 
 #include "Matrix.h"
 
@@ -39,13 +41,10 @@ class TPM : public Matrix {
    public:
       
       //constructor
-      TPM(int M,int N);
+      TPM();
 
       //copy constructor
       TPM(const TPM &);
-
-      //file constructor
-      TPM(const char *);
 
       //destructor
       virtual ~TPM();
@@ -62,9 +61,6 @@ class TPM : public Matrix {
 
       //geef N terug
       int gM() const;
-
-      //geef n terug
-      int gn() const;
 
       void hubbard_1D(int option,double U);
 
@@ -118,28 +114,26 @@ class TPM : public Matrix {
 
       static void init_overlap(int,int);
 
+      static void init(int,int);
+
+      static void clear();
+
    private:
 
       //!static list of dimension [n_tp][2] that takes in a tp index i and returns two sp indices: a = t2s[i][0] and b = t2s[i][1]
-      static int **t2s;
+      static vector< vector<int> > t2s;
 
       //!static list of dimension [M][M] that takes two sp indices a,b and returns a tp index i: i = s2t[a][b]
       static int **s2t;
-
-      //!static counter that counts the number of TPM objects running in the program
-      static int counter;
 
       //!static variables of the inverse overlapmatrix.
       static double Sa,Sb,Sc;
 
       //!nr of particles
-      int N;
+      static int N;
 
       //!dimension of sp hilbert space
-      int M;
-
-      //!dimension of tp hilbert space and of the matrix
-      int n;
+      static int M;
 
 };
 

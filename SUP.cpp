@@ -21,7 +21,7 @@ SUP::SUP(int M,int N){
    SZ_tp = new TPM * [2];
 
    for(int i = 0;i < 2;++i)
-      SZ_tp[i] = new TPM(M,N);
+      SZ_tp[i] = new TPM();
 
    this->dim = 2*n_tp;
 
@@ -29,7 +29,7 @@ SUP::SUP(int M,int N){
 
    this->n_ph = M*M;
    
-   SZ_ph = new PHM(M,N);
+   SZ_ph = new PHM();
 
    dim += n_ph;
 
@@ -83,7 +83,7 @@ SUP::SUP(const SUP &SZ_c)
    SZ_tp = new TPM * [2];
 
    for(int i = 0;i < 2;++i)
-      SZ_tp[i] = new TPM(M,N);
+      SZ_tp[i] = new TPM();
 
    (*SZ_tp[0]) = (*SZ_c.SZ_tp[0]);
    (*SZ_tp[1]) = (*SZ_c.SZ_tp[1]);
@@ -94,7 +94,7 @@ SUP::SUP(const SUP &SZ_c)
 
    dim += n_ph;
    
-   SZ_ph = new PHM(M,N);
+   SZ_ph = new PHM();
 
    *SZ_ph = *SZ_c.SZ_ph;
 
@@ -672,7 +672,7 @@ void SUP::dscal(double alpha){
 void SUP::proj_U(){
   
    //eerst M_Gamma + Q(M_Q) + ( G(M_G) + T1(M_T1) + T2(M_T2) ) in O stoppen
-   TPM O(M,N);
+   TPM O;
 
    O.collaps(1,*this);
 
@@ -692,7 +692,7 @@ void SUP::proj_U(){
  */
 void SUP::proj_C(const TPM &tpm)
 {
-   TPM hulp(M,N);
+   TPM hulp;
 
    hulp.collaps(0,*this);
 

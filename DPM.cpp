@@ -300,7 +300,8 @@ int DPM::gn() const
  */
 void DPM::T(double A,double B,double C,const TPM &tpm)
 {
-   SPM spm(C,tpm);
+   SPM spm;
+   spm.bar(C,tpm);
 
    double ward = 2*B*tpm.trace();
 
@@ -410,7 +411,7 @@ void DPM::T(int option,const TPM &tpm)
 
       //eerst zoeken we de inverse T1 down bar matrix
       //dit is gewoon een inverse Q-like afbeelding:
-      TPM bar(M,N);
+      TPM bar;
 
       double a = 1;
       double b = 3.0/(N*(N - 1.0));

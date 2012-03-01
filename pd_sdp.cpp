@@ -37,7 +37,11 @@ int main(void){
    int M = 8;//dim sp hilbert space
    int N = 3;//nr of particles
 
-   TPM ham(M,N);
+   SPM::init(M,N);
+   TPM::init(M,N);
+   PHM::init(M,N);
+
+   TPM ham;
    ham.sp_pairing(8);
 
    SUP S(M,N);
@@ -91,12 +95,12 @@ int main(void){
       B -= Z;
 
       //collaps B onto b to construct the right hand side of the primal Newton equation
-      TPM b(M,N);
+      TPM b;
 
       b.collaps(1,B);
 
       //dit wordt de stap:
-      TPM delta(M,N);
+      TPM delta;
 
       //los het stelsel op, geeft aantal iteraties nodig terug:
       cout << delta.solve(b,D_inv) << "\t";
@@ -142,7 +146,7 @@ int main(void){
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,2.0);
+         a = DS.line_search(DZ,S,Z,1.0);
 
          S.daxpy(a,DS);
          Z.daxpy(a,DZ);
@@ -201,6 +205,9 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
+   
+   PHM::clear();
+   TPM::clear();
    
    return 0;
 

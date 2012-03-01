@@ -2,8 +2,10 @@
 #define PHM_H
 
 #include <iostream>
+#include <vector>
 
 using std::ostream;
+using std::vector;
 
 #include "Matrix.h"
 #include "TPM.h"
@@ -31,7 +33,7 @@ class PHM : public Matrix {
    public:
       
       //constructor
-      PHM(int M,int N);
+      PHM();
 
       //copy constructor
       PHM(const PHM &);
@@ -55,9 +57,6 @@ class PHM : public Matrix {
       //geef N terug
       int gM() const;
 
-      //geef dim terug
-      int gn() const;
-
       void G(int option,const TPM &);
 
       void G2(const TPM &);
@@ -68,25 +67,23 @@ class PHM : public Matrix {
 
       void bar(const T2PM &);
 
+      static void init(int,int);
+
+      static void clear();
+
    private:
 
-      //!static counter that counts the number of PHM objects running in the program
-      static int counter;
-
       //!static list of dimension [n_ph][2] that takes in a ph index i and returns two sp indices: a = ph2s[i][0] and b = ph2s[i][1]
-      static int **ph2s;
+      static vector< vector<int> > ph2s;
 
       //!static list of dimension [M][M] that takes two sp indices a,b and returns a ph index i: i = s2t[a][b]
       static int **s2ph;
 
       //!number of particles
-      int N;
+      static int N;
 
       //!dimension of sp hilbert space
-      int M;
-
-      //!dimension of ph space and dimension of PHM Matrix object
-      int n;
+      static int M;
 
 };
 

@@ -1,18 +1,22 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include <fstream>
 
 using std::ostream;
 using std::ofstream;
 using std::ifstream;
+using std::cout;
 using std::endl;
 using std::ios;
+using std::vector;
 
 #include "include.h"
 
-int TPM::counter = 0;
+int TPM::M;
+int TPM::N;
 
-int **TPM::t2s;
+vector< vector<int> > TPM::t2s;
 int **TPM::s2t;
 
 double TPM::Sa;
@@ -20,177 +24,73 @@ double TPM::Sb;
 double TPM::Sc;
 
 /**
- * standard constructor: constructs Matrix object of dimension M*(M - 1)/2 and
- * if counter == 0, allocates and constructs the lists containing the relationship between sp and tp basis.
- * @param M nr of sp orbitals
- * @param N nr of particles
+ * initialize the static variables and allocate the static lists
+ * @param M_i the number of sp orbitals
+ * @param N_i the number of particles
  */
-TPM::TPM(int M,int N) : Matrix(M*(M - 1)/2) {
+void TPM::init(int M_i,int N_i){
 
-   this->N = N;
-   this->M = M;
-   this->n = M*(M - 1)/2;
+   M = M_i;
+   N = N_i;
 
-   if(counter == 0){
+   //allocate
+   s2t = new int * [M];
 
-      //allocatie van sp2tp
-      s2t = new int * [M];
-      s2t[0] = new int [M*M];
+   for(int a = 0;a < M;++a)
+      s2t[a] = new int [M];
 
-      for(int i = 1;i < M;++i)
-         s2t[i] = s2t[i - 1] + M;
+   //construct
+   int tp = 0;
 
-      //allocatie van tp2sp
-      t2s = new int * [n];
+   vector<int> v(2);
 
-      for(int i = 0;i < n;++i)
-         t2s[i] = new int [2];
+   for(int a = 0;a < M;++a)
+      for(int b = a + 1;b < M;++b){
 
-      //initialisatie van de twee arrays
-      int teller = 0;
+         v[0] = a;
+         v[1] = b;
 
-      for(int i = 0;i < M;++i)
-         for(int j = i + 1;j < M;++j){
+         t2s.push_back(v);
 
-            s2t[i][j] = teller;
+         s2t[a][b] = tp;
+         s2t[b][a] = tp;
 
-            t2s[teller][0] = i;
-            t2s[teller][1] = j;
+         ++tp;
 
-            ++teller;
+      }
 
-         }
-
-      for(int i = 0;i < M;++i)
-         for(int j = i + 1;j < M;++j)
-            s2t[j][i] = s2t[i][j];
-
-      init_overlap(M,N);
-
-   }
-
-   ++counter;
+   //make overlap coefficients
+   init_overlap(M,N);
 
 }
+
+/**
+ * deallocate the static lists
+ */
+void TPM::clear(){
+
+   for(int a = 0;a < M;++a)
+      delete [] s2t[a];
+
+   delete [] s2t;
+
+}
+
+/**
+ * standard constructor: constructs Matrix object of dimension M*(M - 1)/2 and
+ */
+TPM::TPM() : Matrix(t2s.size()) { }
 
 /**
  * copy constructor: constructs Matrix object of dimension M*(M - 1)/2 and fills it with the content of matrix tpm_c
- * if counter == 0, the lists containing the relationship between sp and tp basis.
  * @param tpm_c object that will be copied into this.
  */
-TPM::TPM(const TPM &tpm_c) : Matrix(tpm_c){
-
-   this->N = tpm_c.N;
-   this->M = tpm_c.M;
-   this->n = M*(M - 1)/2;
-
-   if(counter == 0){
-
-      //allocatie van sp2tp
-      s2t = new int * [M];
-      s2t[0] = new int [M*M];
-
-      for(int i = 1;i < M;++i)
-         s2t[i] = s2t[i - 1] + M;
-
-      //allocatie van tp2sp
-      t2s = new int * [n];
-
-      for(int i = 0;i < n;++i)
-         t2s[i] = new int [2];
-
-      //initialisatie van de twee arrays
-      int teller = 0;
-
-      for(int i = 0;i < M;++i)
-         for(int j = i + 1;j < M;++j){
-
-            s2t[i][j] = teller;
-
-            t2s[teller][0] = i;
-            t2s[teller][1] = j;
-
-            ++teller;
-
-         }
-
-      for(int i = 0;i < M;++i)
-         for(int j = i + 1;j < M;++j)
-            s2t[j][i] = s2t[i][j];
-
-      init_overlap(M,N);
-
-   }
-
-   ++counter;
-
-}
-
-/**
- * construct from file: constructs Matrix object of dimension M*(M - 1)/2 and fills it with the content of the file
- * if counter == 0, the lists containing the relationship between sp and tp basis.
- * @param filename name of the input file
- */
-TPM::TPM(const char *filename) : Matrix(filename){
-
-   ifstream input(filename);
-
-   input >> this->n;
-
-   int I,J;
-   double value;
-
-   //inefficient way of going to the last line of the file:
-   for(int i = 0;i < n;++i)
-      for(int j = 0;j < n;++j)
-         input >> I >> J >> value;
-
-   input >> this->M >> this->N;
-
-  if(counter == 0){
-
-      //allocatie van sp2tp
-      s2t = new int * [M];
-      s2t[0] = new int [M*M];
-
-      for(int i = 1;i < M;++i)
-         s2t[i] = s2t[i - 1] + M;
-
-      //allocatie van tp2sp
-      t2s = new int * [n];
-
-      for(int i = 0;i < n;++i)
-         t2s[i] = new int [2];
-
-      //initialisatie van de twee arrays
-      int teller = 0;
-
-      for(int i = 0;i < M;++i)
-         for(int j = i + 1;j < M;++j){
-
-            s2t[i][j] = teller;
-
-            t2s[teller][0] = i;
-            t2s[teller][1] = j;
-
-            ++teller;
-
-         }
-
-      for(int i = 0;i < M;++i)
-         for(int j = i + 1;j < M;++j)
-            s2t[j][i] = s2t[i][j];
-
-      init_overlap(M,N);
-
-   }
-
-   ++counter;
-
-}
+TPM::TPM(const TPM &tpm_c) : Matrix(tpm_c){ }
 
 /**
  * static function that constructs the parameters of the overlapmatrix
+ * @param M nr of sp orbs
+ * @param N nr of particles
  */
 void TPM::init_overlap(int M,int N){
 
@@ -240,26 +140,9 @@ void TPM::init_overlap(int M,int N){
 }
 
 /**
- * destructor: if counter == 1 the memory for the static lists t2s en s2t will be deleted.
- * 
+ * destructor
  */
-TPM::~TPM(){
-
-   if(counter == 1){
-
-      delete [] s2t[0];
-      delete [] s2t;
-
-      for(int i = 0;i < n;++i)
-         delete [] t2s[i];
-
-      delete [] t2s;
-
-   }
-
-   --counter;
-
-}
+TPM::~TPM(){ }
 
 /**
  * access the elements of the matrix in sp mode, antisymmetry is automatically accounted for:\n\n
@@ -294,8 +177,8 @@ double TPM::operator()(int a,int b,int c,int d) const{
 
 ostream &operator<<(ostream &output,TPM &tpm_p){
 
-   for(int i = 0;i < tpm_p.n;++i)
-      for(int j = 0;j < tpm_p.n;++j){
+   for(int i = 0;i < tpm_p.gn();++i)
+      for(int j = 0;j < tpm_p.gn();++j){
 
          output << i << "\t" << j << "\t|\t" << tpm_p.t2s[i][0] << "\t" << tpm_p.t2s[i][1]
 
@@ -324,14 +207,6 @@ int TPM::gM() const
 }
 
 /**
- * @return de dimensie of the tp matrix space
- */
-int TPM::gn() const
-{
-   return n;
-}
-
-/**
  * construct the hubbard hamiltonian with on site repulsion U
  * @param U onsite repulsion term
  * @param option == 0 use periodic boundary conditions, == 1 use no pbc
@@ -342,12 +217,12 @@ void TPM::hubbard_1D(int option,double U){
 
    double ward = 1.0/(N - 1.0);
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = t2s[i][0];
       b = t2s[i][1];
 
-      for(int j = i;j < n;++j){
+      for(int j = i;j < gn();++j){
 
          c = t2s[j][0];
          d = t2s[j][1];
@@ -427,20 +302,20 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
 
    }
 
-   SPM spm(M,N);
+   SPM spm;
 
    //de trace*2 omdat mijn definitie van trace in berekeningen over alle (alpha,beta) loopt
    double ward = B*tpm_d.trace()*2.0;
 
    //construct de spm met schaling C
-   spm.constr(C,tpm_d);
+   spm.bar(C,tpm_d);
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       int a = t2s[i][0];
       int b = t2s[i][1];
 
-      for(int j = i;j < n;++j){
+      for(int j = i;j < gn();++j){
 
          int c = t2s[j][0];
          int d = t2s[j][1];
@@ -470,13 +345,13 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
  */
 void TPM::unit(){
 
-   double ward = N*(N - 1.0)/(2.0*n);
+   double ward = N*(N - 1.0)/(M*(M - 1.0));
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       (*this)(i,i) = ward;
 
-      for(int j = i + 1;j < n;++j)
+      for(int j = i + 1;j < gn();++j)
          (*this)(i,j) = (*this)(j,i) = 0.0;
 
    }
@@ -488,9 +363,9 @@ void TPM::unit(){
  */
 void TPM::proj_Tr(){
 
-   double ward = (this->trace())/(double)n;
+   double ward = (2.0*this->trace())/(M*(M-1.0));
 
-   for(int i = 0;i < n;++i)
+   for(int i = 0;i < gn();++i)
       (*this)(i,i) -= ward;
 
 }
@@ -509,10 +384,10 @@ void TPM::H(const TPM &b,const SUP &D){
 #ifdef __Q_CON
 
    //maak Q(b)
-   TPM Qb(M,N);
+   TPM Qb;
    Qb.Q(1,b);
 
-   TPM hulp(M,N);
+   TPM hulp;
 
    hulp.L_map(D.tpm(1),Qb);
 
@@ -525,10 +400,10 @@ void TPM::H(const TPM &b,const SUP &D){
 #ifdef __G_CON
 
    //maak G(b)
-   PHM Gb(M,N);
+   PHM Gb;
    Gb.G(1,b);
 
-   PHM hulpje(M,N);
+   PHM hulpje;
 
    hulpje.L_map(D.phm(),Gb);
 
@@ -606,7 +481,7 @@ int TPM::solve(TPM &b,const SUP &D){
    double rr_old,ward;
 
    //nog de Hb aanmaken ook, maar niet initialiseren:
-   TPM Hb(M,N);
+   TPM Hb;
 
    int cg_iter = 0;
 
@@ -648,21 +523,21 @@ int TPM::solve(TPM &b,const SUP &D){
  */
 void TPM::G(int option,const PHM &phm){
 
-   SPM spm(M,N);
+   SPM spm;
 
    if(option == 1)
-      spm.constr(1.0/(N - 1.0),phm);
+      spm.bar(1.0/(N - 1.0),phm);
    else
-      spm.constr(1.0/(M - N + 1.0),phm);
+      spm.bar(1.0/(M - N + 1.0),phm);
 
    int a,b,c,d;
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = t2s[i][0];
       b = t2s[i][1];
 
-      for(int j = i;j < n;++j){
+      for(int j = i;j < gn();++j){
 
          c = t2s[j][0];
          d = t2s[j][1];
@@ -712,12 +587,12 @@ void TPM::bar(const DPM &dpm){
 
    int a,b,c,d;
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = t2s[i][0];
       b = t2s[i][1];
 
-      for(int j = i;j < n;++j){
+      for(int j = i;j < gn();++j){
 
          c = t2s[j][0];
          d = t2s[j][1];
@@ -742,7 +617,7 @@ void TPM::bar(const DPM &dpm){
  */
 void TPM::T(int option,const DPM &dpm){
 
-   TPM tpm(M,N);
+   TPM tpm;
    tpm.bar(dpm);
 
    if(option == 1){
@@ -774,12 +649,12 @@ void TPM::bar(const PPHM &pphm){
 
    int a,b,c,d;
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = t2s[i][0];
       b = t2s[i][1];
 
-      for(int j = i;j < n;++j){
+      for(int j = i;j < gn();++j){
 
          c = t2s[j][0];
          d = t2s[j][1];
@@ -803,14 +678,14 @@ void TPM::bar(const PPHM &pphm){
 void TPM::T(const PPHM &pphm){
 
    //first make some necessary derivate matrices of pphm
-   TPM bar(M,N);
+   TPM bar;
    bar.bar(pphm);
 
-   PHM phm(M,N);
+   PHM phm;
    phm.bar(pphm);
 
    //watch out, scaling for spm is not the usual!
-   SPM spm(M,N);
+   SPM spm;
 
    for(int a = 0;a < M;++a)
       for(int b = a;b < M;++b){
@@ -826,12 +701,12 @@ void TPM::T(const PPHM &pphm){
 
    int a,b,c,d;
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = t2s[i][0];
       b = t2s[i][1];
 
-      for(int j = i;j < n;++j){
+      for(int j = i;j < gn();++j){
 
          c = t2s[j][0];
          d = t2s[j][1];
@@ -869,7 +744,7 @@ void TPM::collaps(int option,const SUP &S){
 
    *this = S.tpm(0);
 
-   TPM hulp(M,N);
+   TPM hulp;
 
    hulp.Q(1,S.tpm(1));
 
@@ -961,7 +836,7 @@ void TPM::sp_pairing(double pair_coupling){
 
    int a,b,c,d;
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = t2s[i][0];
       b = t2s[i][1];
@@ -971,7 +846,7 @@ void TPM::sp_pairing(double pair_coupling){
       if(a/2 == b/2)
          (*this)(i,i) -= 2.0*pair_coupling*x[a/2]*x[a/2];
 
-      for(int j = i + 1;j < n;++j){
+      for(int j = i + 1;j < gn();++j){
 
          c = t2s[j][0];
          d = t2s[j][1];
@@ -1011,7 +886,7 @@ void TPM::pairing(double x[]){
 
    int a,b,c,d;
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = t2s[i][0];
       b = t2s[i][1];
@@ -1019,7 +894,7 @@ void TPM::pairing(double x[]){
       if(a/2 == b/2)
          (*this)(i,i) -= 2.0*x[a/2]*x[a/2];
 
-      for(int j = i + 1;j < n;++j){
+      for(int j = i + 1;j < gn();++j){
 
          c = t2s[j][0];
          d = t2s[j][1];
@@ -1064,12 +939,12 @@ void TPM::bar(const T2PM &t2pm)
 {
    int a,b,c,d;
 
-   for(int i=0;i<n;i++)
+   for(int i=0;i< gn();i++)
    {
       a = t2s[i][0];
       b = t2s[i][1];
 
-      for(int j=i;j<n;j++)
+      for(int j=i;j< gn();j++)
       {
          c = t2s[j][0];
          d = t2s[j][1];
@@ -1093,23 +968,23 @@ void TPM::T(const T2PM &t2pm)
    double matthias = 2*brecht;
 
    // A bar
-   TPM tpm(M,N);
+   TPM tpm;
    tpm.bar(t2pm);
 
    // A dubble bar
-   SPM spm(M,N);
+   SPM spm;
    spm.bar(t2pm);
 
    // A tilde bar
-   PHM phm(M,N);
+   PHM phm;
    phm.bar(t2pm);
 
-   for(int i=0;i<n;i++)
+   for(int i=0;i<gn();i++)
    {
       a = t2s[i][0];
       b = t2s[i][1];
 
-      for(int j=i;j<n;j++)
+      for(int j=i;j<gn();j++)
       {
          c = t2s[j][0];
          d = t2s[j][1];

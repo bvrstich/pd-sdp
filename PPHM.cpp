@@ -247,7 +247,8 @@ void PPHM::T(int option,const TPM &tpm){
    if(option == 0){
 
       //construct the spm
-      SPM spm(1.0/(N - 1.0),tpm);
+      SPM spm;
+      spm.bar(1.0/(N - 1.0),tpm);
 
       int a,b,c,d,e,z;
 
@@ -292,7 +293,7 @@ void PPHM::T(int option,const TPM &tpm){
    }
    else{
 
-      TPM Q(M,N);
+      TPM Q;
       Q.Q(1,tpm);
 
       DPM T(M,N);

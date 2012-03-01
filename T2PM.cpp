@@ -262,7 +262,8 @@ void T2PM::T(const TPM &tpm)
 {
    int a,b,c,d,e,z;
 
-   SPM spm(1.0/(N-1.0),tpm);
+   SPM spm;
+   spm.bar(1.0/(N-1.0),tpm);
 
    for(int i = 0;i < n_pph;i++)
    {
@@ -351,7 +352,7 @@ T2PM::operator PPHM() const
  */
 T2PM::operator SPM() const
 {
-   SPM A(M,N);
+   SPM A;
 
    for(int i = 0;i < M;i++)
       for(int j = i;j < M;j++)

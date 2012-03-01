@@ -6,28 +6,28 @@ using std::endl;
 
 #include "include.h"
 
+int SPM::M;
+int SPM::N;
+
+void SPM::init(int M_i,int N_i){
+
+   M = M_i;
+   N = N_i;
+
+}
+
 /**
  * constructor, makes matrix of dimension M
  * @param M dimension of single particle space and dimension of the Matrix
  * @param N Nr of particles
  */
-SPM::SPM(int M,int N) : Matrix(M) {
-
-   this->M = M;
-   this->N = N;
-
-}
+SPM::SPM() : Matrix(M) { }
 
 /**
  * copy constructor
  * @param spm_copy content of this matrix will be copied into the constructed matrix
  */
-SPM::SPM(const SPM &spm_copy) : Matrix(spm_copy) {
-
-   this->M = spm_copy.gM();
-   this->N = spm_copy.gN();
-
-}
+SPM::SPM(const SPM &spm_copy) : Matrix(spm_copy) { }
 
 /**
  * destructor
@@ -54,19 +54,19 @@ int SPM::gM() const
 
 ostream &operator<<(ostream &output,SPM &spm_p){
 
-   for(int i = 0;i < spm_p.M;++i)
-      for(int j = 0;j < spm_p.M;++j)
+   for(int i = 0;i < spm_p.gM();++i)
+      for(int j = 0;j < spm_p.gM();++j)
          output << i << "\t" << j << "\t" << spm_p(i,j) << endl;
 
    return output;
 
 }
 
-template<> void SPM::bar(const T2PM &MT)
-{
+void SPM::bar(const T2PM &MT){
+
    for(int a = 0;a < M;a++)
-      for(int b = a;b < M;b++)
-      {
+      for(int b = a;b < M;b++){
+
          (*this)(a,b) = 0.0;
 
          for(int l=0;l<M;l++)
@@ -74,7 +74,9 @@ template<> void SPM::bar(const T2PM &MT)
                (*this)(a,b) += MT(l,k,a,l,k,b);
 
          (*this)(b,a) = (*this)(a,b);
+
       }
+
 }
 
 /* vim: set ts=3 sw=3 expandtab :*/
