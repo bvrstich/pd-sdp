@@ -9,148 +9,89 @@ using std::endl;
 
 #include "include.h"
 
-int DPM::counter = 0;
-
-int **DPM::dp2s;
+vector< vector<int> > DPM::dp2s;
 int ***DPM::s2dp;
+
+int DPM::M;
+int DPM::N;
+
+/**
+ * initialize the static variables and allocate the static lists
+ * @param M_i the number of sp orbitals
+ * @param N_i the number of particles
+ */
+void DPM::init(int M_i,int N_i){
+
+   M = M_i;
+   N = N_i;
+
+   //allocate
+   s2dp = new int ** [M];
+
+   for(int a = 0;a < M;++a){
+
+      s2dp[a] = new int * [M];
+
+      for(int b = 0;b < M;++b)
+         s2dp[a][b] = new int [M];
+
+   }
+
+   int dp = 0;
+
+   vector<int> v(3);
+
+   for(int a = 0;a < M;++a)
+      for(int b = a + 1;b < M;++b)
+         for(int c = b + 1;c < M;++c){
+
+            s2dp[a][b][c] = dp;
+
+            v[0] = a;
+            v[1] = b;
+            v[2] = c;
+
+            dp2s.push_back(v);
+
+            ++dp;
+
+         }
+
+}
+
+/**
+ * deallocate the static lists
+ */
+void DPM::clear(){
+
+   for(int a = 0;a < M;++a){
+
+      for(int b = 0;b < M;++b)
+         delete [] s2dp[a][b];
+
+      delete [] s2dp[a];
+
+   }
+
+   delete [] s2dp;
+
+}
 
 /**
  * standard constructor: constructs Matrix object of dimension M*(M - 1)*(M - 2)/6 and
- * if counter == 0, allocates and constructs the lists containing the relationship between sp and dp basis.
- * @param M nr of sp orbitals
- * @param N nr of particles
  */
-DPM::DPM(int M,int N) : Matrix(M*(M - 1)*(M - 2)/6) {
-
-   this->N = N;
-   this->M = M;
-   this->n = M*(M - 1)*(M - 2)/6;
-
-   if(counter == 0){
-
-      //allocatie van s2dp
-      s2dp = new int ** [M];
-
-      for(int i = 0;i < M;++i){
-
-         s2dp[i] = new int * [M];
-
-         for(int j = 0;j < M;++j)
-            s2dp[i][j] = new int [M];
-
-      }
-
-      //allocatie van dp2s
-      dp2s = new int * [n];
-
-      for(int i = 0;i < n;++i)
-         dp2s[i] = new int [3];
-
-      //initialisatie van de twee arrays
-      int teller = 0;
-
-      for(int a = 0;a < M;++a)
-         for(int b = a + 1;b < M;++b)
-            for(int c = b + 1;c < M;++c){
-
-               s2dp[a][b][c] = teller;
-
-               dp2s[teller][0] = a;
-               dp2s[teller][1] = b;
-               dp2s[teller][2] = c;
-
-               ++teller;
-
-            }
-
-   }
-
-   ++counter;
-
-}
+DPM::DPM() : Matrix(dp2s.size()) { }
 
 /**
  * copy constructor: constructs Matrix object of dimension M*(M - 1)*(M - 2)/6 and copies the content of dpm_c into it,
- * if counter == 0, allocates and constructs the lists containing the relationship between sp and dp basis.
  * @param dpm_c input DPM to be copied
  */
-DPM::DPM(const DPM &dpm_c) : Matrix(dpm_c)
-{
-   this->N = dpm_c.N;
-   this->M = dpm_c.M;
-   this->n = M*(M - 1)*(M - 2)/6;
-
-   if(counter == 0){
-
-      //allocatie van s2dp
-      s2dp = new int ** [M];
-
-      for(int i = 0;i < M;++i){
-
-         s2dp[i] = new int * [M];
-
-         for(int j = 0;j < M;++j)
-            s2dp[i][j] = new int [M];
-
-      }
-
-      //allocatie van dp2s
-      dp2s = new int * [n];
-
-      for(int i = 0;i < n;++i)
-         dp2s[i] = new int [3];
-
-      //initialisatie van de twee arrays
-      int teller = 0;
-
-      for(int a = 0;a < M;++a)
-         for(int b = a + 1;b < M;++b)
-            for(int c = b + 1;c < M;++c){
-
-               s2dp[a][b][c] = teller;
-
-               dp2s[teller][0] = a;
-               dp2s[teller][1] = b;
-               dp2s[teller][2] = c;
-
-               ++teller;
-
-            }
-
-   }
-
-   ++counter;
-
-}
+DPM::DPM(const DPM &dpm_c) : Matrix(dpm_c){ }
 
 /**
- * destructor: if counter == 1 the memory for the static lists dp2s en s2dp will be deleted.
+ * destructor
  */
-DPM::~DPM(){
-
-   if(counter == 1){
-
-      for(int i = 0;i < M;++i){
-
-         for(int j = 0;j < M;++j)
-            delete [] s2dp[i][j];
-
-         delete [] s2dp[i];
-
-      }
-
-      delete [] s2dp;
-
-      for(int i = 0;i < n;++i)
-         delete [] dp2s[i];
-
-      delete [] dp2s;
-
-   }
-
-   --counter;
-
-}
+DPM::~DPM(){ }
 
 /**
  * access the elements of the matrix in sp mode, antisymmetry is automatically accounted for:\n\n
@@ -254,8 +195,8 @@ double DPM::operator()(int a,int b,int c,int d,int e,int z) const{
 
 ostream &operator<<(ostream &output,DPM &dpm_p){
 
-   for(int i = 0;i < dpm_p.n;++i)
-      for(int j = 0;j < dpm_p.n;++j){
+   for(int i = 0;i < dpm_p.gn();++i)
+      for(int j = 0;j < dpm_p.gn();++j){
 
          output << i << "\t" << j << "\t|\t" << dpm_p.dp2s[i][0] << "\t" << dpm_p.dp2s[i][1] << "\t" << dpm_p.dp2s[i][2]
 
@@ -284,14 +225,6 @@ int DPM::gM() const
 }
 
 /**
- * @return dimension of dp space and of Matrix
- */
-int DPM::gn() const
-{
-   return n;
-}
-
-/**
  * The T1-like (generalized T1) map: maps a TPM object (tpm) on a DPM object (*this)
  * @param A term before the tp part of the map
  * @param B term before the np part of the map
@@ -307,13 +240,13 @@ void DPM::T(double A,double B,double C,const TPM &tpm)
 
    int a,b,c,d,e,z;
 
-   for(int i = 0;i < n;++i){
+   for(int i = 0;i < gn();++i){
 
       a = dp2s[i][0];
       b = dp2s[i][1];
       c = dp2s[i][2];
 
-      for(int j = i;j < n;++j){
+      for(int j = i;j < gn();++j){
 
          d = dp2s[j][0];
          e = dp2s[j][1];
@@ -391,7 +324,8 @@ void DPM::T(double A,double B,double C,const TPM &tpm)
 
 }
 /**
- * The T1-map: maps a TPM object (tpm) on a DPM object (*this). Watch out, like with the TPM::T with option = -1, when M = 2N the Q-like map is singular and the
+ * The T1-map: maps a TPM object (tpm) on a DPM object (*this). 
+ * Watch out, like with the TPM::T with option = -1, when M = 2N the Q-like map is singular and the
  * inverse map is undefined, so don't use it.
  * @param option == +1 T1_up map, == -1, inverse T1_down map
  * @param tpm input TPM

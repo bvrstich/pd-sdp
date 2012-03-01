@@ -39,7 +39,7 @@ SUP::SUP(int M,int N){
    
    this->n_dp = M*(M - 1)*(M - 2)/6;
 
-   SZ_dp = new DPM(M,N);
+   SZ_dp = new DPM();
 
    dim += n_dp;
 
@@ -49,7 +49,7 @@ SUP::SUP(int M,int N){
 
    this->n_pph = M*M*(M - 1)/2;
 
-   SZ_pph = new PPHM(M,N);
+   SZ_pph = new PPHM();
 
    dim += n_pph;
 
@@ -104,7 +104,7 @@ SUP::SUP(const SUP &SZ_c)
    
    this->n_dp = M*(M - 1)*(M - 2)/6;
 
-   SZ_dp = new DPM(M,N);
+   SZ_dp = new DPM();
 
    dim += n_dp;
 
@@ -116,7 +116,7 @@ SUP::SUP(const SUP &SZ_c)
 
    this->n_pph = M*M*(M - 1)/2;
 
-   SZ_pph = new PPHM(M,N);
+   SZ_pph = new PPHM();
 
    dim += n_pph;
 

@@ -39,7 +39,18 @@ int main(void){
 
    SPM::init(M,N);
    TPM::init(M,N);
+
+#ifdef __G_CON
    PHM::init(M,N);
+#endif
+
+#ifdef __T1_CON
+   DPM::init(M,N);
+#endif
+
+#ifdef __T2_CON
+   PPHM::init(M,N);
+#endif
 
    TPM ham;
    ham.sp_pairing(8);
@@ -205,8 +216,19 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
+
+#ifdef __T2_CON
+   PPHM::clear();
+#endif
    
+#ifdef __T1_CON
+   DPM::clear();
+#endif
+
+#ifdef __G_CON
    PHM::clear();
+#endif
+
    TPM::clear();
    
    return 0;

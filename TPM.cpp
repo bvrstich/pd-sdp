@@ -415,10 +415,10 @@ void TPM::H(const TPM &b,const SUP &D){
 
 #ifdef __T1_CON
 
-   DPM T1b(M,N);
+   DPM T1b;
    T1b.T(1,b);
 
-   DPM hulp_T1(M,N);
+   DPM hulp_T1;
 
    hulp_T1.L_map(D.dpm(),T1b);
 
@@ -430,10 +430,10 @@ void TPM::H(const TPM &b,const SUP &D){
 
 #ifdef __T2_CON
 
-   PPHM T2b(M,N);
+   PPHM T2b;
    T2b.T(0,b);
 
-   PPHM hulp_T2(M,N);
+   PPHM hulp_T2;
 
    hulp_T2.L_map(D.pphm(),T2b);
 

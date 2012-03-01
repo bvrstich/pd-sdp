@@ -30,7 +30,7 @@ class PPHM : public Matrix {
    public:
       
       //constructor
-      PPHM(int M,int N);
+      PPHM();
 
       //copy constructor
       PPHM(const PPHM &);
@@ -51,31 +51,26 @@ class PPHM : public Matrix {
       //geef M terug
       int gM() const;
 
-      //geef dim terug
-      int gn() const;
-
       //maak een PPHM van een TPM via de T2 conditie
       void T(int option,const TPM &);
 
+      static void init(int,int);
+
+      static void clear();
+
    private:
 
-      //!static counter that counts the number of PPHM objects running in the program
-      static int counter;
-
       //!static list of dimension [n_pph][3] that takes in a pph index i and returns three sp indices: a = pph2s[i][0], b = pph2s[i][1] and c = pph2s[i][2]
-      static int **pph2s;
+      static vector< vector<int> > pph2s;
 
       //!static list of dimension [M][M][M] that takes three sp indices a,b and c and returns a pph index i: i = s2pph[a][b][c]
       static int ***s2pph;
 
       //!nr of particles
-      int N;
+      static int N;
 
       //!dimension of sp hilbert space
-      int M;
-
-      //!dimension of pph space
-      int n;
+      static int M;
 
 };
 

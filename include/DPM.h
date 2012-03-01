@@ -30,7 +30,7 @@ class DPM : public Matrix {
    public:
       
       //constructor
-      DPM(int M,int N);
+      DPM();
 
       //copy constructor
       DPM(const DPM &);
@@ -51,9 +51,6 @@ class DPM : public Matrix {
       //geef M terug
       int gM() const;
 
-      //geef dim terug
-      int gn() const;
-
       //generalized T1 map
       void T(double,double,double,const TPM &);
 
@@ -66,25 +63,23 @@ class DPM : public Matrix {
       //input from file with sp indices
       void in_sp(const char *);
 
+      static void init(int,int);
+
+      static void clear();
+
    private:
 
-      //!static counter that counts the number of DPM objects running in the program
-      static int counter;
-
       //!static list of dimension [n_dp][3] that takes in a dp index i and returns three sp indices: a = dp2s[i][0], b = dp2s[i][1] and c = dp2s[i][2]
-      static int **dp2s;
+      static vector< vector<int> > dp2s;
 
       //!static list of dimension [M][M][M] that takes three sp indices a,b and c and returns a dp index i: i = s2dp[a][b][c]
       static int ***s2dp;
 
       //!nr of particles
-      int N;
+      static int N;
 
       //!dimension of sp hilbert space
-      int M;
-
-      //!dimension of dp space
-      int n;
+      static int M;
 
 };
 

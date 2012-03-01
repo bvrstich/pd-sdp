@@ -338,7 +338,7 @@ void T2PM::T(const TPM &tpm)
  */
 T2PM::operator PPHM() const
 {
-   PPHM A(M,N);
+   PPHM A;
 
    for(int i = 0;i < n_pph;i++)
       for(int j = i;j < n_pph;j++)
