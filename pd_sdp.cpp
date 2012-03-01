@@ -52,6 +52,10 @@ int main(void){
    PPHM::init(M,N);
 #endif
 
+#ifdef __T2P_CON
+   T2PM::init(M,N);
+#endif
+
    TPM ham;
    ham.sp_pairing(8);
 
@@ -216,6 +220,10 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
+
+#ifdef __T2P_CON
+   T2PM::clear();
+#endif
 
 #ifdef __T2_CON
    PPHM::clear();

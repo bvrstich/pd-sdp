@@ -445,10 +445,10 @@ void TPM::H(const TPM &b,const SUP &D){
 
 #ifdef __T2P_CON
 
-   T2PM T2pb(M,N);
+   T2PM T2pb;
    T2pb.T(b);
 
-   T2PM hulp_T2P(M,N);
+   T2PM hulp_T2P;
 
    hulp_T2P.L_map(D.t2pm(),T2pb);
 

@@ -59,7 +59,7 @@ SUP::SUP(int M,int N){
 
    this->n_t2p = M*M*(M - 1)/2+M;
 
-   SZ_t2p = new T2PM(M,N);
+   SZ_t2p = new T2PM();
 
    dim += n_t2p;
 
@@ -128,7 +128,7 @@ SUP::SUP(const SUP &SZ_c)
 
    this->n_t2p = M*M*(M - 1)/2+M;
 
-   SZ_t2p = new T2PM(M,N);
+   SZ_t2p = new T2PM();
 
    dim += n_t2p;
 

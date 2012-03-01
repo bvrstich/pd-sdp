@@ -8,133 +8,91 @@ using std::endl;
 
 #include "include.h"
 
-int T2PM::counter = 0;
-
-int **T2PM::pph2s;
+vector< vector<int> > T2PM::pph2s;
 int ***T2PM::s2pph;
+
+int T2PM::M;
+int T2PM::N;
+
+/**
+ * initialize the static variables and allocate the static lists
+ * @param M_i the number of sp orbitals
+ * @param N_i the number of particles
+ */
+void T2PM::init(int M_i,int N_i){
+
+   M = M_i;
+   N = N_i;
+
+   //allocate
+   s2pph = new int ** [M];
+
+   for(int a = 0;a < M;++a){
+
+      s2pph[a] = new int * [M];
+
+      for(int b = 0;b < M;++b)
+         s2pph[a][b] = new int [M];
+
+   }
+
+   int pph = 0;
+
+   vector<int> v(3);
+
+   for(int a = 0;a < M;++a)
+      for(int b = a + 1;b < M;++b)
+         for(int c = 0;c < M;++c){
+
+            s2pph[a][b][c] = pph;
+
+            v[0] = a;
+            v[1] = b;
+            v[2] = c;
+
+            pph2s.push_back(v);
+
+            ++pph;
+
+         }
+
+}
+
+/**
+ * deallocate the static lists
+ */
+void T2PM::clear(){
+
+   for(int a = 0;a < M;++a){
+
+      for(int b = 0;b < M;++b)
+         delete [] s2pph[a][b];
+
+      delete [] s2pph[a];
+
+   }
+
+   delete [] s2pph;
+
+}
 
 /**
  * standard constructor: constructs Matrix object of dimension M+M^2*(M - 1)/2 and
- * if counter == 0, allocates and constructs the lists containing the relationship between sp and T2' basis.
  * @param M nr of sp orbitals
  * @param N nr of particles
  */
-T2PM::T2PM(int M,int N) : Matrix(M+M*M*(M-1)/2)
-{
-   this->N = N;
-   this->M = M;
-   this->n_pph = M*M*(M-1)/2;
-   this->n = M + n_pph;
-
-   if(counter == 0)
-   {
-      //allocatie van s2pph
-      s2pph = new int ** [M];
-
-      for(int i = 0;i < M;i++)
-      {
-         s2pph[i] = new int * [M];
-
-         for(int j = 0;j < M;j++)
-            s2pph[i][j] = new int [M];
-      }
-
-      //allocatie van pph2s
-      pph2s = new int * [n];
-
-      for(int i = 0;i < n;i++)
-         pph2s[i] = new int [3];
-
-      //initialisatie van de twee arrays
-      int teller = 0;
-
-      for(int a = 0;a < M;a++)
-         for(int b = a + 1;b < M;b++)
-            for(int c = 0;c < M;c++)
-            {
-               s2pph[a][b][c] = teller;
-
-               pph2s[teller][0] = a;
-               pph2s[teller][1] = b;
-               pph2s[teller++][2] = c;
-            }
-   }
-   counter++;
-}
+T2PM::T2PM() : Matrix(pph2s.size() + M) { }
 
 /**
  * copy constructor: constructs Matrix object of dimension M*(M - 1)*(M - 2)/6 and copies the content of T2PM_c into it,
- * if counter == 0, allocates and constructs the lists containing the relationship between sp and dp basis.
  * @param T2PM_c input T2PM to be copied
  */
-T2PM::T2PM(const T2PM &T2PM_c) : Matrix(T2PM_c)
-{
-   this->N = T2PM_c.N;
-   this->M = T2PM_c.M;
-   this->n = T2PM_c.n;
-   this->n_pph = T2PM_c.n_pph;
-
-   if(counter == 0)
-   {
-      //allocatie van s2pph
-      s2pph = new int ** [M];
-
-      for(int i = 0;i < M;i++)
-      {
-         s2pph[i] = new int * [M];
-
-         for(int j = 0;j < M;j++)
-            s2pph[i][j] = new int [M];
-      }
-
-      //allocatie van pph2s
-      pph2s = new int * [n];
-
-      for(int i = 0;i < n;++i)
-         pph2s[i] = new int [3];
-
-      //initialisatie van de twee arrays
-      int teller = 0;
-
-      for(int a = 0;a < M;++a)
-         for(int b = a + 1;b < M;++b)
-            for(int c = 0;c < M;++c)
-            {
-               s2pph[a][b][c] = teller;
-
-               pph2s[teller][0] = a;
-               pph2s[teller][1] = b;
-               pph2s[teller++][2] = c;
-            }
-   }
-   counter++;
-}
+T2PM::T2PM(const T2PM &T2PM_c) : Matrix(T2PM_c) { }
 
 /**
- * destructor: if counter == 1 the memory for the static lists pph2s en s2pph twill be deleted.
+ * destructor
  */
-T2PM::~T2PM()
-{
-   if(counter == 1)
-   {
-      for(int i = 0;i < M;++i)
-      {
-         for(int j = 0;j < M;++j)
-            delete [] s2pph[i][j];
-
-         delete [] s2pph[i];
-      }
-
-      delete [] s2pph;
-
-      for(int i = 0;i < n;++i)
-         delete [] pph2s[i];
-
-      delete [] pph2s;
-   }
-
-   --counter;
-}
+T2PM::~T2PM() { }
 
 /**
  * access the elements of the matrix in sp mode, antisymmetry is automatically accounted for:\n\n
@@ -206,24 +164,27 @@ ostream &operator<<(ostream &output,const T2PM &T2PM_p)
    output << std::setprecision(10) << std::scientific;
 
    // T2 part
-   for(int i = 0;i < T2PM_p.n_pph;i++)
-      for(int j = i;j <  T2PM_p.n_pph;j++)
+   for(unsigned int i = 0;i < T2PM_p.pph2s.size();i++)
+      for(unsigned int j = i;j <  T2PM_p.pph2s.size();j++)
          output << i << "\t" << j << "\t|\t" << T2PM_p.pph2s[i][0] << "\t" << T2PM_p.pph2s[i][1] << "\t"
+
             << T2PM_p.pph2s[i][2] << "\t" << T2PM_p.pph2s[j][0] << "\t" << T2PM_p.pph2s[j][1] << "\t"
+
             << T2PM_p.pph2s[j][2] << "\t -> " << T2PM_p(i,j) << endl;
 
    // off diagonal part
-   for(int i = 0;i < T2PM_p.n_pph;i++)
-      for(int j = 0;j <  T2PM_p.M;j++)
+   for(unsigned int i = 0;i < T2PM_p.pph2s.size();i++)
+      for(int j = 0;j < T2PM_p.gM();j++)
          output << i << "\t" << j << "\t|\t" << T2PM_p.pph2s[i][0] << "\t" << T2PM_p.pph2s[i][1] << "\t"
-            << T2PM_p.pph2s[i][2] << "\t" << j << "\t -> " << T2PM_p(i,j+T2PM_p.n_pph)
-            << endl;
+
+            << T2PM_p.pph2s[i][2] << "\t" << j << "\t -> " << T2PM_p(i,j+T2PM_p.pph2s.size()) << endl;
 
    // rho part
-   for(int i = 0;i < T2PM_p.M;i++)
-      for(int j = i;j <  T2PM_p.M;j++)
-         output << i+T2PM_p.n_pph << "\t" << j+T2PM_p.n_pph << "\t|\t" << i << "\t" << j << "\t -> " << T2PM_p(i+T2PM_p.n_pph,j+T2PM_p.n_pph)
-            << endl;
+   for(int i = 0;i < T2PM_p.gM();i++)
+      for(int j = i;j <  T2PM_p.gM();j++)
+         output << i+T2PM_p.pph2s.size() << "\t" << j+T2PM_p.pph2s.size() << "\t|\t" << i << "\t" << j << "\t -> " 
+         
+         << T2PM_p(i+T2PM_p.pph2s.size(),j+T2PM_p.pph2s.size()) << endl;
 
    output.unsetf(std::ios_base::floatfield);
 
@@ -247,14 +208,6 @@ int T2PM::gM() const
 }
 
 /**
- * @return dimension of T2' space and of Matrix
- */
-int T2PM::gn() const
-{
-   return n;
-}
-
-/**
  * The T2-map: maps a TPM object (tpm) on a T2PM object (*this)
  * @param tpm input TPM
  */
@@ -265,13 +218,13 @@ void T2PM::T(const TPM &tpm)
    SPM spm;
    spm.bar(1.0/(N-1.0),tpm);
 
-   for(int i = 0;i < n_pph;i++)
+   for(unsigned int i = 0;i < pph2s.size();i++)
    {
       a = pph2s[i][0];
       b = pph2s[i][1];
       c = pph2s[i][2];
 
-      for(int j = i;j < n_pph;j++)
+      for(unsigned int j = i;j < pph2s.size();j++)
       {
          d = pph2s[j][0];
          e = pph2s[j][1];
@@ -311,14 +264,14 @@ void T2PM::T(const TPM &tpm)
       for(int j = i;j < M;j++)
       {
 
-         (*this)(n_pph+i,n_pph+j) = spm(i,j);
+         (*this)(pph2s.size()+i,pph2s.size()+j) = spm(i,j);
 
-         (*this)(n_pph+j,n_pph+i) = (*this)(n_pph+i,n_pph+j);
+         (*this)(pph2s.size()+j,pph2s.size()+i) = (*this)(pph2s.size()+i,pph2s.size()+j);
 
       }
 
 
-   for(int i = 0;i < n_pph;i++)
+   for(unsigned int i = 0;i < pph2s.size();i++)
    {
       a = pph2s[i][0];
       b = pph2s[i][1];
@@ -326,9 +279,9 @@ void T2PM::T(const TPM &tpm)
 
       for(int j = 0;j < M;j++)
       {
-         (*this)(i,n_pph+j) = tpm(a,b,j,c);
+         (*this)(i,pph2s.size()+j) = tpm(a,b,j,c);
 
-         (*this)(n_pph+j,i) = (*this)(i,j+n_pph);
+         (*this)(pph2s.size()+j,i) = (*this)(i,j+pph2s.size());
       }
    }
 }
@@ -340,8 +293,8 @@ T2PM::operator PPHM() const
 {
    PPHM A;
 
-   for(int i = 0;i < n_pph;i++)
-      for(int j = i;j < n_pph;j++)
+   for(unsigned int i = 0;i < pph2s.size();i++)
+      for(unsigned int j = i;j < pph2s.size();j++)
          A(i,j) = A(j,i) = (*this)(i,j);
 
    return A;
@@ -356,7 +309,7 @@ T2PM::operator SPM() const
 
    for(int i = 0;i < M;i++)
       for(int j = i;j < M;j++)
-         A(i,j) = A(j,i) = (*this)(n_pph+i,n_pph+j);
+         A(i,j) = A(j,i) = (*this)(pph2s.size()+i,pph2s.size()+j);
 
    return A;
 }

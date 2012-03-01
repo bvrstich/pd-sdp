@@ -28,7 +28,7 @@ class T2PM : public Matrix {
    public:
 
       //constructor
-      T2PM(int M,int N);
+      T2PM();
 
       //copy constructor
       T2PM(const T2PM &);
@@ -51,9 +51,6 @@ class T2PM : public Matrix {
       //geef M terug
       int gM() const;
 
-      //geef dim terug
-      int gn() const;
-
       //maak een T2PM van een TPM
       void T(const TPM &);
 
@@ -61,28 +58,24 @@ class T2PM : public Matrix {
 
       operator SPM() const;
 
+      static void init(int,int);
+
+      static void clear();
+
    private:
 
-      //!static counter that counts the number of T2PM objects running in the program
-      static int counter;
-
       //!static list of dimension [n_dp][3] that takes in a pph index i and returns three sp indices: a = dp2s[i][0], b = dp2s[i][1] and c = dp2s[i][2]
-      static int **pph2s;
+      static vector< vector<int> > pph2s;
 
       //!static list of dimension [M][M][M] that takes three sp indices a,b and c and returns a pph index i: i = s2dp[a][b][c]
       static int ***s2pph;
 
       //!nr of particles
-      int N;
+      static int N;
 
       //!dimension of sp hilbert space
-      int M;
+      static int M;
 
-      //!dimension of T2' space
-      int n;
-
-      //!dimension of T2 space
-      int n_pph;
 };
 
 #endif /* T2PM_H */
