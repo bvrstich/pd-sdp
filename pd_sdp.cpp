@@ -34,6 +34,14 @@ int main(void){
 
    cout.precision(10);
 
+   input readin("start.stp");
+
+   MxElem setup(readin);
+   setup.Init(readin);
+
+   setup.DoLodwinTfo();
+   setup.PrintLarger(1.0e-15);
+
    int M = 8;//dim sp hilbert space
    int N = 3;//nr of particles
 

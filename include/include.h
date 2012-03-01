@@ -67,4 +67,10 @@
 #include "SUP.h"
 #include "EIG.h"
 
+#include "Gauss.h"
+#include "input.h"
+#include "MxElem.h"
+#include "MxElemFiller.h"
+#include "preamble.h"
+
 /* vim: set ts=3 sw=3 expandtab :*/
