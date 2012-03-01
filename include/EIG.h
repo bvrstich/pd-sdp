@@ -49,8 +49,6 @@ class EIG{
 
       int gM() const;
 
-      int gn_tp() const;
-
       int gdim() const;
 
       double centerpot(double,const EIG &,double,double) const;
@@ -62,15 +60,11 @@ class EIG{
 
 #ifdef __G_CON
 
-      int gn_ph() const;
-
       Vector<PHM> &phv() const;
 
 #endif
 
 #ifdef __T1_CON
-
-      int gn_dp() const;
 
       Vector<DPM> &dpv() const;
 
@@ -78,15 +72,11 @@ class EIG{
 
 #ifdef __T2_CON
 
-      int gn_pph() const;
-
       Vector<PPHM> &pphv() const;
 
 #endif
 
 #ifdef __T2P_CON
-
-      int gn_t2p() const;
 
       Vector<T2PM> &t2pv() const;
 
@@ -98,6 +88,8 @@ class EIG{
 
       double center_dev() const;
 
+      static void init(int,int);
+
    private:
 
       //!variable that tells if the memory has been allocated (flag = 1) or not (flag = 0)
@@ -107,30 +99,22 @@ class EIG{
       Vector<TPM> **v_tp;
 
       //!number of particles
-      int N;
+      static int N;
 
       //!dimension of sp space
-      int M;
-
-      //!dimension of tp space
-      int n_tp;
+      static int M;
 
 #ifdef __G_CON
 
       //!pointer to a Vector<PHM> object that will contain the eigenvalues of the G part of a SUP matrix
       Vector<PHM> *v_ph;
       
-      //!dimension of ph space
-      int n_ph;
-
 #endif
 
 #ifdef __T1_CON
 
       //!pointer to a Vector<DPM> object that will contain the eigenvalues of the T1 part of a SUP matrix
       Vector<DPM> *v_dp;
-      
-      int n_dp;
 
 #endif
 
@@ -139,8 +123,6 @@ class EIG{
       //!pointer to a Vector<PPHM> object that will contain the eigenvalues of the T2 part of a SUP matrix
       Vector<PPHM> *v_pph;
 
-      int n_pph;
-
 #endif
 
 #ifdef __T2P_CON
@@ -148,12 +130,10 @@ class EIG{
       //!pointer to a Vector<T2PM> object that will contain the eigenvalues of the T2P part of a SUP matrix
       Vector<T2PM> *v_t2p;
 
-      int n_t2p;
-
 #endif
 
       //!total dimension of the EIG object
-      int dim;
+      static int dim;
 
 };
 

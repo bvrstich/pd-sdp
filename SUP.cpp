@@ -6,63 +6,65 @@ using std::ostream;
 
 #include "include.h"
 
+int SUP::M;
+int SUP::N;
+int SUP::dim;
+
+/**
+ * initialize the statics
+ * @param L_in the nr of sites
+ * @param N_in the nr of particles
+ */
+void SUP::init(int M_in,int N_in){
+
+   M = M_in;
+   N = N_in;
+
+   dim = M*(M - 1);
+
+#ifdef __G_CON
+   dim += M*M;
+#endif
+
+#ifdef __T1_CON
+   dim += M*(M - 1)*(M - 2)/6;
+#endif
+
+#ifdef __T2_CON
+   dim += M*M*(M - 1)/2;
+#endif
+
+#ifdef __T2P_CON
+   dim += M*M*(M - 1)/2 + M;
+#endif
+
+}
+
 /**
  * standard constructor\n
  * Allocates two TPM matrices and optionally a PHM, DPM or PPHM matrix.
- * @param M number of sp orbitals
- * @param N number of particles
  */
-SUP::SUP(int M,int N){
-
-   this->M = M;
-   this->N = N;
-   this->n_tp = M*(M - 1)/2;
+SUP::SUP(){
 
    SZ_tp = new TPM * [2];
 
    for(int i = 0;i < 2;++i)
       SZ_tp[i] = new TPM();
 
-   this->dim = 2*n_tp;
-
 #ifdef __G_CON
-
-   this->n_ph = M*M;
-   
    SZ_ph = new PHM();
-
-   dim += n_ph;
-
 #endif
 
 #ifdef __T1_CON
-   
-   this->n_dp = M*(M - 1)*(M - 2)/6;
-
    SZ_dp = new DPM();
-
-   dim += n_dp;
-
 #endif
 
 #ifdef __T2_CON
-
-   this->n_pph = M*M*(M - 1)/2;
-
    SZ_pph = new PPHM();
-
-   dim += n_pph;
-
 #endif
 
 #ifdef __T2P_CON
-
-   this->n_t2p = M*M*(M - 1)/2+M;
-
    SZ_t2p = new T2PM();
-
-   dim += n_t2p;
-
 #endif
 
 }
@@ -73,12 +75,7 @@ SUP::SUP(int M,int N){
  * input SUP SZ_c into it.
  * @param SZ_c input SUP
  */
-SUP::SUP(const SUP &SZ_c)
-{
-   this->M = SZ_c.M;
-   this->N = SZ_c.N;
-   this->n_tp = SZ_c.n_tp;
-   this->dim = 2*n_tp;
+SUP::SUP(const SUP &SZ_c) {
 
    SZ_tp = new TPM * [2];
 
@@ -89,51 +86,27 @@ SUP::SUP(const SUP &SZ_c)
    (*SZ_tp[1]) = (*SZ_c.SZ_tp[1]);
 
 #ifdef __G_CON
-
-   this->n_ph = M*M;
-
-   dim += n_ph;
-   
    SZ_ph = new PHM();
 
    *SZ_ph = *SZ_c.SZ_ph;
-
 #endif
 
 #ifdef __T1_CON
-   
-   this->n_dp = M*(M - 1)*(M - 2)/6;
-
    SZ_dp = new DPM();
 
-   dim += n_dp;
-
    *SZ_dp = *SZ_c.SZ_dp;
-
 #endif
 
 #ifdef __T2_CON
-
-   this->n_pph = M*M*(M - 1)/2;
-
    SZ_pph = new PPHM();
 
-   dim += n_pph;
-
    *SZ_pph = *SZ_c.SZ_pph;
-
 #endif
 
 #ifdef __T2P_CON
-
-   this->n_t2p = M*M*(M - 1)/2+M;
-
    SZ_t2p = new T2PM();
 
-   dim += n_t2p;
-
    *SZ_t2p = *SZ_c.SZ_t2p;
-
 #endif
 
 }
@@ -149,27 +122,19 @@ SUP::~SUP(){
    delete [] SZ_tp;
 
 #ifdef __G_CON
-   
    delete SZ_ph;
-
 #endif
 
 #ifdef __T1_CON
-
    delete SZ_dp;
-
 #endif
 
 #ifdef __T2_CON
-   
    delete SZ_pph;
-
 #endif
 
 #ifdef __T2P_CON
-
    delete SZ_t2p;
-
 #endif
 
 }
@@ -493,62 +458,6 @@ int SUP::gM() const
 }
 
 /**
- * @return dimension of tp space
- */
-int SUP::gn_tp() const
-{
-   return n_tp;
-}
-
-#ifdef __G_CON
-
-/**
- * @return dimension of ph space
- */
-int SUP::gn_ph() const
-{
-   return n_ph;
-}
-
-#endif
-
-#ifdef __T1_CON
-
-/**
- * @return dimension of dp space
- */
-int SUP::gn_dp() const
-{
-   return n_dp;
-}
-
-#endif
-
-#ifdef __T2_CON
-
-/**
- * @return dimension of pph space
- */
-int SUP::gn_pph() const
-{
-   return n_pph;
-}
-
-#endif
-
-#ifdef __T2P_CON
-
-/**
- * @return dimension of t2p space
- */
-int SUP::gn_t2p() const
-{
-   return n_t2p;
-}
-
-#endif
-
-/**
  * @return total dimension of SUP (carrier) space
  */
 int SUP::gdim() const
@@ -702,7 +611,7 @@ void SUP::proj_C(const TPM &tpm)
 
    //Z_res is the orthogonal piece of this that will be deducted,
    //so the piece of this in the U-space - ham
-   SUP Z_res(M,N);
+   SUP Z_res;
 
    //apply iverse S to it and put it in Z_res.tpm(0)
    (Z_res.tpm(0)).S(-1,hulp);
@@ -727,7 +636,7 @@ void SUP::D(const SUP &S,const SUP &Z)
    Z_copy.sqrt(1);
 
    //links en rechts vermenigvuldigen met wortel Z
-   SUP hulp(M,N);
+   SUP hulp;
 
    hulp.L_map(Z_copy,S);
 
@@ -1023,7 +932,7 @@ void SUP::fill(){
  */
 int SUP::solve(SUP &B,const SUP &D)
 {
-   SUP HB(M,N);
+   SUP HB;
    HB.H(*this,D);
 
    B -= HB;
@@ -1093,7 +1002,7 @@ double SUP::center_dev(const SUP &Z) const
 
    sqrt_S.sqrt(1);
 
-   SUP SZ(M,N);
+   SUP SZ;
    SZ.L_map(sqrt_S,Z);
 
    EIG eig(SZ);
@@ -1125,7 +1034,7 @@ double SUP::line_search(const SUP &DZ,const SUP &S,const SUP &Z,double max_dev) 
    wortel.sqrt(-1);
 
    //de L_map
-   SUP hulp(M,N);
+   SUP hulp;
    hulp.L_map(wortel,*this);
 
    //eigenwaarden in eigen_S stoppen

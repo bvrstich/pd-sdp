@@ -7,6 +7,40 @@ using std::endl;
 
 #include "include.h"
 
+int EIG::M;
+int EIG::N;
+int EIG::dim;
+
+/**
+ * initialize the statics
+ * @param L_in the nr of sites
+ * @param N_in the nr of particles
+ */
+void EIG::init(int M_in,int N_in){
+
+   M = M_in;
+   N = N_in;
+
+   dim = M*(M - 1);
+
+#ifdef __G_CON
+   dim += M*M;
+#endif
+
+#ifdef __T1_CON
+   dim += M*(M - 1)*(M - 2)/6;
+#endif
+
+#ifdef __T2_CON
+   dim += M*M*(M - 1)/2;
+#endif
+
+#ifdef __T2P_CON
+   dim += M*M*(M - 1)/2 + M;
+#endif
+
+}
+
 /**
  * Default constructor, sets flag to 0
  */
@@ -23,14 +57,6 @@ EIG::EIG(){
  */
 EIG::EIG(const SUP &SZ)
 {
-   //first allocate the memory
-   this->N = SZ.gN();
-   this->M = SZ.gM();
-
-   this->n_tp = SZ.gn_tp();
-
-   this->dim = 2*n_tp;
-
    v_tp = new Vector<TPM> * [2];
 
    for(int i = 0;i < 2;++i)
@@ -39,43 +65,19 @@ EIG::EIG(const SUP &SZ)
    flag = 1;
 
 #ifdef __G_CON
-   
-   this->n_ph = M*M;
-
-   dim += n_ph;
-
    v_ph = new Vector<PHM>(SZ.phm());
-
 #endif
 
 #ifdef __T1_CON
-   
-   this->n_dp = M*(M - 1)*(M - 2)/6;
-
-   dim += n_dp;
-
    v_dp = new Vector<DPM>(SZ.dpm());
-
 #endif
 
 #ifdef __T2_CON
-
-   this->n_pph = M*M*(M - 1)/2;
-
-   dim += n_pph;
-
    v_pph = new Vector<PPHM>(SZ.pphm());
- 
 #endif
 
 #ifdef __T2P_CON
-
-   this->n_t2p = M*M*(M - 1)/2+M;
-
-   dim += n_t2p;
-
    v_t2p = new Vector<T2PM>(SZ.t2pm());
-
 #endif
 
 }
@@ -89,57 +91,27 @@ EIG::EIG(const EIG &eig_c)
 {
    flag = 1;
 
-   this->N = eig_c.N;
-   this->M = eig_c.M;
-
-   this->n_tp = eig_c.n_tp;
-
-   this->dim = 2*n_tp;
-
    v_tp = new Vector<TPM> * [2];
 
    for(int i = 0;i < 2;++i)
       v_tp[i] = new Vector<TPM>(eig_c.tpv(i));
 
 #ifdef __G_CON
-
-   this->n_ph = M*M;
-
-   dim += n_ph;
-
    v_ph = new Vector<PHM>(eig_c.phv());
-
 #endif
 
 #ifdef __T1_CON
-
-   this->n_dp = M*(M - 1)*(M - 2)/6;
-
-   dim += n_dp;
-
    v_dp = new Vector<DPM>(eig_c.dpv());
-
 #endif
 
 #ifdef __T2_CON
-
-   this->n_pph = M*M*(M - 1)/2;
-
-   dim += n_pph;
-
    v_pph = new Vector<PPHM>(eig_c.pphv());
-
 #endif
 
 #ifdef __T2P_CON
-
-   this->n_t2p = M*M*(M - 1)/2+M;
-
-   dim += n_t2p;
-
    v_t2p = new Vector<T2PM>(eig_c.t2pv());
-
 #endif
+
 }
 
 /**
@@ -262,14 +234,6 @@ int EIG::gM() const
    return M;
 }
 
-/**
- * @return dimension of tp space
- */
-int EIG::gn_tp() const
-{
-   return n_tp;
-}
-
 /** 
  * Diagonalize a SUP matrix and put the eigenvalues in the EIG object (*this) when it has allready been
  * allocated before
@@ -319,14 +283,6 @@ Vector<TPM> &EIG::tpv(int i) const
 
 #ifdef __G_CON
 
-/**
- * @return dimension of ph space
- */
-int EIG::gn_ph() const
-{
-   return n_ph;
-}
-
 /** 
  * get the Vector<PHM> object containing the eigenvalues of the PHM block G
  * @return a Vector<PHM> object containing the desired eigenvalues
@@ -339,15 +295,6 @@ Vector<PHM> &EIG::phv() const
 #endif
 
 #ifdef __T1_CON
-
-/**
- * @return dimension of dp space
- */
-int EIG::gn_dp() const
-{
-   return n_dp;
-}
-
 /** 
  * get the Vector<DPM> object containing the eigenvalues of the DPM block T1
  * @return a Vector<DPM> object containing the desired eigenvalues
@@ -360,15 +307,6 @@ Vector<DPM> &EIG::dpv() const
 #endif
 
 #ifdef __T2_CON
-
-/**
- * @return dimension of pph space
- */
-int EIG::gn_pph() const
-{
-   return n_pph;
-}
-
 /** 
  * get the Vector<PPHM> object containing the eigenvalues of the PPHM block T2
  * @return a Vector<PPHM> object containing the desired eigenvalues
@@ -381,15 +319,6 @@ Vector<PPHM> &EIG::pphv() const
 #endif
 
 #ifdef __T2P_CON
-
-/**
- * @return dimension of t2p space
- */
-int EIG::gn_t2p() const
-{
-   return n_t2p;
-}
-
 /** 
  * get the Vector<T2PM> object containing the eigenvalues of the T2PM block T2P
  * @return a Vector<T2PM> object containing the desired eigenvalues

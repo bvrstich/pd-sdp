@@ -34,7 +34,7 @@ class SUP{
    public:
 
       //constructor
-      SUP(int M,int N);
+      SUP();
 
       //copy constructor
       SUP(const SUP &);
@@ -114,15 +114,11 @@ class SUP{
 
       PHM &phm() const;
 
-      int gn_ph() const;
-
 #endif
 
 #ifdef __T1_CON
       
       DPM &dpm() const;
-
-      int gn_dp() const;
 
 #endif
 
@@ -130,17 +126,15 @@ class SUP{
 
       PPHM &pphm() const;
 
-      int gn_pph() const;
-
 #endif
 
 #ifdef __T2P_CON
 
       T2PM &t2pm() const;
 
-      int gn_t2p() const;
-
 #endif
+   
+   static void init(int,int);
 
    private:
 
@@ -148,24 +142,18 @@ class SUP{
       TPM **SZ_tp;
 
       //!number of sp orbitals
-      int M;
+      static int M;
 
       //!nr of particles
-      int N;
-
-      //!dimension of tp space
-      int n_tp;
+      static int N;
 
       //!total dimension of the SUP matrix
-      int dim;
+      static int dim;
 
 #ifdef __G_CON
 
       //!pointer to the particle hole matrix
       PHM *SZ_ph;
-
-      //!dimenson of particle hole space
-      int n_ph;
 
 #endif
 
@@ -174,9 +162,6 @@ class SUP{
       //!pointer tot he three particles matrix DPM
       DPM *SZ_dp;
 
-      //!dimension of three particle space
-      int n_dp;
-
 #endif
 
 #ifdef __T2_CON
@@ -184,18 +169,12 @@ class SUP{
       //!pointer tot he three particles matrix DPM
       PPHM *SZ_pph;
 
-      //!dimension of three particle space
-      int n_pph;
-
 #endif
 
 #ifdef __T2P_CON
 
       //!pointer tot he three particles matrix DPM
       T2PM *SZ_t2p;
-
-      //!dimension of three particle space
-      int n_t2p;
 
 #endif
 

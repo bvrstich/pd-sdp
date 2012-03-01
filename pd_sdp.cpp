@@ -55,14 +55,17 @@ int main(void){
 #ifdef __T2P_CON
    T2PM::init(M,N);
 #endif
+   
+   SUP::init(M,N);
+   EIG::init(M,N);
 
    TPM ham;
    ham.sp_pairing(8);
 
-   SUP S(M,N);
+   SUP S;
    S.init_S();
 
-   SUP Z(M,N);
+   SUP Z;
    Z.init_Z(1000.0,ham,S);
 
    int dim = Z.gdim();
@@ -91,7 +94,7 @@ int main(void){
       cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
 
       //matrix D aanmaken voor de hessiaan van het duale stelsel
-      SUP D(M,N);
+      SUP D;
       D.D(S,Z);
 
       //D inverteren voor de hessiaan van het primale stelsel
@@ -121,7 +124,7 @@ int main(void){
       cout << delta.solve(b,D_inv) << "\t";
 
       //nog updaten van S en Z
-      SUP DS(M,N);
+      SUP DS;
 
       DS.fill(delta);
 
