@@ -173,11 +173,32 @@ void CartInt::clear(){
 }
 
 /** 
- * Standard constructor
+ * Standard constructor: allocates the matrices and fills them with the correct elements
  */
-CartInt::CartInt(){ }
+CartInt::CartInt(){ 
+
+   int dim = s2inlxyz.size();
+
+   S = new Matrix(dim);
+   T = new Matrix(dim);
+   U = new Matrix(dim);
+
+   V = new Matrix(dim*dim);
+
+   MxElem setup(*readin);
+   setup.Init(*readin);
+   
+}
 
 /**
  * standard destructor
  */
-CartInt::~CartInt(){ }
+CartInt::~CartInt(){ 
+
+   delete S;
+   delete T;
+   delete U;
+
+   delete V;
+   
+}

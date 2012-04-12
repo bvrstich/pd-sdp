@@ -53,6 +53,9 @@ class CartInt {
 
       //!list to switch between matrix index and physical quantum numbers
       static int ******inlxyz2s;
+
+      //!dimension of the basisset
+      int dim;
       
       //!overlapmatrix
       Matrix *S;
