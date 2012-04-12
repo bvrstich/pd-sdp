@@ -75,4 +75,6 @@
 
 #include "preamble.h"
 
+#include "CartInt.h"
+
 /* vim: set ts=3 sw=3 expandtab :*/

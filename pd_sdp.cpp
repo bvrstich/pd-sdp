@@ -34,7 +34,7 @@ int main(void){
 
    cout.precision(10);
 
-   input readin("start.stp");
+   CartInt::init();
 
    int M = 8;//dim sp hilbert space
    int N = 3;//nr of particles
@@ -243,6 +243,8 @@ int main(void){
 #endif
 
    TPM::clear();
+
+   CartInt::clear();
    
    return 0;
 

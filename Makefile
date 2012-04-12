@@ -22,7 +22,8 @@ CPPSRC	= pd_sdp.cpp\
             Gauss.cpp\
             MxElemFiller.cpp\
             MxElem.cpp\
-            input.cpp
+            input.cpp\
+            CartInt.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
