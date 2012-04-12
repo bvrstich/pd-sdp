@@ -59,10 +59,15 @@ class Gauss{
 
       //Getters
       int gNtypes();
+
       bool ginit();
+
       int gNcontr(int);
+
       char gtype(int);
+
       double galpha(int, int);
+
       double gprefactors(int, int);
 
       //Setters
@@ -74,16 +79,16 @@ class Gauss{
       int Ntypes;
 
       //!Number of contractions for the orbital
-      int * Ncontr;
+      int *Ncontr;
 
       //!Orbital type of the gaussian contraction: s,p,d,f...
-      char * type;
+      char *type;
 
       //!Exponents of the gaussian contraction
-      double ** alpha;
+      double **alpha;
 
       //!Prefactors of the gaussian contraction
-      double ** prefactors;
+      double **prefactors;
 
       //!Whether one or more of the alpha[iii] arrays and prefactors[iii] arrays have been allocated
       bool init;

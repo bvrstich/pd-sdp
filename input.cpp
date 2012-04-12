@@ -525,7 +525,3 @@ void input::debugprint(){
    }
 
 }
-
-
-
-

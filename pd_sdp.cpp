@@ -36,13 +36,6 @@ int main(void){
 
    input readin("start.stp");
 
-   MxElem setup(readin);
-   setup.Init(readin);
-
-   setup.DoLodwinTfo();
-
-   setup.PrintLarger(1.0e-15);
-
    int M = 8;//dim sp hilbert space
    int N = 3;//nr of particles
 
@@ -67,7 +60,7 @@ int main(void){
    
    SUP::init(M,N);
    EIG::init(M,N);
-
+/*
    TPM ham;
    ham.sp_pairing(8);
 
@@ -232,7 +225,7 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
-
+*/
 #ifdef __T2P_CON
    T2PM::clear();
 #endif

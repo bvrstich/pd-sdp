@@ -72,12 +72,19 @@ class input{
 
       //Getters
       char gRotationSymm();
+
       int gCharge();
+
       int gNcores();
+
       string gbasisset();
+
       int gcore(int);
-      R * gvector(int);
-      Gauss * gGaussInfo(int);
+
+      R *gvector(int);
+
+      Gauss *gGaussInfo(int);
+
       int NumberOfElectrons();
 
       //Printer
@@ -86,7 +93,7 @@ class input{
    private:
 
       //!To know the proton number of an element: elements[Z-1] = "name".
-      string * elements;
+      string *elements;
 
       //!Charge = number of protons - number of electrons
       int Charge;
@@ -101,13 +108,13 @@ class input{
       int Ncores;
 
       //!Cores (atomic number)
-      int * cores;
+      int *cores;
 
       //!Positions of the cores
-      R ** vectors;
+      R **vectors;
 
       //!Per core: a Gauss object that stores the basic info to construct the desired Gaussian contractions
-      Gauss ** GaussInfo;
+      Gauss **GaussInfo;
 
       //Helper functions
       void initelements();
