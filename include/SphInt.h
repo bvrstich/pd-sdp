@@ -53,6 +53,10 @@ class SphInt {
 
       Matrix &gV();
 
+      static int gdim();
+
+      static int gN();
+
       static void init();
 
       static void clear();
@@ -61,6 +65,9 @@ class SphInt {
 
       //!static objects needed to construct and destruct all the lists
       static int l_max,n_max,N_Z;
+
+      //!nr of particles
+      static int N;
 
       static vector< vector<int> > s2inlm;
 

@@ -18,6 +18,7 @@ vector< vector<int> > SphInt::t2s;
 int **SphInt::s2t;
 
 int SphInt::dim;
+int SphInt::N;
 int SphInt::N_Z;
 int SphInt::n_max;
 int SphInt::l_max;
@@ -30,6 +31,7 @@ void SphInt::init(){
    N_Z = CartInt::gN_Z();
    n_max = CartInt::gn_max();
    l_max = CartInt::gl_max();
+   N = CartInt::gN();
 
    //allocate
    inlm2s = new int *** [N_Z];
@@ -117,6 +119,98 @@ SphInt::SphInt(const CartInt &ci){
 
    V = new Matrix(dim*dim);
 
+   int i,n_i,l_i,m_i;
+   int j,n_j,l_j,m_j;
+
+   //start with overlap
+   for(int s_i = 0;s_i < dim;++s_i){
+
+      i = s2inlm[s_i][0];
+      n_i = s2inlm[s_i][1];
+      l_i = s2inlm[s_i][2];
+      m_i = s2inlm[s_i][3];
+
+      for(int s_j = s_i;s_j < dim;++s_j){
+
+         j = s2inlm[s_j][0];
+         n_j = s2inlm[s_j][1];
+         l_j = s2inlm[s_j][2];
+         m_j = s2inlm[s_j][3];
+
+         (*S)(s_i,s_j) = 0.0;
+
+         if(i == j){//basisfunctions on the same core
+
+            if(l_i == l_j && m_i == m_j){
+
+               if(l_i == 0){
+
+                  (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,0,j,n_j,l_j,0,0,0);
+
+               }
+               else if(l_i == 1){
+
+                  if(m_i == 0)
+                     (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,1,j,n_j,l_j,0,0,1);
+                  else
+                     (*S)(s_i,s_j) = 0.5 * ( ci.gS(i,n_i,l_i,1,0,0,j,n_j,l_j,1,0,0) + ci.gS(i,n_i,l_i,0,1,0,j,n_j,l_j,0,1,0) );
+
+               }
+               else if(l_i == 2){
+
+                  if(m_i == 0){
+
+                     (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,0,0,2)
+                     
+                        + 0.25 * ( ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0) +  ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) 
+                        
+                              + 2.0 * ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,2,0,0) )
+
+                        - ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,2,0,0) - ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,0,2,0);
+
+                  }
+                  else if(m_i == 1 || m_i == -1){
+
+                     (*S)(s_i,s_j) = 0.5 * ( ci.gS(i,n_i,l_i,1,0,1,j,n_j,l_j,1,0,1) + ci.gS(i,n_i,l_i,0,1,1,j,n_j,l_j,0,1,1) );
+
+                  }
+                  else if(m_i == 2 || m_i == -2){
+
+                     (*S)(s_i,s_j) = 3.0/8.0 * ( ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) + ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0)
+                     
+                           - 2.0 * ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,0,2,0)) + 0.5 * ci.gS(i,n_i,l_i,1,1,0,j,n_j,l_j,1,1,0);
+
+                  }
+
+               }
+               else if(l_i == 3){
+
+                  cout << "If I get here, add more" << endl;
+
+               }
+               else if(l_i == 4){
+
+                  cout << "If I get here, add more" << endl;
+
+               }
+               else if(l_i == 5){
+
+                  cout << "If I get here, add more" << endl;
+
+               }
+               else
+                  cout << "Basisset too large for me" << endl;
+
+            }
+
+         }
+         else{//basisfunctions on different cores
+
+         }
+
+      }
+   }
+
 }
 
 /** 
@@ -128,7 +222,7 @@ SphInt::SphInt(const SphInt &ci_c){
    S = new Matrix(ci_c.gS());
    T = new Matrix(ci_c.gT());
    U = new Matrix(ci_c.gU());
-   
+
    V = new Matrix(ci_c.gV());
 
 }
@@ -143,7 +237,7 @@ SphInt::~SphInt(){
    delete U;
 
    delete V;
-   
+
 }
 
 /** 
@@ -212,5 +306,24 @@ const Matrix &SphInt::gV() const {
 Matrix &SphInt::gV() { 
 
    return *V;
+
+}
+
+/**
+ * @return the dimension of spatial sp space
+ */
+int SphInt::gdim() {
+
+   return dim;
+
+}
+
+/**
+ * static function
+ * @return nr of electrons
+ */
+int SphInt::gN(){
+
+   return N;
 
 }

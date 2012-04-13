@@ -37,8 +37,15 @@ int main(void){
    CartInt::init();
    SphInt::init();
 
-   int M = 8;//dim sp hilbert space
-   int N = 3;//nr of particles
+   int M = 2*SphInt::gdim();//dim sp hilbert space
+   int N = SphInt::gN();//nr of particles
+
+   CartInt ci;
+   ci.norm();
+
+   cout << ci;
+
+   SphInt si(ci);
 
    SPM::init(M,N);
    TPM::init(M,N);

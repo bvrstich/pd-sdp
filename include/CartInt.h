@@ -38,6 +38,8 @@ class CartInt {
 
       const Matrix &gS() const;
 
+      int gS(int,int,int,int,int,int,int,int,int,int,int,int) const;
+
       Matrix &gS();
 
       const Matrix &gT() const;
@@ -66,6 +68,8 @@ class CartInt {
 
       static int gl_max();
 
+      static int gN();
+
       static void init();
 
       static void clear();
@@ -74,6 +78,9 @@ class CartInt {
 
       //!static objects needed to construct and destruct all the lists
       static int l_max,n_max,N_Z;
+
+      //!nr of electrons
+      static int N;
 
       //!input object contains all info about system
       static input *readin;

@@ -23,6 +23,7 @@ vector< vector<int> > CartInt::t2s;
 int **CartInt::s2t;
 
 int CartInt::dim;
+int CartInt::N;
 
 /** 
  * static function that reads in the input data and makes the matrix elements
@@ -38,6 +39,8 @@ void CartInt::init(){
    n_max = 0;
    l_max = 0;
    N_Z = readin->gNcores();
+
+   N = readin->NumberOfElectrons();
 
    for(int i = 0;i < readin->gNcores();++i){
 
@@ -560,5 +563,24 @@ int CartInt::gn_max(){
 int CartInt::gl_max(){
 
    return l_max;
+
+}
+
+/**
+ * static function
+ * @return nr of electrons
+ */
+int CartInt::gN(){
+
+   return N;
+
+}
+
+/**
+ * access to the matrix elements using quantum numbers
+ */
+int CartInt::gS(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
+
+   return (*S)(inlxyz2s[i][n_i - l_i - 1][l_i][x_i][y_i][z_i],inlxyz2s[j][n_j - l_j - 1][l_j][x_j][y_j][z_j]);
 
 }
