@@ -36,6 +36,11 @@ int main(void){
 
    CartInt::init();
 
+   CartInt ci;
+   ci.norm();
+
+   cout << ci;
+
    int M = 8;//dim sp hilbert space
    int N = 3;//nr of particles
 

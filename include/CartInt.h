@@ -21,9 +21,9 @@ class CartInt {
 
    /**
     * Output stream operator overloaded
-    * @param cartint_p the CartInt you want to print
+    * @param ci_p the CartInt you want to print
     */
-   friend ostream &operator<<(ostream &output,CartInt &cartint_p);
+   friend ostream &operator<<(ostream &output,CartInt &ci_p);
 
    public:
       
@@ -51,6 +51,8 @@ class CartInt {
       const Matrix &gV() const;
 
       Matrix &gV();
+
+      void norm();
 
       static void init();
 

@@ -350,3 +350,144 @@ Matrix &CartInt::gV() {
    return *V;
 
 }
+
+/**
+ * normalize the cartesian wavefunctions, needed for transformation to spherical
+ */
+void CartInt::norm() {
+
+   double norm[dim];
+
+   for(int i = 0;i < dim;++i)
+      norm[i] = sqrt((*S)(i,i));
+
+   //first the one body matrices
+   for(int i = 0;i < dim;++i)
+      for(int j = i;j < dim;++j){
+
+         (*S)(i,j) /= norm[i] * norm[j];
+         (*T)(i,j) /= norm[i] * norm[j];
+         (*U)(i,j) /= norm[i] * norm[j];
+
+      }
+
+   int a,b,c,d;
+
+   //then the two body matrices
+   for(int i = 0;i < dim*dim;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = i;j < dim*dim;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         (*V)(i,j) /= norm[a] * norm[b] * norm[c] * norm[d];
+
+      }
+
+   }
+
+   S->symmetrize();
+   T->symmetrize();
+   U->symmetrize();
+   V->symmetrize();
+
+}
+
+ostream &operator<<(ostream &output,CartInt &ci_p){
+
+   output << endl;
+   output << "Overlap Matrix:" << endl;
+   output << endl;
+
+   //first overlap
+   for(int s_i = 0;s_i < ci_p.dim;++s_i)
+      for(int s_j = 0;s_j < ci_p.dim;++s_j){
+
+         output << ci_p.s2inlxyz[s_i][0] << "\t" << ci_p.s2inlxyz[s_i][1] << "\t" << ci_p.s2inlxyz[s_i][2]
+         
+            << "\t(" << ci_p.s2inlxyz[s_i][3] << "," << ci_p.s2inlxyz[s_i][4] << "," << ci_p.s2inlxyz[s_i][5] << ")\t|\t"
+
+            << ci_p.s2inlxyz[s_j][0] << "\t" << ci_p.s2inlxyz[s_j][1] << "\t" << ci_p.s2inlxyz[s_j][2]
+         
+            << "\t(" << ci_p.s2inlxyz[s_j][3] << "," << ci_p.s2inlxyz[s_j][4] << "," << ci_p.s2inlxyz[s_j][5] << ")\t|\t" << (ci_p.gS())(s_i,s_j) << endl;
+
+      }
+
+   output << endl;
+   output << "Kinetic energy:" << endl;
+   output << endl;
+
+   //kinetic energy
+   for(int s_i = 0;s_i < ci_p.dim;++s_i)
+      for(int s_j = 0;s_j < ci_p.dim;++s_j){
+
+         output << ci_p.s2inlxyz[s_i][0] << "\t" << ci_p.s2inlxyz[s_i][1] << "\t" << ci_p.s2inlxyz[s_i][2]
+         
+            << "\t(" << ci_p.s2inlxyz[s_i][3] << "," << ci_p.s2inlxyz[s_i][4] << "," << ci_p.s2inlxyz[s_i][5] << ")\t|\t"
+
+            << ci_p.s2inlxyz[s_j][0] << "\t" << ci_p.s2inlxyz[s_j][1] << "\t" << ci_p.s2inlxyz[s_j][2]
+         
+            << "\t(" << ci_p.s2inlxyz[s_j][3] << "," << ci_p.s2inlxyz[s_j][4] << "," << ci_p.s2inlxyz[s_j][5] << ")\t|\t" << (ci_p.gT())(s_i,s_j) << endl;
+
+      }
+
+   output << endl;
+   output << "Nuclear attraction energy:" << endl;
+   output << endl;
+
+   //kinetic energy
+   for(int s_i = 0;s_i < ci_p.dim;++s_i)
+      for(int s_j = 0;s_j < ci_p.dim;++s_j){
+
+         output << ci_p.s2inlxyz[s_i][0] << "\t" << ci_p.s2inlxyz[s_i][1] << "\t" << ci_p.s2inlxyz[s_i][2]
+
+            << "\t(" << ci_p.s2inlxyz[s_i][3] << "," << ci_p.s2inlxyz[s_i][4] << "," << ci_p.s2inlxyz[s_i][5] << ")\t|\t"
+
+            << ci_p.s2inlxyz[s_j][0] << "\t" << ci_p.s2inlxyz[s_j][1] << "\t" << ci_p.s2inlxyz[s_j][2]
+
+            << "\t(" << ci_p.s2inlxyz[s_j][3] << "," << ci_p.s2inlxyz[s_j][4] << "," << ci_p.s2inlxyz[s_j][5] << ")\t|\t" << (ci_p.gU())(s_i,s_j) << endl;
+
+      }
+
+   output << endl;
+   output << "Electronic repulsion attraction energy:" << endl;
+   output << endl;
+
+   int s_i,s_j,s_k,s_l;
+
+   for(int t_i = 0;t_i < ci_p.dim*ci_p.dim;++t_i){
+
+      s_i = ci_p.t2s[t_i][0];
+      s_j = ci_p.t2s[t_i][1];
+
+      for(int t_j = 0;t_j < ci_p.dim*ci_p.dim;++t_j){
+
+         s_k = ci_p.t2s[t_j][0];
+         s_l = ci_p.t2s[t_j][1];
+
+         output << "[\t" << ci_p.s2inlxyz[s_i][0] << "\t" << ci_p.s2inlxyz[s_i][1] << "\t" << ci_p.s2inlxyz[s_i][2]
+
+            << "\t(" << ci_p.s2inlxyz[s_i][3] << "," << ci_p.s2inlxyz[s_i][4] << "," << ci_p.s2inlxyz[s_i][5] << ")\t|\t"
+
+            << ci_p.s2inlxyz[s_j][0] << "\t" << ci_p.s2inlxyz[s_j][1] << "\t" << ci_p.s2inlxyz[s_j][2]
+
+            << "\t(" << ci_p.s2inlxyz[s_j][3] << "," << ci_p.s2inlxyz[s_j][4] << "," << ci_p.s2inlxyz[s_j][5] << ")\t]\t||\t[" 
+
+            << ci_p.s2inlxyz[s_k][0] << "\t" << ci_p.s2inlxyz[s_k][1] << "\t" << ci_p.s2inlxyz[s_k][2]
+
+            << "\t(" << ci_p.s2inlxyz[s_k][3] << "," << ci_p.s2inlxyz[s_k][4] << "," << ci_p.s2inlxyz[s_k][5] << ")\t|\t"
+
+            << ci_p.s2inlxyz[s_l][0] << "\t" << ci_p.s2inlxyz[s_l][1] << "\t" << ci_p.s2inlxyz[s_l][2]
+
+            << "\t(" << ci_p.s2inlxyz[s_l][3] << "," << ci_p.s2inlxyz[s_l][4] << "," << ci_p.s2inlxyz[s_l][5] << ")\t]\t" <<(ci_p.gV())(t_i,t_j) << endl;
+
+      }
+   }
+
+   return output;
+
+}
