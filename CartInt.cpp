@@ -17,6 +17,7 @@ int ******CartInt::inlxyz2s;
 
 int CartInt::l_max;
 int CartInt::n_max;
+int CartInt::N_Z;
 
 vector< vector<int> > CartInt::t2s;
 int **CartInt::s2t;
@@ -36,6 +37,7 @@ void CartInt::init(){
 
    n_max = 0;
    l_max = 0;
+   N_Z = readin->gNcores();
 
    for(int i = 0;i < readin->gNcores();++i){
 
@@ -489,5 +491,74 @@ ostream &operator<<(ostream &output,CartInt &ci_p){
    }
 
    return output;
+
+}
+
+
+/**
+ * public static function to access the lists safely from other classes
+ * @param s the single particle index
+ * @param option indicates what quantumnumber will be returned
+ * @return option == 0: i , option == 1 : n, option == 2 : l, option == 3 : x, option == 4 : y , option == 5 : z
+ */
+int CartInt::gs2inlxyz(int s,int option) {
+
+   return s2inlxyz[s][option];
+
+}
+
+/**
+ * public static function to access the lists safely from other classes
+ * @param i the i'th core
+ * @param n the main quantumnumber
+ * @param l the angular momentum
+ * @param x the power of x in the Gaussian wavefucntion
+ * @param y the power of y in the Gaussian wavefucntion
+ * @param z the power of z in the Gaussian wavefucntion
+ * @return s the single particle index corresponding to i n l x y z quantumnumbers
+ */
+int CartInt::ginlxyz2s(int i,int n,int l,int x,int y,int z) {
+
+   return inlxyz2s[i][n][l][x][y][z];
+
+}
+
+/**
+ * static function that returns the dimension
+ * @return the dimension of the basisset
+ */
+int CartInt::gdim(){
+
+   return dim;
+
+}
+
+/**
+ * static function that returns the dimension
+ * @return nr of cores N_Z
+ */
+int CartInt::gN_Z(){
+
+   return N_Z;
+
+}
+
+/**
+ * static function
+ * @return highest main quantumnumber in the basisset
+ */
+int CartInt::gn_max(){
+
+   return n_max;
+
+}
+
+/**
+ * static function
+ * @return highest angular momentum quantumnumber in the basisset
+ */
+int CartInt::gl_max(){
+
+   return l_max;
 
 }

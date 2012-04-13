@@ -35,11 +35,7 @@ int main(void){
    cout.precision(10);
 
    CartInt::init();
-
-   CartInt ci;
-   ci.norm();
-
-   cout << ci;
+   SphInt::init();
 
    int M = 8;//dim sp hilbert space
    int N = 3;//nr of particles
@@ -249,6 +245,7 @@ int main(void){
 
    TPM::clear();
 
+   SphInt::clear();
    CartInt::clear();
    
    return 0;
