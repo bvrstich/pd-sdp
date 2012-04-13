@@ -18,6 +18,11 @@ int ******CartInt::inlxyz2s;
 int CartInt::l_max;
 int CartInt::n_max;
 
+vector< vector<int> > CartInt::t2s;
+int **CartInt::s2t;
+
+int CartInt::dim;
+
 /** 
  * static function that reads in the input data and makes the matrix elements
  */
@@ -132,6 +137,31 @@ void CartInt::init(){
 
    }
 
+   dim = s2inlxyz.size();
+
+   s2t = new int * [dim];
+
+   for(int i = 0;i < dim;++i)
+      s2t[i] = new int [dim];
+
+   vector<int> vst(2);
+
+   int iter = 0;
+
+   for(int i = 0;i < dim;++i)
+      for(int j = 0;j < dim;++j){
+
+         vst[0] = i;
+         vst[1] = j;
+
+         t2s.push_back(vst);
+
+         s2t[i][j] = iter;
+
+         ++iter;
+
+      }
+
 }
 
 /** 
@@ -168,6 +198,11 @@ void CartInt::clear(){
 
    delete [] inlxyz2s;
 
+   for(int i = 0;i < dim;++i)
+      delete [] s2t[i];
+
+   delete [] s2t;
+
    delete readin;
 
 }
@@ -177,8 +212,6 @@ void CartInt::clear(){
  */
 CartInt::CartInt(){ 
 
-   int dim = s2inlxyz.size();
-
    S = new Matrix(dim);
    T = new Matrix(dim);
    U = new Matrix(dim);
@@ -187,7 +220,53 @@ CartInt::CartInt(){
 
    MxElem setup(*readin);
    setup.Init(*readin);
+
+   for(int i = 0;i < dim;++i)
+      for(int j = i;j < dim;++j){
+
+         (*S)(i,j) = setup.gSoverlap(i,j);
+         (*T)(i,j) = setup.gKEseparate(i,j);
+         (*U)(i,j) = setup.gTelem(i,j) - setup.gKEseparate(i,j);
+
+      }
+
+   S->symmetrize();
+   T->symmetrize();
+   U->symmetrize();
+
+   int a,b,c,d;
+
+   for(int i = 0;i < dim*dim;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = i;j < dim*dim;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         (*V)(i,j) = setup.gVelem(a,b,c,d);
+
+      }
+   }
+
+   V->symmetrize();
    
+}
+
+/** 
+ * copy constructor
+ * @param ci_c CartInt object to be copied in the newly constructed object
+ */
+CartInt::CartInt(const CartInt &ci_c){ 
+
+   S = new Matrix(ci_c.gS());
+   T = new Matrix(ci_c.gT());
+   U = new Matrix(ci_c.gU());
+   
+   V = new Matrix(ci_c.gV());
+
 }
 
 /**
@@ -201,4 +280,73 @@ CartInt::~CartInt(){
 
    delete V;
    
+}
+
+/** 
+ * @return the overlapmatrix, const version
+ */
+const Matrix &CartInt::gS() const { 
+
+   return *S;
+
+}
+
+/** 
+ * @return the overlapmatrix
+ */
+Matrix &CartInt::gS() { 
+
+   return *S;
+
+}
+
+/** 
+ * @return the kinetic energy matrix, const version
+ */
+const Matrix &CartInt::gT() const { 
+
+   return *T; 
+}
+
+/** 
+ * @return the kinetic energy matrix
+ */
+Matrix &CartInt::gT() { 
+
+   return *T;
+
+}
+
+/** 
+ * @return the nuclear attraction matrix, const version
+ */
+const Matrix &CartInt::gU() const { 
+
+   return *U; 
+}
+
+/** 
+ * @return the nuclear attraction matrix
+ */
+Matrix &CartInt::gU() { 
+
+   return *U;
+
+}
+
+/** 
+ * @return the electronic repulsion matrix
+ */
+const Matrix &CartInt::gV() const { 
+
+   return *V; 
+}
+
+/** 
+ * @return the electronic repulsion matrix
+ */
+Matrix &CartInt::gV() { 
+
+   return *V;
+
 }

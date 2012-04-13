@@ -36,6 +36,22 @@ class CartInt {
       //destructor
       virtual ~CartInt();
 
+      const Matrix &gS() const;
+
+      Matrix &gS();
+
+      const Matrix &gT() const;
+
+      Matrix &gT();
+
+      const Matrix &gU() const;
+
+      Matrix &gU();
+
+      const Matrix &gV() const;
+
+      Matrix &gV();
+
       static void init();
 
       static void clear();
@@ -54,8 +70,14 @@ class CartInt {
       //!list to switch between matrix index and physical quantum numbers
       static int ******inlxyz2s;
 
+      //!list relating tp to sp indices
+      static vector< vector<int> > t2s;
+
+      //!list relating tp to sp indices
+      static int **s2t;
+
       //!dimension of the basisset
-      int dim;
+      static int dim;
       
       //!overlapmatrix
       Matrix *S;
