@@ -47,6 +47,11 @@ int main(void){
 
    SphInt si(ci);
 
+   ofstream out("sphint.out");
+   out.precision(10);
+
+   out << si;
+
    SPM::init(M,N);
    TPM::init(M,N);
 

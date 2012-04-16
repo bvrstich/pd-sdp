@@ -24,7 +24,8 @@ CPPSRC	= pd_sdp.cpp\
             MxElem.cpp\
             input.cpp\
             CartInt.cpp\
-            SphInt.cpp
+            SphInt.cpp\
+            Transform.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 

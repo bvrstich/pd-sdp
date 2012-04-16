@@ -38,7 +38,11 @@ class CartInt {
 
       const Matrix &gS() const;
 
-      int gS(int,int,int,int,int,int,int,int,int,int,int,int) const;
+      double gS(int,int,int,int,int,int,int,int,int,int,int,int) const;
+
+      double gT(int,int,int,int,int,int,int,int,int,int,int,int) const;
+
+      double gU(int,int,int,int,int,int,int,int,int,int,int,int) const;
 
       Matrix &gS();
 

@@ -138,6 +138,8 @@ SphInt::SphInt(const CartInt &ci){
          m_j = s2inlm[s_j][3];
 
          (*S)(s_i,s_j) = 0.0;
+         (*T)(s_i,s_j) = 0.0;
+         (*U)(s_i,s_j) = 0.0;
 
          if(i == j){//basisfunctions on the same core
 
@@ -146,20 +148,33 @@ SphInt::SphInt(const CartInt &ci){
                if(l_i == 0){
 
                   (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,0,j,n_j,l_j,0,0,0);
+                  (*T)(s_i,s_j) = ci.gT(i,n_i,l_i,0,0,0,j,n_j,l_j,0,0,0);
+                  (*U)(s_i,s_j) = ci.gU(i,n_i,l_i,0,0,0,j,n_j,l_j,0,0,0);
 
                }
                else if(l_i == 1){
 
-                  if(m_i == 0)
+                  if(m_i == 0){
+
                      (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,1,j,n_j,l_j,0,0,1);
-                  else
+                     (*T)(s_i,s_j) = ci.gT(i,n_i,l_i,0,0,1,j,n_j,l_j,0,0,1);
+                     (*U)(s_i,s_j) = ci.gU(i,n_i,l_i,0,0,1,j,n_j,l_j,0,0,1);
+
+                  }
+                  else{
+
                      (*S)(s_i,s_j) = 0.5 * ( ci.gS(i,n_i,l_i,1,0,0,j,n_j,l_j,1,0,0) + ci.gS(i,n_i,l_i,0,1,0,j,n_j,l_j,0,1,0) );
+                     (*T)(s_i,s_j) = 0.5 * ( ci.gT(i,n_i,l_i,1,0,0,j,n_j,l_j,1,0,0) + ci.gT(i,n_i,l_i,0,1,0,j,n_j,l_j,0,1,0) );
+                     (*U)(s_i,s_j) = 0.5 * ( ci.gU(i,n_i,l_i,1,0,0,j,n_j,l_j,1,0,0) + ci.gU(i,n_i,l_i,0,1,0,j,n_j,l_j,0,1,0) );
+
+                  }
 
                }
                else if(l_i == 2){
 
                   if(m_i == 0){
 
+                     //S
                      (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,0,0,2)
                      
                         + 0.25 * ( ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0) +  ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) 
@@ -168,17 +183,47 @@ SphInt::SphInt(const CartInt &ci){
 
                         - ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,2,0,0) - ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,0,2,0);
 
+                     //T
+                     (*T)(s_i,s_j) = ci.gT(i,n_i,l_i,0,0,2,j,n_j,l_j,0,0,2)
+
+                        + 0.25 * ( ci.gT(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0) +  ci.gT(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) 
+
+                              + 2.0 * ci.gT(i,n_i,l_i,0,2,0,j,n_j,l_j,2,0,0) )
+
+                        - ci.gT(i,n_i,l_i,0,0,2,j,n_j,l_j,2,0,0) - ci.gT(i,n_i,l_i,0,0,2,j,n_j,l_j,0,2,0);
+
+                     //U
+                     (*U)(s_i,s_j) = ci.gU(i,n_i,l_i,0,0,2,j,n_j,l_j,0,0,2)
+
+                        + 0.25 * ( ci.gU(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0) +  ci.gU(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) 
+
+                              + 2.0 * ci.gU(i,n_i,l_i,0,2,0,j,n_j,l_j,2,0,0) )
+
+                        - ci.gU(i,n_i,l_i,0,0,2,j,n_j,l_j,2,0,0) - ci.gU(i,n_i,l_i,0,0,2,j,n_j,l_j,0,2,0);
+
+
                   }
                   else if(m_i == 1 || m_i == -1){
 
                      (*S)(s_i,s_j) = 0.5 * ( ci.gS(i,n_i,l_i,1,0,1,j,n_j,l_j,1,0,1) + ci.gS(i,n_i,l_i,0,1,1,j,n_j,l_j,0,1,1) );
+                     (*T)(s_i,s_j) = 0.5 * ( ci.gT(i,n_i,l_i,1,0,1,j,n_j,l_j,1,0,1) + ci.gT(i,n_i,l_i,0,1,1,j,n_j,l_j,0,1,1) );
+                     (*U)(s_i,s_j) = 0.5 * ( ci.gU(i,n_i,l_i,1,0,1,j,n_j,l_j,1,0,1) + ci.gU(i,n_i,l_i,0,1,1,j,n_j,l_j,0,1,1) );
 
                   }
                   else if(m_i == 2 || m_i == -2){
 
+                     //S
                      (*S)(s_i,s_j) = 3.0/8.0 * ( ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) + ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0)
-                     
+
                            - 2.0 * ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,0,2,0)) + 0.5 * ci.gS(i,n_i,l_i,1,1,0,j,n_j,l_j,1,1,0);
+
+                     (*T)(s_i,s_j) = 3.0/8.0 * ( ci.gT(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) + ci.gT(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0)
+
+                           - 2.0 * ci.gT(i,n_i,l_i,2,0,0,j,n_j,l_j,0,2,0)) + 0.5 * ci.gT(i,n_i,l_i,1,1,0,j,n_j,l_j,1,1,0);
+
+                     (*U)(s_i,s_j) = 3.0/8.0 * ( ci.gU(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) + ci.gU(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0)
+
+                           - 2.0 * ci.gU(i,n_i,l_i,2,0,0,j,n_j,l_j,0,2,0)) + 0.5 * ci.gU(i,n_i,l_i,1,1,0,j,n_j,l_j,1,1,0);
 
                   }
 
@@ -205,6 +250,14 @@ SphInt::SphInt(const CartInt &ci){
 
          }
          else{//basisfunctions on different cores
+
+            if(m_i == m_j){//else zero
+
+               if(m_i == 0){
+
+               }
+
+            }
 
          }
 
@@ -325,5 +378,56 @@ int SphInt::gdim() {
 int SphInt::gN(){
 
    return N;
+
+}
+
+ostream &operator<<(ostream &output,SphInt &si_p){
+
+   output << endl;
+   output << "Overlap Matrix:" << endl;
+   output << endl;
+
+   for(int s_i = 0;s_i < si_p.gdim();++s_i)
+      for(int s_j = s_i;s_j < si_p.gdim();++s_j){
+
+         output << si_p.s2inlm[s_i][0] << "\t" << si_p.s2inlm[s_i][1] << "\t" << si_p.s2inlm[s_i][2] << "\t" << si_p.s2inlm[s_i][3]
+         
+            << "\t|\t" << si_p.s2inlm[s_j][0] << "\t" << si_p.s2inlm[s_j][1] << "\t" << si_p.s2inlm[s_j][2]
+         
+            << "\t" << si_p.s2inlm[s_j][3] << "\t|\t" << (si_p.gS())(s_i,s_j) << endl;
+
+      }
+
+   output << endl;
+   output << "Kinetic energy:" << endl;
+   output << endl;
+
+   for(int s_i = 0;s_i < si_p.gdim();++s_i)
+      for(int s_j = s_i;s_j < si_p.gdim();++s_j){
+
+         output << si_p.s2inlm[s_i][0] << "\t" << si_p.s2inlm[s_i][1] << "\t" << si_p.s2inlm[s_i][2] << "\t" << si_p.s2inlm[s_i][3]
+         
+            << "\t|\t" << si_p.s2inlm[s_j][0] << "\t" << si_p.s2inlm[s_j][1] << "\t" << si_p.s2inlm[s_j][2]
+         
+            << "\t" << si_p.s2inlm[s_j][3] << "\t|\t" << (si_p.gT())(s_i,s_j) << endl;
+
+      }
+
+   output << endl;
+   output << "Nuclear attraction:" << endl;
+   output << endl;
+
+   for(int s_i = 0;s_i < si_p.gdim();++s_i)
+      for(int s_j = s_i;s_j < si_p.gdim();++s_j){
+
+         output << si_p.s2inlm[s_i][0] << "\t" << si_p.s2inlm[s_i][1] << "\t" << si_p.s2inlm[s_i][2] << "\t" << si_p.s2inlm[s_i][3]
+         
+            << "\t|\t" << si_p.s2inlm[s_j][0] << "\t" << si_p.s2inlm[s_j][1] << "\t" << si_p.s2inlm[s_j][2]
+         
+            << "\t" << si_p.s2inlm[s_j][3] << "\t|\t" << (si_p.gU())(s_i,s_j) << endl;
+
+      }
+
+   return output;
 
 }

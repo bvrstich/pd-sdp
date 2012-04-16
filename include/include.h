@@ -78,4 +78,6 @@
 #include "CartInt.h"
 #include "SphInt.h"
 
+#include "Transform.h"
+
 /* vim: set ts=3 sw=3 expandtab :*/

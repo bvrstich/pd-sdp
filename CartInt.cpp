@@ -522,7 +522,7 @@ int CartInt::gs2inlxyz(int s,int option) {
  */
 int CartInt::ginlxyz2s(int i,int n,int l,int x,int y,int z) {
 
-   return inlxyz2s[i][n][l][x][y][z];
+   return inlxyz2s[i][n - l - 1][l][x][y][z];
 
 }
 
@@ -579,8 +579,26 @@ int CartInt::gN(){
 /**
  * access to the matrix elements using quantum numbers
  */
-int CartInt::gS(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
+double CartInt::gS(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
 
    return (*S)(inlxyz2s[i][n_i - l_i - 1][l_i][x_i][y_i][z_i],inlxyz2s[j][n_j - l_j - 1][l_j][x_j][y_j][z_j]);
+
+}
+
+/**
+ * access to the matrix elements using quantum numbers
+ */
+double CartInt::gT(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
+
+   return (*T)(inlxyz2s[i][n_i - l_i - 1][l_i][x_i][y_i][z_i],inlxyz2s[j][n_j - l_j - 1][l_j][x_j][y_j][z_j]);
+
+}
+
+/**
+ * access to the matrix elements using quantum numbers
+ */
+double CartInt::gU(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
+
+   return (*U)(inlxyz2s[i][n_i - l_i - 1][l_i][x_i][y_i][z_i],inlxyz2s[j][n_j - l_j - 1][l_j][x_j][y_j][z_j]);
 
 }
