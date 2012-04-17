@@ -642,7 +642,7 @@ Transform::Transform(int i,int n,int l,int m){
 
          coef[8] = new complex<double>(sqrt(5.0/3.0)/8.0,0.0);
          ind[8] = CartInt::ginlxyz2s(i,n,l,3,2,0);
-         
+
          coef[9] = new complex<double>(0.0,-sqrt(5.0/3.0)/8.0);
          ind[9] = CartInt::ginlxyz2s(i,n,l,2,3,0);
 
@@ -927,12 +927,24 @@ Transform::Transform(int i,int n,int l,int m){
  */
 Transform::Transform(const Transform &tf_c){ 
 
+   dim = tf_c.gdim();
+
+   coef = new complex<double> * [dim];
+   ind = new int [dim];
+
+   for(int i = 0;i < dim;++i){
+
+      coef[i] = new complex<double>(tf_c.gcoef(i));
+      ind[i] = tf_c.gind(i);
+
+   }
+
 }
 
 /**
  * standard destructor
  */
-Transform::~Transform(){ 
+Transform::~Transform(){
 
    for(int i = 0;i < dim;++i)
       delete coef[i];
@@ -940,5 +952,34 @@ Transform::~Transform(){
    delete [] coef;
 
    delete [] ind;
+
+}
+
+/**
+ * @return the dimension, i.e. number of terms in the transformation
+ */
+int Transform::gdim() const {
+
+   return dim;
+
+}
+
+/**
+ * @param i the "i'th" term in the transformation
+ * @return the coefficient corresponding to the "i'th" term in the transformation
+ */
+complex<double> Transform::gcoef(int i) const {
+
+   return *coef[i];
+
+}
+
+/**
+ * @param i the "i'th" term in the transformation
+ * @return the cartesian sp index corresponding to the "i'th" term in the transformation
+ */
+int Transform::gind(int i) const {
+
+   return ind[i];
 
 }

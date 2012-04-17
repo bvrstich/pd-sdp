@@ -31,6 +31,12 @@ class Transform {
       //destructor
       virtual ~Transform();
 
+      int gdim() const;
+
+      complex<double> gcoef(int) const;
+
+      int gind(int) const;
+
    private:
 
       //!spherical indices

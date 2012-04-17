@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <complex>
 #include <vector>
 
 using std::endl;
@@ -8,6 +9,7 @@ using std::ostream;
 using std::ofstream;
 using std::ifstream;
 using std::vector;
+using std::complex;
 
 #include "include.h"
 
@@ -130,6 +132,8 @@ SphInt::SphInt(const CartInt &ci){
       l_i = s2inlm[s_i][2];
       m_i = s2inlm[s_i][3];
 
+      Transform tf_i(i,n_i,l_i,m_i);
+
       for(int s_j = s_i;s_j < dim;++s_j){
 
          j = s2inlm[s_j][0];
@@ -137,132 +141,42 @@ SphInt::SphInt(const CartInt &ci){
          l_j = s2inlm[s_j][2];
          m_j = s2inlm[s_j][3];
 
-         (*S)(s_i,s_j) = 0.0;
-         (*T)(s_i,s_j) = 0.0;
-         (*U)(s_i,s_j) = 0.0;
+         Transform tf_j(j,n_j,l_j,m_j);
 
-         if(i == j){//basisfunctions on the same core
+         complex<double> c_s(0.0,0.0);
 
-            if(l_i == l_j && m_i == m_j){
+         //S
+         for(int d_i = 0;d_i < tf_i.gdim();++d_i)
+            for(int d_j = 0;d_j < tf_j.gdim();++d_j)
+               c_s += conj(tf_i.gcoef(d_i)) * tf_j.gcoef(d_j) * (ci.gS())(tf_i.gind(d_i),tf_j.gind(d_j));
 
-               if(l_i == 0){
+         (*S)(s_i,s_j) = real(c_s);
 
-                  (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,0,j,n_j,l_j,0,0,0);
-                  (*T)(s_i,s_j) = ci.gT(i,n_i,l_i,0,0,0,j,n_j,l_j,0,0,0);
-                  (*U)(s_i,s_j) = ci.gU(i,n_i,l_i,0,0,0,j,n_j,l_j,0,0,0);
+         complex<double> c_t(0.0,0.0);
 
-               }
-               else if(l_i == 1){
+         //T
+         for(int d_i = 0;d_i < tf_i.gdim();++d_i)
+            for(int d_j = 0;d_j < tf_j.gdim();++d_j)
+               c_t += conj(tf_i.gcoef(d_i)) * tf_j.gcoef(d_j) * (ci.gT())(tf_i.gind(d_i),tf_j.gind(d_j));
 
-                  if(m_i == 0){
+         (*T)(s_i,s_j) = real(c_t);
 
-                     (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,1,j,n_j,l_j,0,0,1);
-                     (*T)(s_i,s_j) = ci.gT(i,n_i,l_i,0,0,1,j,n_j,l_j,0,0,1);
-                     (*U)(s_i,s_j) = ci.gU(i,n_i,l_i,0,0,1,j,n_j,l_j,0,0,1);
+         complex<double> c_u(0.0,0.0);
 
-                  }
-                  else{
+         //U
+         for(int d_i = 0;d_i < tf_i.gdim();++d_i)
+            for(int d_j = 0;d_j < tf_j.gdim();++d_j)
+               c_u += conj(tf_i.gcoef(d_i)) * tf_j.gcoef(d_j) * (ci.gU())(tf_i.gind(d_i),tf_j.gind(d_j));
 
-                     (*S)(s_i,s_j) = 0.5 * ( ci.gS(i,n_i,l_i,1,0,0,j,n_j,l_j,1,0,0) + ci.gS(i,n_i,l_i,0,1,0,j,n_j,l_j,0,1,0) );
-                     (*T)(s_i,s_j) = 0.5 * ( ci.gT(i,n_i,l_i,1,0,0,j,n_j,l_j,1,0,0) + ci.gT(i,n_i,l_i,0,1,0,j,n_j,l_j,0,1,0) );
-                     (*U)(s_i,s_j) = 0.5 * ( ci.gU(i,n_i,l_i,1,0,0,j,n_j,l_j,1,0,0) + ci.gU(i,n_i,l_i,0,1,0,j,n_j,l_j,0,1,0) );
-
-                  }
-
-               }
-               else if(l_i == 2){
-
-                  if(m_i == 0){
-
-                     //S
-                     (*S)(s_i,s_j) = ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,0,0,2)
-                     
-                        + 0.25 * ( ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0) +  ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) 
-                        
-                              + 2.0 * ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,2,0,0) )
-
-                        - ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,2,0,0) - ci.gS(i,n_i,l_i,0,0,2,j,n_j,l_j,0,2,0);
-
-                     //T
-                     (*T)(s_i,s_j) = ci.gT(i,n_i,l_i,0,0,2,j,n_j,l_j,0,0,2)
-
-                        + 0.25 * ( ci.gT(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0) +  ci.gT(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) 
-
-                              + 2.0 * ci.gT(i,n_i,l_i,0,2,0,j,n_j,l_j,2,0,0) )
-
-                        - ci.gT(i,n_i,l_i,0,0,2,j,n_j,l_j,2,0,0) - ci.gT(i,n_i,l_i,0,0,2,j,n_j,l_j,0,2,0);
-
-                     //U
-                     (*U)(s_i,s_j) = ci.gU(i,n_i,l_i,0,0,2,j,n_j,l_j,0,0,2)
-
-                        + 0.25 * ( ci.gU(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0) +  ci.gU(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) 
-
-                              + 2.0 * ci.gU(i,n_i,l_i,0,2,0,j,n_j,l_j,2,0,0) )
-
-                        - ci.gU(i,n_i,l_i,0,0,2,j,n_j,l_j,2,0,0) - ci.gU(i,n_i,l_i,0,0,2,j,n_j,l_j,0,2,0);
-
-
-                  }
-                  else if(m_i == 1 || m_i == -1){
-
-                     (*S)(s_i,s_j) = 0.5 * ( ci.gS(i,n_i,l_i,1,0,1,j,n_j,l_j,1,0,1) + ci.gS(i,n_i,l_i,0,1,1,j,n_j,l_j,0,1,1) );
-                     (*T)(s_i,s_j) = 0.5 * ( ci.gT(i,n_i,l_i,1,0,1,j,n_j,l_j,1,0,1) + ci.gT(i,n_i,l_i,0,1,1,j,n_j,l_j,0,1,1) );
-                     (*U)(s_i,s_j) = 0.5 * ( ci.gU(i,n_i,l_i,1,0,1,j,n_j,l_j,1,0,1) + ci.gU(i,n_i,l_i,0,1,1,j,n_j,l_j,0,1,1) );
-
-                  }
-                  else if(m_i == 2 || m_i == -2){
-
-                     //S
-                     (*S)(s_i,s_j) = 3.0/8.0 * ( ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) + ci.gS(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0)
-
-                           - 2.0 * ci.gS(i,n_i,l_i,2,0,0,j,n_j,l_j,0,2,0)) + 0.5 * ci.gS(i,n_i,l_i,1,1,0,j,n_j,l_j,1,1,0);
-
-                     (*T)(s_i,s_j) = 3.0/8.0 * ( ci.gT(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) + ci.gT(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0)
-
-                           - 2.0 * ci.gT(i,n_i,l_i,2,0,0,j,n_j,l_j,0,2,0)) + 0.5 * ci.gT(i,n_i,l_i,1,1,0,j,n_j,l_j,1,1,0);
-
-                     (*U)(s_i,s_j) = 3.0/8.0 * ( ci.gU(i,n_i,l_i,2,0,0,j,n_j,l_j,2,0,0) + ci.gU(i,n_i,l_i,0,2,0,j,n_j,l_j,0,2,0)
-
-                           - 2.0 * ci.gU(i,n_i,l_i,2,0,0,j,n_j,l_j,0,2,0)) + 0.5 * ci.gU(i,n_i,l_i,1,1,0,j,n_j,l_j,1,1,0);
-
-                  }
-
-               }
-               else if(l_i == 3){
-
-                  cout << "If I get here, add more" << endl;
-
-               }
-               else if(l_i == 4){
-
-                  cout << "If I get here, add more" << endl;
-
-               }
-               else if(l_i == 5){
-
-                  cout << "If I get here, add more" << endl;
-
-               }
-               else
-                  cout << "Basisset too large for me" << endl;
-
-            }
-
-         }
-         else{//basisfunctions on different cores
-
-            if(m_i == m_j){//else zero
-
-               if(m_i == 0){
-
-               }
-
-            }
-
-         }
+         (*U)(s_i,s_j) = real(c_u);
 
       }
+
    }
+
+   S->symmetrize();
+   T->symmetrize();
+   U->symmetrize();
 
 }
 
@@ -391,9 +305,9 @@ ostream &operator<<(ostream &output,SphInt &si_p){
       for(int s_j = s_i;s_j < si_p.gdim();++s_j){
 
          output << si_p.s2inlm[s_i][0] << "\t" << si_p.s2inlm[s_i][1] << "\t" << si_p.s2inlm[s_i][2] << "\t" << si_p.s2inlm[s_i][3]
-         
+
             << "\t|\t" << si_p.s2inlm[s_j][0] << "\t" << si_p.s2inlm[s_j][1] << "\t" << si_p.s2inlm[s_j][2]
-         
+
             << "\t" << si_p.s2inlm[s_j][3] << "\t|\t" << (si_p.gS())(s_i,s_j) << endl;
 
       }
@@ -406,9 +320,9 @@ ostream &operator<<(ostream &output,SphInt &si_p){
       for(int s_j = s_i;s_j < si_p.gdim();++s_j){
 
          output << si_p.s2inlm[s_i][0] << "\t" << si_p.s2inlm[s_i][1] << "\t" << si_p.s2inlm[s_i][2] << "\t" << si_p.s2inlm[s_i][3]
-         
+
             << "\t|\t" << si_p.s2inlm[s_j][0] << "\t" << si_p.s2inlm[s_j][1] << "\t" << si_p.s2inlm[s_j][2]
-         
+
             << "\t" << si_p.s2inlm[s_j][3] << "\t|\t" << (si_p.gT())(s_i,s_j) << endl;
 
       }
@@ -421,9 +335,9 @@ ostream &operator<<(ostream &output,SphInt &si_p){
       for(int s_j = s_i;s_j < si_p.gdim();++s_j){
 
          output << si_p.s2inlm[s_i][0] << "\t" << si_p.s2inlm[s_i][1] << "\t" << si_p.s2inlm[s_i][2] << "\t" << si_p.s2inlm[s_i][3]
-         
+
             << "\t|\t" << si_p.s2inlm[s_j][0] << "\t" << si_p.s2inlm[s_j][1] << "\t" << si_p.s2inlm[s_j][2]
-         
+
             << "\t" << si_p.s2inlm[s_j][3] << "\t|\t" << (si_p.gU())(s_i,s_j) << endl;
 
       }

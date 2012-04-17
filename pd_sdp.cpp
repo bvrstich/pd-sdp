@@ -43,14 +43,9 @@ int main(void){
    CartInt ci;
    ci.norm();
 
-   cout << ci;
-
    SphInt si(ci);
 
-   ofstream out("sphint.out");
-   out.precision(10);
-
-   out << si;
+   cout << si;
 
    SPM::init(M,N);
    TPM::init(M,N);
