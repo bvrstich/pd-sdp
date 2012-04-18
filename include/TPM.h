@@ -16,6 +16,8 @@ class PHM;
 class DPM;
 class PPHM;
 class T2PM;
+class SphInt;
+class CartInt;
 
 /**
  * @author Brecht Verstichel
@@ -111,6 +113,10 @@ class TPM : public Matrix {
       void bar(const T2PM &);
 
       void T(const T2PM &);
+
+      void molecule(const SphInt &);
+
+      void molecule(const CartInt &);
 
       static void init_overlap(int,int);
 

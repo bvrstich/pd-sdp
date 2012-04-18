@@ -53,6 +53,16 @@ class SphInt {
 
       Matrix &gV();
 
+      double gS(int,int) const;
+
+      double gT(int,int) const;
+
+      double gU(int,int) const;
+
+      double gV(int,int,int,int) const;
+
+      void orthogonalize();
+
       static int gdim();
 
       static int gN();

@@ -459,7 +459,7 @@ ostream &operator<<(ostream &output,CartInt &ci_p){
       }
 
    output << endl;
-   output << "Electronic repulsion attraction energy:" << endl;
+   output << "Electronic repulsion energy:" << endl;
    output << endl;
 
    int s_i,s_j,s_k,s_l;
@@ -577,28 +577,164 @@ int CartInt::gN(){
 }
 
 /**
- * access to the matrix elements using quantum numbers
+ * orthogonalizes the basis: inverse sqrt of S
  */
-double CartInt::gS(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
+void CartInt::orthogonalize() {
 
-   return (*S)(inlxyz2s[i][n_i - l_i - 1][l_i][x_i][y_i][z_i],inlxyz2s[j][n_j - l_j - 1][l_j][x_j][y_j][z_j]);
+   //first inverse sqrt of S
+   S->sqrt(-1);
+
+   Matrix T_copy(dim);
+   Matrix U_copy(dim);
+
+   T_copy = 0.0;
+   U_copy = 0.0;
+
+   //transform T
+   for(int i = 0;i < dim;++i)
+      for(int j = 0;j < dim;++j){
+
+         for(int k = 0;k < dim;++k){
+
+            T_copy(i,j) += (*S)(i,k) * (*T)(k,j);
+            U_copy(i,j) += (*S)(i,k) * (*U)(k,j);
+
+         }
+
+      }
+
+   *T = 0.0;
+   *U = 0.0;
+
+   for(int i = 0;i < dim;++i)
+      for(int j = i;j < dim;++j){
+
+         for(int k = 0;k < dim;++k){
+
+            (*T)(i,j) += T_copy(i,k) * (*S)(k,j);
+            (*U)(i,j) += U_copy(i,k) * (*S)(k,j);
+
+         }
+
+      }
+
+   Matrix V_copy(dim*dim);
+
+   V_copy = 0.0;
+
+   int a,b,c,d;
+
+   //contract a
+   for(int i = 0;i < dim*dim;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = 0;j < dim*dim;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         for(int a_ = 0;a_ < dim;++a_)
+            V_copy(i,j) += (*S)(a,a_) * (*V)(s2t[a_][b],j); 
+
+      }
+   }
+
+   *V = 0.0;
+
+   //contract b
+   for(int i = 0;i < dim*dim;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = 0;j < dim*dim;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         for(int b_ = 0;b_ < dim;++b_)
+            (*V)(i,j) += (*S)(b,b_) * V_copy(s2t[a][b_],j); 
+
+      }
+   }
+
+   V_copy = 0.0;
+
+   //contract c
+   for(int i = 0;i < dim*dim;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = 0;j < dim*dim;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         for(int c_ = 0;c_ < dim;++c_)
+            V_copy(i,j) += (*V)(i,s2t[c_][d]) * (*S)(c_,c); 
+
+      }
+   }
+
+   *V = 0.0;
+
+   //contract d
+   for(int i = 0;i < dim*dim;++i){
+
+      a = t2s[i][0];
+      b = t2s[i][1];
+
+      for(int j = 0;j < dim*dim;++j){
+
+         c = t2s[j][0];
+         d = t2s[j][1];
+
+         for(int d_ = 0;d_ < dim;++d_)
+            (*V)(i,j) += V_copy(i,s2t[c][d_]) * (*S)(d_,d); 
+
+      }
+   }
+
+   T->symmetrize();
+   U->symmetrize();
 
 }
 
 /**
- * access to the matrix elements using quantum numbers
+ * access to the individual elements of the matrices
  */
-double CartInt::gT(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
+double CartInt::gS(int i,int j) const {
 
-   return (*T)(inlxyz2s[i][n_i - l_i - 1][l_i][x_i][y_i][z_i],inlxyz2s[j][n_j - l_j - 1][l_j][x_j][y_j][z_j]);
+   return (*S)(i,j);
 
 }
 
 /**
- * access to the matrix elements using quantum numbers
+ * access to the individual elements of the matrices
  */
-double CartInt::gU(int i,int n_i,int l_i,int x_i,int y_i,int z_i,int j,int n_j,int l_j,int x_j,int y_j,int z_j) const {
+double CartInt::gT(int i,int j) const {
 
-   return (*U)(inlxyz2s[i][n_i - l_i - 1][l_i][x_i][y_i][z_i],inlxyz2s[j][n_j - l_j - 1][l_j][x_j][y_j][z_j]);
+   return (*T)(i,j);
+
+}
+
+/**
+ * access to the individual elements of the matrices
+ */
+double CartInt::gU(int i,int j) const {
+
+   return (*U)(i,j);
+
+}
+
+/**
+ * access to the individual elements of the matrices
+ */
+double CartInt::gV(int a,int b,int c,int d) const {
+
+   return (*V)(s2t[a][b],s2t[c][d]);
 
 }

@@ -38,12 +38,6 @@ class CartInt {
 
       const Matrix &gS() const;
 
-      double gS(int,int,int,int,int,int,int,int,int,int,int,int) const;
-
-      double gT(int,int,int,int,int,int,int,int,int,int,int,int) const;
-
-      double gU(int,int,int,int,int,int,int,int,int,int,int,int) const;
-
       Matrix &gS();
 
       const Matrix &gT() const;
@@ -59,6 +53,16 @@ class CartInt {
       Matrix &gV();
 
       void norm();
+
+      void orthogonalize();
+
+      double gS(int,int) const;
+
+      double gT(int,int) const;
+
+      double gU(int,int) const;
+
+      double gV(int,int,int,int) const;
 
       static int gs2inlxyz(int,int);
 

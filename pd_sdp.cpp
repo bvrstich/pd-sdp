@@ -19,7 +19,6 @@ using std::ofstream;
 #include "include.h"
 
 /**
- * 
  * In the main the actual program is run.\n 
  * Part 1: An easy initial point is taken and then centered to the required precision (flag == 0)\n
  * Part 2: When the primal dual point is sufficiently centered steps are taken to reduce the
@@ -44,8 +43,7 @@ int main(void){
    ci.norm();
 
    SphInt si(ci);
-
-   cout << si;
+   si.orthogonalize();
 
    SPM::init(M,N);
    TPM::init(M,N);
@@ -68,9 +66,9 @@ int main(void){
    
    SUP::init(M,N);
    EIG::init(M,N);
-/*
+
    TPM ham;
-   ham.sp_pairing(8);
+   ham.molecule(si);
 
    SUP S;
    S.init_S();
@@ -233,7 +231,7 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
-*/
+
 #ifdef __T2P_CON
    T2PM::clear();
 #endif

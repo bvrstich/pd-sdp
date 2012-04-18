@@ -1,8 +1,8 @@
-Basisset=cc-pVQZ
+Basisset=6-31G
 Charge=0
 RotationSymmetry=z
 
 Distances=0
 
 Cores=1
-1 Be 0 0 0
+1 He 0 0 0

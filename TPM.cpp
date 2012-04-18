@@ -1034,4 +1034,127 @@ void TPM::T(const T2PM &t2pm)
    }
 }
 
+/**
+ * construct the Hamiltonian of a molecule from the input of SphInt.
+ * @param si input spherical matrixelements
+ */
+void TPM::molecule(const SphInt &si){
+
+   int alpha,beta,gamma,delta;
+   int a,b,c,d;
+   int s_a,s_b,s_c,s_d;
+
+   for(int i = 0;i < gn();++i){
+
+      alpha = t2s[i][0];
+      beta = t2s[i][1];
+
+      a = alpha/2;
+      b = beta/2;
+
+      s_a = alpha%2;
+      s_b = beta%2;
+
+      for(int j = i;j < gn();++j){
+
+         gamma = t2s[j][0];
+         delta = t2s[j][1];
+
+         c = gamma/2;
+         d = delta/2;
+
+         s_c = gamma%2;
+         s_d = delta%2;
+
+         (*this)(i,j) = 0.0;
+
+         //first single particle part
+         if(alpha == gamma)
+            if(s_b == s_d)
+               (*this)(i,j) += 1.0/(N - 1.0) * (si.gT(b,d) + si.gU(b,d));
+
+         if(beta == gamma)
+            if(s_a == s_d)
+               (*this)(i,j) -= 1.0/(N - 1.0) * (si.gT(a,d) + si.gU(a,d));
+
+         if(beta == delta)
+            if(s_a == s_c)
+               (*this)(i,j) += 1.0/(N - 1.0) * (si.gT(a,c) + si.gU(a,c));
+
+         //two particle piece
+         if(s_a == s_c && s_b == s_d)
+            (*this)(i,j) += si.gV(a,b,c,d);
+
+         if(s_a == s_d && s_b == s_c)
+            (*this)(i,j) -= si.gV(a,b,d,c);
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * construct the Hamiltonian of a molecule from the input of CartInt.
+ * @param si input cartesian matrixelements
+ */
+void TPM::molecule(const CartInt &ci){
+
+   int alpha,beta,gamma,delta;
+
+   int a,b,c,d;
+   int s_a,s_b,s_c,s_d;
+
+   for(int i = 0;i < gn();++i){
+
+      alpha = t2s[i][0];
+      beta = t2s[i][1];
+
+      a = alpha/2;
+      b = beta/2;
+
+      s_a = alpha%2;
+      s_b = beta%2;
+
+      for(int j = i;j < gn();++j){
+
+         gamma = t2s[j][0];
+         delta = t2s[j][1];
+
+         c = gamma/2;
+         d = delta/2;
+
+         s_c = gamma%2;
+         s_d = delta%2;
+
+         (*this)(i,j) = 0.0;
+
+         //first single particle part
+         if(alpha == gamma)
+            if(s_b == s_d)
+               (*this)(i,j) += 1.0/(N - 1.0) * (ci.gT(b,d) + ci.gU(b,d));
+
+         if(beta == gamma)
+            if(s_a == s_d)
+               (*this)(i,j) -= 1.0/(N - 1.0) * (ci.gT(a,d) + ci.gU(a,d));
+
+         if(beta == delta)
+            if(s_a == s_c)
+               (*this)(i,j) += 1.0/(N - 1.0) * (ci.gT(a,c) + ci.gU(a,c));
+
+         //two particle piece
+         if(s_a == s_c && s_b == s_d)
+            (*this)(i,j) += ci.gV(a,b,c,d);
+
+         if(s_a == s_d && s_b == s_c)
+            (*this)(i,j) -= ci.gV(a,b,d,c);
+
+      }
+   }
+
+   this->symmetrize();
+
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/
