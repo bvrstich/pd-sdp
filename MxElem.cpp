@@ -504,7 +504,6 @@ void MxElem::RemoveFromDisk(){
 
 }
 
-
 /**
  * Calculate the nuclear-nuclear potential energy of a problem
  * @param problem the problem to be solved

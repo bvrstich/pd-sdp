@@ -74,7 +74,7 @@ int main(void){
    S.init_S();
 
    SUP Z;
-   Z.init_Z(1000.0,ham,S);
+   Z.init_Z(10000.0,ham,S);
 
    int dim = Z.gdim();
 
@@ -87,7 +87,7 @@ int main(void){
    //eerst centering
    double gamma = 1.0;
 
-   double tolerance = 1.0e-4;
+   double tolerance = 1.0e-7;
 
    //flag == 0 : initiele centering run (tot op tolerance)
    //flag == 1 : doe een stap met gamma = 0
@@ -99,7 +99,7 @@ int main(void){
 
    while(flag != 3){
 
-      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
+      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy + CartInt::gNucRepEn() << "\t";
 
       //matrix D aanmaken voor de hessiaan van het duale stelsel
       SUP D;
@@ -226,7 +226,7 @@ int main(void){
    cout << endl;
    cout << "FINAL RESULT " << endl;
    cout << endl;
-   cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
+   cout << "E_0 = " << energy + CartInt::gNucRepEn() << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
    cout << endl;
 
    //print density matrix to file

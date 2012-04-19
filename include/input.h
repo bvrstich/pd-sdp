@@ -87,6 +87,8 @@ class input{
 
       int NumberOfElectrons();
 
+      double NucRepEn() const;
+
       //Printer
       void debugprint();
 

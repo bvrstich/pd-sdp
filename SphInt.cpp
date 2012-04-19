@@ -25,6 +25,8 @@ int SphInt::N_Z;
 int SphInt::n_max;
 int SphInt::l_max;
 
+double SphInt::NucRepEn;
+
 /** 
  * static function that allocates the static lists and calculates the dimensions and such
  */
@@ -34,6 +36,7 @@ void SphInt::init(){
    n_max = CartInt::gn_max();
    l_max = CartInt::gl_max();
    N = CartInt::gN();
+   NucRepEn = CartInt::gNucRepEn();
 
    //allocate
    inlm2s = new int *** [N_Z];

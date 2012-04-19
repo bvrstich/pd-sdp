@@ -525,3 +525,21 @@ void input::debugprint(){
    }
 
 }
+
+/**
+ * @return the nuclear-nuclear repulsion energy of a problem
+ */
+double input::NucRepEn() const{
+
+   double energy = 0.0;
+
+   for (int i = 0;i < Ncores;i++){
+
+      for (int j = i + 1;j < Ncores;j++)
+         energy += cores[i] * cores[j] / sqrt(vectors[i]->DistanceSquared(*vectors[j]));
+      
+   }
+
+   return energy;
+
+}

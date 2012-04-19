@@ -25,6 +25,8 @@ int **CartInt::s2t;
 int CartInt::dim;
 int CartInt::N;
 
+double CartInt::NucRepEn;
+
 /** 
  * static function that reads in the input data and makes the matrix elements
  */
@@ -166,6 +168,8 @@ void CartInt::init(){
          ++iter;
 
       }
+
+   NucRepEn = readin->NucRepEn();
 
 }
 
@@ -736,5 +740,14 @@ double CartInt::gU(int i,int j) const {
 double CartInt::gV(int a,int b,int c,int d) const {
 
    return (*V)(s2t[a][b],s2t[c][d]);
+
+}
+
+/**
+ * static function that returns the nuclear repulsion energy for this configuration
+ */
+double CartInt::gNucRepEn() {
+
+   return NucRepEn;
 
 }

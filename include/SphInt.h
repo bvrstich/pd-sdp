@@ -76,6 +76,9 @@ class SphInt {
       //!static objects needed to construct and destruct all the lists
       static int l_max,n_max,N_Z;
 
+      //!nuclear repulsion energy
+      static double NucRepEn;
+
       //!nr of particles
       static int N;
 

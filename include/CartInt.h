@@ -78,6 +78,8 @@ class CartInt {
 
       static int gN();
 
+      static double gNucRepEn();
+
       static void init();
 
       static void clear();
@@ -86,6 +88,9 @@ class CartInt {
 
       //!static objects needed to construct and destruct all the lists
       static int l_max,n_max,N_Z;
+
+      //!nuclear repulsion energy
+      static double NucRepEn;
 
       //!nr of electrons
       static int N;
