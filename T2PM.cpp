@@ -78,8 +78,6 @@ void T2PM::clear(){
 
 /**
  * standard constructor: constructs Matrix object of dimension M+M^2*(M - 1)/2 and
- * @param M nr of sp orbitals
- * @param N nr of particles
  */
 T2PM::T2PM() : Matrix(pph2s.size() + M) { }
 

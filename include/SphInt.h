@@ -22,6 +22,7 @@ class SphInt {
 
    /**
     * Output stream operator overloaded
+    * @param output ostream object e.g. cout
     * @param si_p the SphInt you want to print
     */
    friend ostream &operator<<(ostream &output,SphInt &si_p);

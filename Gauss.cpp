@@ -43,7 +43,7 @@
 
 /**
  * Constructor for the Gauss class
- * @param Ntypes the number of different contractions for the atom under consideration
+ * @param NumberOfTypes the number of different contractions for the atom under consideration
  */
 Gauss::Gauss(int NumberOfTypes){
 

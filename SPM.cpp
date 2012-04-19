@@ -9,6 +9,11 @@ using std::endl;
 int SPM::M;
 int SPM::N;
 
+/**
+ * function that initializes the statics
+ * @param M_i dimension of single particle space
+ * @param N_i number of particles
+ */
 void SPM::init(int M_i,int N_i){
 
    M = M_i;
@@ -18,8 +23,6 @@ void SPM::init(int M_i,int N_i){
 
 /**
  * constructor, makes matrix of dimension M
- * @param M dimension of single particle space and dimension of the Matrix
- * @param N Nr of particles
  */
 SPM::SPM() : Matrix(M) { }
 

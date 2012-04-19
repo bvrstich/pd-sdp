@@ -13,7 +13,7 @@ int EIG::dim;
 
 /**
  * initialize the statics
- * @param L_in the nr of sites
+ * @param M_in the nr of sites
  * @param N_in the nr of particles
  */
 void EIG::init(int M_in,int N_in){

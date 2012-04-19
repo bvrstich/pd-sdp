@@ -1097,7 +1097,7 @@ void TPM::molecule(const SphInt &si){
 
 /**
  * construct the Hamiltonian of a molecule from the input of CartInt.
- * @param si input cartesian matrixelements
+ * @param ci input cartesian matrixelements
  */
 void TPM::molecule(const CartInt &ci){
 

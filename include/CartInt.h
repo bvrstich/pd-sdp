@@ -21,6 +21,7 @@ class CartInt {
 
    /**
     * Output stream operator overloaded
+    * @param output ostream object e.g. cout
     * @param ci_p the CartInt you want to print
     */
    friend ostream &operator<<(ostream &output,CartInt &ci_p);

@@ -56,6 +56,7 @@
 /**
  * Constructor for the MxElem class
  * @param readin the problem to be solved
+ * @param dopzmarker boolean containing the information on whether or not to mark the pz values
  */
 MxElem::MxElem(input & readin, bool dopzmarker){
 
@@ -795,6 +796,7 @@ void MxElem::DoLodwinTfo(){
 /**
  * Initialise the matrix elements
  * @param readin the problem to be solved
+ * @param Efield double value containing the electric field strength
  */
 void MxElem::Init(input & readin, double Efield){
 

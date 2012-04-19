@@ -333,7 +333,7 @@ double MxElemFiller::KERecursion(double alpha1, double alpha2, R & R1, R & R2, i
  * @param Rp the center of the moment
  * @param npx the power of (x-Rpx) in the moment
  * @param npy the power of (y-Rpy) in the moment
- * @param npy the power of (z-Rpz) in the moment
+ * @param npz the power of (z-Rpz) in the moment
  * @return the moment matrix element
  */
 double MxElemFiller::Moment(int atom_1, int orbit_1, int n1x, int n1y, int n1z, int atom_2, int orbit_2, int n2x, int n2y, int n2z, R & Rp, int npx, int npy, int npz){

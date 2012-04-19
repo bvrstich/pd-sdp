@@ -181,7 +181,7 @@ R* input::gvector(int i){
 
 /**
  * Getter function for the Gauss information object of the i-th core
- * @param i the number of the core
+ * @param cnt the number of the core
  * @return the Gauss information object of the i-th core
  */
 Gauss* input::gGaussInfo(int cnt){

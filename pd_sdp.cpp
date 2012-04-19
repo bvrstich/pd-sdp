@@ -40,10 +40,7 @@ int main(void){
    int N = SphInt::gN();//nr of particles
 
    CartInt ci;
-   ci.norm();
-
-   SphInt si(ci);
-   si.orthogonalize();
+   ci.orthogonalize();
 
    SPM::init(M,N);
    TPM::init(M,N);
@@ -68,7 +65,7 @@ int main(void){
    EIG::init(M,N);
 
    TPM ham;
-   ham.molecule(si);
+   ham.molecule(ci);
 
    SUP S;
    S.init_S();
