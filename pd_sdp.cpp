@@ -35,7 +35,7 @@ int main(void){
    cout.precision(10);
 
    int M = 8;//dim sp hilbert space
-   int N = 3;//nr of particles
+   int N = 4;//nr of particles
 
    SPM::init(M,N);
    TPM::init(M,N);
@@ -60,7 +60,7 @@ int main(void){
    EIG::init(M,N);
 
    TPM ham;
-   ham.sp_pairing(8);
+   ham.hubbard_1D(0,1);
 
    SUP S;
    S.init_S();
@@ -231,7 +231,7 @@ int main(void){
 #ifdef __T2_CON
    PPHM::clear();
 #endif
-   
+
 #ifdef __T1_CON
    DPM::clear();
 #endif
@@ -241,7 +241,7 @@ int main(void){
 #endif
 
    TPM::clear();
-   
+
    return 0;
 
 }
