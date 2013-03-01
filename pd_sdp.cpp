@@ -32,6 +32,8 @@ using std::ofstream;
 
 int main(void){
 
+   srand(time(NULL));
+
    cout.precision(10);
 
    int M = 8;//dim sp hilbert space
@@ -55,12 +57,32 @@ int main(void){
 #ifdef __T2P_CON
    T2PM::init(M,N);
 #endif
-   
+
    SUP::init(M,N);
    EIG::init(M,N);
 
+   Matrix X(M);
+
+   for(int i = 0;i < M;++i)
+      for(int j = 0;j < M;++j)
+         X(i,j) = (double) (rand() - RAND_MAX)/(double)RAND_MAX;
+
+   double norm = std::sqrt(X.ddot(X));
+
+   X.dscal(1.0/norm);
+
+   PHM phm;
+
+   for(int a = 0;a < M;++a)
+      for(int b = 0;b < M;++b)
+         for(int c = 0;c < M;++c)
+            for(int d = 0;d < M;++d)
+               phm(a,b,c,d) = X(a,b) * X(c,d);
+
    TPM ham;
-   ham.hubbard_1D(0,1);
+   ham.G(1,phm);
+
+   ham.dscal(-1.0);
 
    SUP S;
    S.init_S();
@@ -222,7 +244,10 @@ int main(void){
    cout << endl;
 
    //print density matrix to file
-//   (S.tpm(0)).out("rdm.out");
+   //   (S.tpm(0)).out("rdm.out");
+
+   Vector<PHM> v(S.phm());
+   cout << v;
 
 #ifdef __T2P_CON
    T2PM::clear();
