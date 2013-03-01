@@ -61,10 +61,10 @@ int main(void){
    SUP::init(M,N);
    EIG::init(M,N);
 
-   Matrix X(M);
+   Matrix X(M/2);
 
-   for(int i = 0;i < M;++i)
-      for(int j = 0;j < M;++j)
+   for(int i = 0;i < M/2;++i)
+      for(int j = 0;j < M/2;++j)
          X(i,j) = (double) (rand() - RAND_MAX)/(double)RAND_MAX;
 
    double norm = std::sqrt(X.ddot(X));
@@ -72,182 +72,228 @@ int main(void){
    X.dscal(1.0/norm);
 
    PHM phm;
+   phm = 0.0;
 
-   for(int a = 0;a < M;++a)
-      for(int b = 0;b < M;++b)
-         for(int c = 0;c < M;++c)
-            for(int d = 0;d < M;++d)
-               phm(a,b,c,d) = X(a,b) * X(c,d);
+   int iter = 0;
 
-   TPM ham;
-   ham.G(1,phm);
+   while(iter < 20){
 
-   ham.dscal(-1.0);
+      for(int a = 0;a < M/2;++a)
+         for(int b = 0;b < M/2;++b)
+            for(int c = 0;c < M/2;++c)
+               for(int d = 0;d < M/2;++d)
+                  phm(2*a,2*b + 1,2*c,2*d + 1) = X(a,b) * X(c,d);
 
-   SUP S;
-   S.init_S();
+      TPM ham;
+      ham.G(1,phm);
 
-   SUP Z;
-   Z.init_Z(1000.0,ham,S);
+      ham.dscal(-1.0);
 
-   int dim = Z.gdim();
+      SUP S;
+      S.init_S();
 
-   //eerste primal dual gap:
-   double pd_gap = S.ddot(Z);
-   double energy = (S.tpm(0)).ddot(ham);
+      SUP Z;
+      Z.init_Z(1000.0,ham,S);
 
-   double center_dev = S.center_dev(Z);
+      int dim = Z.gdim();
 
-   //eerst centering
-   double gamma = 1.0;
+      //eerste primal dual gap:
+      double pd_gap = S.ddot(Z);
+      double energy = (S.tpm(0)).ddot(ham);
 
-   double tolerance = 1.0e-4;
+      double center_dev = S.center_dev(Z);
 
-   //flag == 0 : initiele centering run (tot op tolerance)
-   //flag == 1 : doe een stap met gamma = 0
-   //flag == 2 : doe een stap met gamma = 1
-   //flag == 3 : game over man
-   int flag = 0;
+      //eerst centering
+      double gamma = 1.0;
 
-   double a;//stapgrootte
+      double tolerance = 1.0e-4;
 
-   while(flag != 3){
+      //flag == 0 : initiele centering run (tot op tolerance)
+      //flag == 1 : doe een stap met gamma = 0
+      //flag == 2 : doe een stap met gamma = 1
+      //flag == 3 : game over man
+      int flag = 0;
 
-      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
+      double a;//stapgrootte
 
-      //matrix D aanmaken voor de hessiaan van het duale stelsel
-      SUP D;
-      D.D(S,Z);
+      while(flag != 3){
 
-      //D inverteren voor de hessiaan van het primale stelsel
-      SUP D_inv(D);
-      D_inv.invert();
+         cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
 
-      //rechterlid maken van stelsel dat moet worden opgelost:
-      SUP B(S);
+         //matrix D aanmaken voor de hessiaan van het duale stelsel
+         SUP D;
+         D.D(S,Z);
 
-      //invert B
-      B.invert();
+         //D inverteren voor de hessiaan van het primale stelsel
+         SUP D_inv(D);
+         D_inv.invert();
 
-      //schalen met 
-      B.dscal(gamma*pd_gap/dim);
+         //rechterlid maken van stelsel dat moet worden opgelost:
+         SUP B(S);
 
-      B -= Z;
+         //invert B
+         B.invert();
 
-      //collaps B onto b to construct the right hand side of the primal Newton equation
-      TPM b;
+         //schalen met 
+         B.dscal(gamma*pd_gap/dim);
 
-      b.collaps(1,B);
+         B -= Z;
 
-      //dit wordt de stap:
-      TPM delta;
+         //collaps B onto b to construct the right hand side of the primal Newton equation
+         TPM b;
 
-      //los het stelsel op, geeft aantal iteraties nodig terug:
-      cout << delta.solve(b,D_inv) << "\t";
+         b.collaps(1,B);
 
-      //nog updaten van S en Z
-      SUP DS;
+         //dit wordt de stap:
+         TPM delta;
 
-      DS.fill(delta);
+         //los het stelsel op, geeft aantal iteraties nodig terug:
+         cout << delta.solve(b,D_inv) << "\t";
 
-      //DZ is B - D^{-1}*DS*D^{-1}
-      SUP DZ(B);
+         //nog updaten van S en Z
+         SUP DS;
 
-      //eerst D^{-1}*DS*D^{-1} in DZ stoppen
-      B.L_map(D_inv,DS);
+         DS.fill(delta);
 
-      DZ -= B;
+         //DZ is B - D^{-1}*DS*D^{-1}
+         SUP DZ(B);
 
-      //voor de zekerheid nog projecteren op juiste subruimte:
-      DZ.proj_C();
+         //eerst D^{-1}*DS*D^{-1} in DZ stoppen
+         B.L_map(D_inv,DS);
 
-      //met deze 'ansatz' het Z stelsel proberen op te lossen
-      //eerst rechterlid B maken
-      B = Z;
+         DZ -= B;
 
-      B.invert();
+         //voor de zekerheid nog projecteren op juiste subruimte:
+         DZ.proj_C();
 
-      B.dscal(gamma*pd_gap/dim);
+         //met deze 'ansatz' het Z stelsel proberen op te lossen
+         //eerst rechterlid B maken
+         B = Z;
 
-      B -= S;
+         B.invert();
 
-      B.proj_C();
+         B.dscal(gamma*pd_gap/dim);
 
-      //los het stelsel op, geeft aantal duale iteraties nodig terug:
-      cout << DZ.solve(B,D) << endl;
+         B -= S;
 
-      //welke stapgrootte moet ik nemen?
-      if(flag == 0 || flag == 2){//voor centering
+         B.proj_C();
 
-         S += DS;
-         Z += DZ;
+         //los het stelsel op, geeft aantal duale iteraties nodig terug:
+         cout << DZ.solve(B,D) << endl;
 
-      }
-      else{
+         //welke stapgrootte moet ik nemen?
+         if(flag == 0 || flag == 2){//voor centering
 
-         //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,1.0);
+            S += DS;
+            Z += DZ;
 
-         S.daxpy(a,DS);
-         Z.daxpy(a,DZ);
+         }
+         else{
 
-      }
+            //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
+            a = DS.line_search(DZ,S,Z,1.0);
 
-      //update van enkele belangrijke variabelen
-      pd_gap = S.ddot(Z);
-      energy = (S.tpm(0)).ddot(ham);
-      center_dev = S.center_dev(Z);
+            S.daxpy(a,DS);
+            Z.daxpy(a,DZ);
 
-      //keuze voor volgende iteratie:
-      if(flag == 0){
+         }
 
-         //als hij voldoende gecenterd is, exit.
-         if(center_dev < tolerance){
+         //update van enkele belangrijke variabelen
+         pd_gap = S.ddot(Z);
+         energy = (S.tpm(0)).ddot(ham);
+         center_dev = S.center_dev(Z);
 
-            flag = 1;
-            gamma = 0.0;
+         //keuze voor volgende iteratie:
+         if(flag == 0){
+
+            //als hij voldoende gecenterd is, exit.
+            if(center_dev < tolerance){
+
+               flag = 1;
+               gamma = 0.0;
+
+            }
+
+         }
+         else if(flag == 1){
+
+            if(pd_gap < tolerance)//exit when converged
+               flag = 3;
+            else{//center when not convergence
+
+               flag = 2;
+               gamma = 1.0;
+
+            }
+
+         }
+         else{//flag == 2: dus na een centering stap
+
+            if(pd_gap < tolerance)//exit when converged
+               flag = 3;
+            else{//take another step downwards when not converged
+
+               flag = 1;
+               gamma = 0;
+
+            }
 
          }
 
       }
-      else if(flag == 1){
 
-         if(pd_gap < tolerance)//exit when converged
-            flag = 3;
-         else{//center when not convergence
+      cout << endl;
+      cout << "FINAL RESULT " << endl;
+      cout << endl;
+      cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
+      cout << endl;
 
-            flag = 2;
-            gamma = 1.0;
+      //print density matrix to file
+      //   (S.tpm(0)).out("rdm.out");
+
+      Matrix GM(M*M/4);
+
+      int i = 0;
+
+      for(int a = 0;a < M/2;++a)
+         for(int b = 0;b < M/2;++b){
+
+            int j = 0;
+
+            for(int c = 0;c < M/2;++c)
+               for(int d = 0;d < M/2;++d){
+
+                  GM(i,j) = S.phm()(2*a,2*b + 1,2*c,2*d + 1);
+
+                  ++j;
+
+               }
+
+            ++i;
 
          }
 
-      }
-      else{//flag == 2: dus na een centering stap
 
-         if(pd_gap < tolerance)//exit when converged
-            flag = 3;
-         else{//take another step downwards when not converged
+      Vector<Matrix> v(GM);
+      cout << v << endl;
+      cout << endl;
 
-            flag = 1;
-            gamma = 0;
+      i = 0;
+
+      for(int a = 0;a < M/2;++a)
+         for(int b = 0;b < M/2;++b){
+
+            X(a,b) = GM(i,15);
+
+            ++i;
 
          }
 
-      }
+      ++iter;
 
    }
 
-   cout << endl;
-   cout << "FINAL RESULT " << endl;
-   cout << endl;
-   cout << "E_0 = " << energy << " with accuracy of " << pd_gap << " and a deviation from centrality of " << center_dev << endl;
-   cout << endl;
-
-   //print density matrix to file
-   //   (S.tpm(0)).out("rdm.out");
-
-   Vector<PHM> v(S.phm());
-   cout << v;
+   cout << X << endl;
 
 #ifdef __T2P_CON
    T2PM::clear();
