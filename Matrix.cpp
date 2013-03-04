@@ -452,4 +452,27 @@ void Matrix::out(const char *filename) const
 
 }
 
+/**
+ * perform a singular value decomposition
+ */
+void Matrix::svd(double *sigma){
+
+   char jobu = 'N';
+   char jobvt = 'N';
+   
+   double *U;
+   double *VT;
+
+   int lwork = 10*n;
+
+   double *work = new double [lwork];
+
+   int info;
+
+   dgesvd_(&jobu,&jobvt,&n,&n,matrix[0],&n,sigma,U,&n,VT,&n,work,&lwork,&info);
+
+   delete [] work;
+
+}
+
 /* vim: set ts=3 sw=3 expandtab :*/

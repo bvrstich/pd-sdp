@@ -87,6 +87,8 @@ class Matrix{
 
       void mdiag(Vector<Matrix> &diag);
 
+      void svd(double *);
+
       void L_map(const Matrix &,const Matrix &);
 
       void symmetrize();
