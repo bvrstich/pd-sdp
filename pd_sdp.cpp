@@ -15,6 +15,7 @@
 using std::cout;
 using std::endl;
 using std::ofstream;
+using std::ifstream;
 
 #include "include.h"
 
@@ -61,15 +62,21 @@ int main(void){
    SUP::init(M,N);
    EIG::init(M,N);
 
+   ifstream in("/home/bright/bestanden/programmas/spin_pd-bright/X.out");
+
    Matrix X(M/2);
 
    for(int i = 0;i < M/2;++i)
       for(int j = 0;j < M/2;++j)
-         X(i,j) = (double) (rand() - RAND_MAX)/(double)RAND_MAX;
+         in >> i >> j >> X(i,j);
 
    double norm = std::sqrt(X.ddot(X));
 
    X.dscal(1.0/norm);
+
+   for(int i = 0;i < M/2;++i)
+      for(int j = 0;j < M/2;++j)
+         cout << i << "\t" <<  j << "\t" <<  X(i,j) << endl;
 
    PHM phm;
    phm = 0.0;
