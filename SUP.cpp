@@ -348,7 +348,7 @@ T2PM &SUP::t2pm() const
 /**
  * Initialization of the SUP matrix S, is just u^0: see primal_dual.pdf for more information
  */
-void SUP::init_S(){
+void SUP::init_Z(){
 
    (*SZ_tp[0]).unit();
 
@@ -428,9 +428,9 @@ void SUP::fill_Random(){
 }
 
 /**
- * Initialisation for dual SUP matrix Z, see primal_dual.pdf for info.
+ * Initialisation for primal SUP matrix X, see primal_dual.pdf for info.
  */
-void SUP::init_Z(double alpha,const TPM &ham,const SUP &u_0)
+void SUP::init_X(double alpha,const TPM &ham,const SUP &u_0)
 {
    this->fill_Random();
 

@@ -29,10 +29,9 @@ using std::ofstream;
  * Part 3: When the primal dual gap is smaller that the required accuracy exit the while. (flag == 3)\n
  * For more information on the actual method, see primal_dual.pdf
  */
-
 int main(void){
 
-   cout.precision(10);
+   cout.precision(15);
 
    int M = 8;//dim sp hilbert space
    int N = 4;//nr of particles
@@ -62,24 +61,24 @@ int main(void){
    TPM ham;
    ham.hubbard_1D(0,1);
 
-   SUP S;
-   S.init_S();
-
    SUP Z;
-   Z.init_Z(1000.0,ham,S);
+   Z.init_Z();
+
+   SUP X;
+   X.init_X(1000.0,ham,Z);
 
    int dim = Z.gdim();
 
    //eerste primal dual gap:
-   double pd_gap = S.ddot(Z);
-   double energy = (S.tpm(0)).ddot(ham);
+   double pd_gap = Z.ddot(X);
+   double energy = (Z.tpm(0)).ddot(ham);
 
-   double center_dev = S.center_dev(Z);
+   double center_dev = Z.center_dev(X);
 
    //eerst centering
    double gamma = 1.0;
 
-   double tolerance = 1.0e-4;
+   double tolerance = 1.0e-8;
 
    //flag == 0 : initiele centering run (tot op tolerance)
    //flag == 1 : doe een stap met gamma = 0
@@ -91,18 +90,18 @@ int main(void){
 
    while(flag != 3){
 
-      cout << (S.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
+      cout << (Z.tpm(0)).trace() << "\t" << pd_gap << "\t" << center_dev << "\t" << energy << "\t";
 
       //matrix D aanmaken voor de hessiaan van het duale stelsel
       SUP D;
-      D.D(S,Z);
+      D.D(Z,X);
 
       //D inverteren voor de hessiaan van het primale stelsel
       SUP D_inv(D);
       D_inv.invert();
 
       //rechterlid maken van stelsel dat moet worden opgelost:
-      SUP B(S);
+      SUP B(Z);
 
       //invert B
       B.invert();
@@ -110,7 +109,7 @@ int main(void){
       //schalen met 
       B.dscal(gamma*pd_gap/dim);
 
-      B -= Z;
+      B -= X;
 
       //collaps B onto b to construct the right hand side of the primal Newton equation
       TPM b;
@@ -124,57 +123,57 @@ int main(void){
       cout << delta.solve(b,D_inv) << "\t";
 
       //nog updaten van S en Z
-      SUP DS;
+      SUP DZ;
 
-      DS.fill(delta);
+      DZ.fill(delta);
 
       //DZ is B - D^{-1}*DS*D^{-1}
-      SUP DZ(B);
+      SUP DX(B);
 
       //eerst D^{-1}*DS*D^{-1} in DZ stoppen
-      B.L_map(D_inv,DS);
+      B.L_map(D_inv,DZ);
 
-      DZ -= B;
+      DX -= B;
 
       //voor de zekerheid nog projecteren op juiste subruimte:
-      DZ.proj_C();
+      DX.proj_C();
 
       //met deze 'ansatz' het Z stelsel proberen op te lossen
       //eerst rechterlid B maken
-      B = Z;
+      B = X;
 
       B.invert();
 
       B.dscal(gamma*pd_gap/dim);
 
-      B -= S;
+      B -= Z;
 
       B.proj_C();
 
       //los het stelsel op, geeft aantal duale iteraties nodig terug:
-      cout << DZ.solve(B,D) << endl;
+      cout << DX.solve(B,D) << endl;
 
       //welke stapgrootte moet ik nemen?
       if(flag == 0 || flag == 2){//voor centering
 
-         S += DS;
          Z += DZ;
+         X += DX;
 
       }
       else{
 
          //zoek de ideale afstand (geef ook een waarde mee voor de maximale afwijking van het centraal pad):
-         a = DS.line_search(DZ,S,Z,1.0);
+         a = DZ.line_search(DX,Z,X,1.0);
 
-         S.daxpy(a,DS);
          Z.daxpy(a,DZ);
+         X.daxpy(a,DX);
 
       }
 
       //update van enkele belangrijke variabelen
-      pd_gap = S.ddot(Z);
-      energy = (S.tpm(0)).ddot(ham);
-      center_dev = S.center_dev(Z);
+      pd_gap = Z.ddot(X);
+      energy = (Z.tpm(0)).ddot(ham);
+      center_dev = Z.center_dev(X);
 
       //keuze voor volgende iteratie:
       if(flag == 0){
@@ -223,6 +222,9 @@ int main(void){
 
    //print density matrix to file
 //   (S.tpm(0)).out("rdm.out");
+   for(int i = 0;i < Z.tpm(0).gn();++i)
+      for(int j = i;j < Z.tpm(0).gn();++j)
+         cout << i << "\t" << j << "\t" << Z.tpm(0)(i,j) << endl;
 
 #ifdef __T2P_CON
    T2PM::clear();

@@ -57,10 +57,10 @@ class SUP{
       TPM &tpm(int i) const;
 
       //initialiseer S
-      void init_S();
+      void init_Z();
 
       //initialiseer Z
-      void init_Z(double alpha,const TPM &ham,const SUP &u_0);
+      void init_X(double alpha,const TPM &ham,const SUP &u_0);
 
       int gN() const;
 
